@@ -4,35 +4,44 @@
          HERO SECTION
     ============================================================ --}}
     <section class="relative bg-primary-dark overflow-hidden">
-        <!-- Fondo decorativo con gradiente -->
-        <div class="absolute inset-0 opacity-20"
-             style="background: radial-gradient(ellipse at 70% 50%, #0BC4D9 0%, transparent 60%),
-                               radial-gradient(ellipse at 10% 80%, #30A9D9 0%, transparent 50%);">
+        <!-- Gradiente de fondo -->
+        <div class="absolute inset-0 opacity-25"
+             style="background: radial-gradient(ellipse at 75% 40%, #0BC4D9 0%, transparent 55%),
+                               radial-gradient(ellipse at 5% 90%, #30A9D9 0%, transparent 50%);">
         </div>
-
-        <!-- Círculos decorativos -->
-        <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-accent/10 blur-3xl"></div>
-        <div class="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-primary-light/10 blur-3xl"></div>
+        <!-- Patrón de puntos -->
+        <div class="absolute inset-0 opacity-5"
+             style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
+                    background-size: 36px 36px;">
+        </div>
+        <div class="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-accent/10 blur-3xl"></div>
+        <div class="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-primary-light/10 blur-3xl"></div>
 
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-36 text-center">
+
             <!-- Badge -->
-            <span class="inline-block px-4 py-1.5 rounded-full bg-accent/20 text-accent text-xs font-semibold
-                         uppercase tracking-widest mb-6 border border-accent/30">
-                Plataforma educativa #1 en el Perú
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/20 text-accent
+                         text-xs font-semibold uppercase tracking-widest mb-6 border border-accent/30">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                Academia Pre-Universitaria #1 en el Perú
             </span>
 
-            <!-- Título -->
+            <!-- Título principal -->
             <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight max-w-4xl mx-auto">
-                Aprende sin
-                <span class="text-accent"> límites</span>,
-                crece sin
-                <span class="text-primary-light"> fronteras</span>
+                Tu ingreso a la<br>
+                <span class="relative inline-block">
+                    <span class="text-accent">universidad soñada</span>
+                    <span class="absolute -bottom-1 left-0 w-full h-1 bg-accent/30 rounded-full"></span>
+                </span>
+                <br>empieza aquí
             </h1>
 
             <!-- Subtítulo -->
             <p class="mt-6 text-lg sm:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
-                Accede a cursos de calidad, aprende a tu ritmo y transforma tu carrera
-                con la guía de expertos certificados.
+                Prepárate con los mejores docentes para los exámenes de admisión de las universidades
+                más prestigiosas del Perú. Simulacros reales, temario completo y seguimiento personalizado.
             </p>
 
             <!-- Botones CTA -->
@@ -41,28 +50,28 @@
                    class="px-8 py-4 rounded-xl bg-accent text-white font-bold text-base
                           hover:bg-secondary transition-all duration-200 shadow-lg shadow-accent/30
                           hover:shadow-secondary/40 hover:-translate-y-0.5">
-                    Ver planes
+                    Ver planes de estudio
                 </a>
                 <a href="{{ route('register') }}"
                    class="px-8 py-4 rounded-xl border-2 border-white/30 text-white font-bold text-base
                           hover:border-accent hover:text-accent transition-all duration-200">
-                    Crear cuenta gratis
+                    Quiero ingresar →
                 </a>
             </div>
 
             <!-- Stats -->
             <div class="mt-16 grid grid-cols-3 gap-6 max-w-lg mx-auto">
                 <div class="text-center">
-                    <div class="text-3xl font-black text-accent">500+</div>
-                    <div class="text-white/60 text-xs mt-1">Cursos</div>
+                    <div class="text-3xl font-black text-accent">3,500+</div>
+                    <div class="text-white/60 text-xs mt-1">Ingresantes</div>
                 </div>
                 <div class="text-center border-x border-white/10">
-                    <div class="text-3xl font-black text-accent">10K+</div>
-                    <div class="text-white/60 text-xs mt-1">Estudiantes</div>
+                    <div class="text-3xl font-black text-accent">15+</div>
+                    <div class="text-white/60 text-xs mt-1">Universidades</div>
                 </div>
                 <div class="text-center">
                     <div class="text-3xl font-black text-accent">98%</div>
-                    <div class="text-white/60 text-xs mt-1">Satisfacción</div>
+                    <div class="text-white/60 text-xs mt-1">Aprobación</div>
                 </div>
             </div>
         </div>
@@ -70,33 +79,64 @@
         <!-- Onda separadora -->
         <div class="absolute bottom-0 left-0 right-0">
             <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
-                <path d="M0 60L1440 60L1440 20C1440 20 1080 60 720 40C360 20 0 60 0 60Z"
-                      fill="#F2F2F2"/>
+                <path d="M0 60L1440 60L1440 20C1440 20 1080 60 720 40C360 20 0 60 0 60Z" fill="#F2F2F2"/>
             </svg>
+        </div>
+    </section>
+
+    {{-- ============================================================
+         UNIVERSIDADES DESTINO
+    ============================================================ --}}
+    <section class="bg-brand-bg py-14">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 mb-8">
+                Nuestros alumnos ingresan a las mejores universidades del Perú
+            </p>
+            <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-4">
+                @foreach([
+                    ['UNMSM', 'San Marcos'],
+                    ['PUCP',  'Católica'],
+                    ['UNI',   'UNI'],
+                    ['UPCH',  'Cayetano'],
+                    ['UNFV',  'Villarreal'],
+                    ['UNALM', 'La Molina'],
+                    ['USMP',  'San Martín'],
+                ] as $uni)
+                    <div class="flex flex-col items-center gap-2 p-4 bg-white rounded-2xl shadow-sm
+                                hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group">
+                        <div class="w-10 h-10 rounded-xl bg-primary-dark/10 flex items-center justify-center
+                                    group-hover:bg-primary-dark/20 transition-colors duration-200">
+                            <span class="text-primary-dark font-black text-xs">{{ $uni[0] }}</span>
+                        </div>
+                        <span class="text-gray-500 text-[10px] font-medium text-center leading-tight">
+                            {{ $uni[1] }}
+                        </span>
+                    </div>
+                @endforeach
+            </div>
         </div>
     </section>
 
     {{-- ============================================================
          PLANES
     ============================================================ --}}
-    <section id="planes" class="bg-brand-bg py-20 lg:py-28">
+    <section id="planes" class="bg-white py-20 lg:py-28">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <!-- Encabezado de sección -->
             <div class="text-center mb-14">
                 <span class="inline-block px-4 py-1.5 rounded-full bg-accent/10 text-accent
                              text-xs font-semibold uppercase tracking-widest mb-3 border border-accent/20">
-                    Precios
+                    Planes de estudio
                 </span>
                 <h2 class="text-3xl sm:text-4xl font-black text-primary-dark">
-                    Elige el plan perfecto para ti
+                    Elige cómo prepararte
                 </h2>
                 <p class="mt-3 text-gray-500 max-w-xl mx-auto">
-                    Sin sorpresas ni costos ocultos. Paga una vez y accede a todo el contenido.
+                    Temario completo de los exámenes de admisión más exigentes del país.
+                    Paga una vez, ingresa a la universidad.
                 </p>
             </div>
 
-            <!-- Tarjetas de precios -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
 
                 <x-price-card
@@ -105,26 +145,28 @@
                     period="3 meses"
                     badge="Popular"
                     :features="[
-                        'Acceso a +200 cursos',
-                        'Certificados descargables',
-                        'Soporte por correo',
-                        'Actualizaciones incluidas',
-                        'Comunidad de estudiantes',
+                        'Matemática, Álgebra y Geometría',
+                        'Física, Química y Biología',
+                        'Lenguaje, Literatura e Historia',
+                        '4 simulacros de examen al mes',
+                        'Material de estudio descargable',
+                        'Ranking de rendimiento semanal',
                     ]"
                 />
 
                 <x-price-card
                     plan="VIP"
                     price="500"
-                    period="Ilimitado"
-                    badge="Mejor valor"
+                    period="Acceso ilimitado"
+                    badge="Mejor opción"
                     :featured="true"
                     :features="[
                         'Todo lo del plan Premium',
-                        'Acceso ilimitado de por vida',
-                        'Soporte prioritario 24/7',
-                        'Mentoría personalizada',
-                        'Acceso anticipado a cursos',
+                        'Clases en vivo con docentes',
+                        'Simulacros ilimitados 24/7',
+                        'Tutoría personalizada semanal',
+                        'Preparación para UNMSM, PUCP, UNI',
+                        'Acceso de por vida + actualizaciones',
                     ]"
                 />
 
@@ -135,74 +177,72 @@
     {{-- ============================================================
          POR QUÉ ELEGIRNOS
     ============================================================ --}}
-    <section class="bg-white py-20 lg:py-28">
+    <section class="bg-brand-bg py-20 lg:py-28">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <!-- Encabezado de sección -->
             <div class="text-center mb-14">
                 <span class="inline-block px-4 py-1.5 rounded-full bg-primary-dark/10 text-primary-dark
                              text-xs font-semibold uppercase tracking-widest mb-3 border border-primary-dark/10">
-                    Beneficios
+                    Nuestras fortalezas
                 </span>
                 <h2 class="text-3xl sm:text-4xl font-black text-primary-dark">
-                    ¿Por qué elegirnos?
+                    ¿Por qué elegir Academia Nueva Era?
                 </h2>
                 <p class="mt-3 text-gray-500 max-w-xl mx-auto">
-                    Más que una plataforma, somos tu compañero de aprendizaje.
+                    No solo enseñamos, te acompañamos hasta que logres ingresar.
                 </p>
             </div>
 
-            <!-- Cards de beneficios -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
 
-                <!-- Beneficio 1 -->
-                <div class="flex flex-col items-center text-center p-8 rounded-2xl bg-brand-bg
-                            hover:shadow-lg transition-shadow duration-300 group">
+                <!-- Docentes especializados -->
+                <div class="flex flex-col items-center text-center p-8 rounded-2xl bg-white
+                            hover:shadow-xl transition-shadow duration-300 group">
                     <div class="w-16 h-16 rounded-2xl bg-accent/15 flex items-center justify-center mb-5
                                 group-hover:bg-accent/25 transition-colors duration-300">
                         <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                  d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-primary-dark mb-2">Contenido de calidad</h3>
+                    <h3 class="text-xl font-bold text-primary-dark mb-2">Docentes especializados</h3>
                     <p class="text-gray-500 text-sm leading-relaxed">
-                        Cursos diseñados por expertos con años de experiencia en la industria,
-                        actualizados constantemente con las últimas tendencias.
+                        Profesores con amplia experiencia en los temarios y estilos de preguntas
+                        de los principales exámenes de admisión del país.
                     </p>
                 </div>
 
-                <!-- Beneficio 2 -->
-                <div class="flex flex-col items-center text-center p-8 rounded-2xl bg-brand-bg
-                            hover:shadow-lg transition-shadow duration-300 group">
+                <!-- Simulacros reales -->
+                <div class="flex flex-col items-center text-center p-8 rounded-2xl bg-white
+                            hover:shadow-xl transition-shadow duration-300 group">
                     <div class="w-16 h-16 rounded-2xl bg-primary-light/15 flex items-center justify-center mb-5
                                 group-hover:bg-primary-light/25 transition-colors duration-300">
                         <svg class="w-8 h-8 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-primary-dark mb-2">Aprende a tu ritmo</h3>
+                    <h3 class="text-xl font-bold text-primary-dark mb-2">Simulacros reales</h3>
                     <p class="text-gray-500 text-sm leading-relaxed">
-                        Sin horarios fijos. Accede desde cualquier dispositivo cuando quieras,
-                        y avanza según tu disponibilidad y preferencias.
+                        Exámenes modelo basados en los últimos procesos de admisión de la UNMSM,
+                        PUCP, UNI, UPCH y más. Practica en condiciones reales.
                     </p>
                 </div>
 
-                <!-- Beneficio 3 -->
-                <div class="flex flex-col items-center text-center p-8 rounded-2xl bg-brand-bg
-                            hover:shadow-lg transition-shadow duration-300 group">
+                <!-- Alta tasa de ingreso -->
+                <div class="flex flex-col items-center text-center p-8 rounded-2xl bg-white
+                            hover:shadow-xl transition-shadow duration-300 group">
                     <div class="w-16 h-16 rounded-2xl bg-secondary/15 flex items-center justify-center mb-5
                                 group-hover:bg-secondary/25 transition-colors duration-300">
                         <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-primary-dark mb-2">Certificados válidos</h3>
+                    <h3 class="text-xl font-bold text-primary-dark mb-2">Alta tasa de ingreso</h3>
                     <p class="text-gray-500 text-sm leading-relaxed">
-                        Obtén certificados reconocidos al completar cada curso y
-                        destaca tu perfil profesional ante empleadores y clientes.
+                        El 98% de nuestros alumnos VIP logra ingresar en su primera o segunda
+                        postulación. Resultados que respaldan nuestro método.
                     </p>
                 </div>
 
@@ -211,21 +251,85 @@
     </section>
 
     {{-- ============================================================
-         LLAMADA A LA ACCIÓN FINAL
+         TESTIMONIOS
     ============================================================ --}}
     <section class="bg-primary-dark py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="text-center mb-12">
+                <h2 class="text-3xl sm:text-4xl font-black text-white">
+                    Ellos ya lograron su sueño
+                </h2>
+                <p class="mt-3 text-white/60 max-w-xl mx-auto">
+                    Miles de estudiantes ingresaron a la universidad gracias a Academia Nueva Era.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                @foreach([
+                    ['Ingresé a la UNMSM en mi primer intento. Los simulacros me prepararon perfectamente para el examen real.',
+                     'María G.', 'UNMSM — Medicina Humana', 'MG'],
+                    ['El plan VIP valió cada sol. Los docentes de Matemática me explicaron como nunca antes lo habían hecho.',
+                     'Carlos R.', 'PUCP — Ingeniería Civil', 'CR'],
+                    ['Estudié 3 meses con el plan Premium y logré ingresar a la UNI. El ranking semanal me mantuvo enfocado.',
+                     'Lucía T.', 'UNI — Ingeniería de Sistemas', 'LT'],
+                ] as $t)
+                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors duration-300">
+                        <!-- Estrellas -->
+                        <div class="flex gap-1 mb-4">
+                            @for($i = 0; $i < 5; $i++)
+                                <svg class="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                </svg>
+                            @endfor
+                        </div>
+                        <p class="text-white/80 text-sm leading-relaxed italic mb-4">
+                            "{{ $t[0] }}"
+                        </p>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center
+                                        text-accent font-bold text-xs">
+                                {{ $t[3] }}
+                            </div>
+                            <div>
+                                <div class="text-white font-semibold text-sm">{{ $t[1] }}</div>
+                                <div class="text-white/40 text-xs">{{ $t[2] }}</div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- ============================================================
+         LLAMADA A LA ACCIÓN FINAL
+    ============================================================ --}}
+    <section class="bg-brand-bg py-20">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl sm:text-4xl font-black text-white mb-4">
-                ¿Listo para empezar?
+            <!-- Icono graduación -->
+            <div class="w-16 h-16 rounded-2xl bg-primary-dark mx-auto flex items-center justify-center mb-6 shadow-lg">
+                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                </svg>
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-black text-primary-dark mb-4">
+                ¿Listo para ingresar a tu universidad soñada?
             </h2>
-            <p class="text-white/60 text-lg mb-8">
-                Únete a miles de estudiantes que ya están transformando su carrera.
+            <p class="text-gray-500 text-lg mb-8 max-w-xl mx-auto">
+                Únete a más de 3,500 estudiantes que ya lograron su ingreso con nosotros.
+                Tu esfuerzo + nuestro método = resultado garantizado.
             </p>
             <a href="{{ route('register') }}"
                class="inline-block px-10 py-4 rounded-xl bg-accent text-white font-bold text-base
-                      hover:bg-secondary transition-all duration-200 shadow-lg shadow-accent/30">
-                Registrarse gratis
+                      hover:bg-secondary transition-all duration-200 shadow-lg shadow-accent/30
+                      hover:-translate-y-0.5">
+                Comenzar mi preparación
             </a>
+            <p class="text-gray-400 text-sm mt-4">
+                Sin contratos. Sin letras pequeñas. Solo resultados.
+            </p>
         </div>
     </section>
 

@@ -10,33 +10,58 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
+     * Paso 1: mostrar formulario de clave maestra o, si ya fue verificada, el formulario de registro.
      */
-    public function create(): View
+    public function create(): Response
     {
-        return view('auth.register');
+        $view = session('master_key_verified') === true
+            ? view('auth.register')
+            : view('auth.register-key');
+
+        return response($view)->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 
-    public function store(Request $request): RedirectResponse
+    /**
+     * Paso 1 (POST): validar la clave maestra y marcar sesión.
+     */
+    public function verifyKey(Request $request): RedirectResponse
     {
         $request->validate([
-            'name'          => ['required', 'string', 'max:255'],
-            'email'         => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'role'          => ['required', 'in:admin,docente,alumno,representante'],
             'clave_maestra' => ['required', 'string'],
-            'password'      => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         if ($request->clave_maestra !== config('app.master_key')) {
-            return back()
-                ->withInput($request->except('password', 'password_confirmation', 'clave_maestra'))
-                ->withErrors(['clave_maestra' => 'La clave maestra es incorrecta.']);
+            return back()->withErrors([
+                'clave_maestra' => 'La clave maestra es incorrecta.',
+            ]);
         }
+
+        $request->session()->put('master_key_verified', true);
+
+        return redirect()->route('register');
+    }
+
+    /**
+     * Paso 2 (POST): crear la cuenta (sesión ya verificada).
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        if (!session('master_key_verified')) {
+            return redirect()->route('register');
+        }
+
+        $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'role'     => ['required', 'in:admin,docente,alumno,representante'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
 
         $user = User::create([
             'name'     => $request->name,
@@ -47,7 +72,10 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Login primero (migrate() regenera el ID de sesión)
+        // luego forget para que el flag se elimine de la sesión NUEVA
         Auth::login($user);
+        $request->session()->forget('master_key_verified');
 
         return redirect(route('dashboard', absolute: false));
     }

@@ -1,0 +1,10 @@
+{
+    "version": "0.2",
+    "language": "es,en",
+    "words": [
+        "UNMSM", "PUCP", "UPCH", "UNFV", "UNALM", "USMP", "UNI",
+        "vite", "blade", "fillable", "artisan", "middleware",
+        "csrf", "Laravel", "Tailwind", "endforeach", "endif",
+        "foreach", "isset", "endisset", "endauth", "endguest"
+    ]
+}
