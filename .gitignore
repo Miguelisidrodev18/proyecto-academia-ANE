@@ -1,0 +1,21 @@
+# Entorno
+.env
+
+# Dependencias (se regeneran)
+vendor/
+node_modules/
+
+# Cache y archivos generados por Laravel
+bootstrap/cache/*.php
+storage/
+
+# Base de datos local
+database/*.sqlite
+database/*.sqlite-journal
+
+# Carpeta public/ de raíz (los assets ya están en build/)
+public/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
