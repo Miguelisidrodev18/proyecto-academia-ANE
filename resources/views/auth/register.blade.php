@@ -27,6 +27,7 @@
 
     <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-4">
         @csrf
+        <input type="hidden" name="clave_maestra" value="{{ $masterKey }}">
 
         <!-- Nombre -->
         <div>
