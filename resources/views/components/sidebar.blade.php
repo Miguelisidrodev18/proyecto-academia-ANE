@@ -74,7 +74,7 @@ $nav = [
              class="h-10 w-auto object-contain drop-shadow">
         <div class="leading-tight">
             <p class="text-white font-bold text-sm leading-none">Academia</p>
-            <p class="text-[#0BC4D9] font-black text-sm leading-none">Nueva Era</p>
+            <p class="text-[#0BC4D9] font-black text-sm leading-none">Nueva Era Estudiantil</p>
         </div>
     </div>
 

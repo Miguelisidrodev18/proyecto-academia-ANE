@@ -4,9 +4,15 @@
 
             <!-- Columna Logo -->
             <div class="flex flex-col gap-4">
-                <img src="{{ asset('images/logo-academia.png') }}"
-                     alt="Academia Nueva Era"
-                     class="h-12 w-auto object-contain self-start">
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('images/logo-academia.png') }}"
+                         alt="Academia Nueva Era"
+                         class="h-12 w-auto object-contain">
+                    <div class="leading-tight">
+                        <p class="text-white font-bold text-sm leading-none">Academia</p>
+                        <p class="text-accent font-black text-sm leading-none">Nueva Era Estudiantil</p>
+                    </div>
+                </div>
                 <p class="text-white/70 text-sm leading-relaxed">
                     Impulsamos tu aprendizaje con tecnología y metodologías innovadoras.
                     Únete a nuestra comunidad y transforma tu futuro.

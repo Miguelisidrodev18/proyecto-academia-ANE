@@ -7,6 +7,10 @@
                 <img src="{{ asset('images/logo-academia.png') }}"
                      alt="Academia Nueva Era"
                      class="h-10 lg:h-12 w-auto object-contain">
+                <div class="leading-tight">
+                    <p class="text-white font-bold text-sm leading-none">Academia</p>
+                    <p class="text-accent font-black text-sm leading-none">Nueva Era Estudiantil</p>
+                </div>
             </a>
 
             <!-- Menú desktop -->
