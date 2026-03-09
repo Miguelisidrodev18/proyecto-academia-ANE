@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alumno;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard.index');
+        $totalAlumnos   = Alumno::count();
+        $alumnosPremium = Alumno::where('tipo', 'premium')->count();
+
+        return view('dashboard.index', compact('totalAlumnos', 'alumnosPremium'));
     }
 
     public function alumnos()
