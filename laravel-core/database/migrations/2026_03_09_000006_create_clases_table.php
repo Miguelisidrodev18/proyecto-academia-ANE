@@ -6,20 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('clases', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('curso_id')->constrained('cursos')->cascadeOnDelete();
+            $table->string('titulo', 200);
+            $table->datetime('fecha');
+            $table->string('zoom_link')->nullable();
+            $table->text('descripcion')->nullable();
+            $table->boolean('grabada')->default(false);
+            $table->string('grabacion_url')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('clases');
