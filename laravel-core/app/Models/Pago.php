@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\User;
 
 class Pago extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'matricula_id', 'monto', 'metodo_pago', 'comprobante_url',
+        'matricula_id', 'user_id', 'monto', 'metodo_pago', 'comprobante_url',
         'estado', 'fecha_pago', 'referencia', 'notas',
     ];
 
@@ -21,6 +22,7 @@ class Pago extends Model
     ];
 
     public function matricula(): BelongsTo { return $this->belongsTo(Matricula::class); }
+    public function user(): BelongsTo      { return $this->belongsTo(User::class); }
 
     public function estaVerificado(): bool   { return $this->estado === 'verificado'; }
     public function montoFormateado(): string { return 'S/. ' . number_format($this->monto, 2); }

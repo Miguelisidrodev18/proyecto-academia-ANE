@@ -4,6 +4,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Alumnos\AlumnoController;
+use App\Http\Controllers\Matriculas\MatriculaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -12,13 +13,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // ── Módulo Alumnos ─────────────────────────────────────────────────────────
-    // Rutas específicas primero (antes del resource para evitar conflictos de parámetro)
     Route::get('/alumnos/dni/{numero}',      [AlumnoController::class, 'buscarDni'])->name('alumnos.dni');
     Route::patch('/alumnos/{alumno}/estado', [AlumnoController::class, 'cambiarEstado'])->name('alumnos.cambiarEstado');
     Route::resource('alumnos', AlumnoController::class);
 
+    // ── Módulo Matrículas ──────────────────────────────────────────────────────
+    Route::resource('matriculas', MatriculaController::class);
+
     // ── Dashboard stubs (próximamente) ─────────────────────────────────────────
-    Route::get('/dashboard/matriculas',      [DashboardController::class, 'matriculas'])->name('dashboard.matriculas');
     Route::get('/dashboard/pagos',           [DashboardController::class, 'pagos'])->name('dashboard.pagos');
     Route::get('/dashboard/asistencia',      [DashboardController::class, 'asistencia'])->name('dashboard.asistencia');
     Route::get('/dashboard/aula-virtual',    [DashboardController::class, 'aulaVirtual'])->name('dashboard.aula-virtual');
