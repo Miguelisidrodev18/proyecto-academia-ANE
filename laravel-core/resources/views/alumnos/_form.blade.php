@@ -1,7 +1,15 @@
 {{-- Partial compartido entre create.blade.php y edit.blade.php --}}
-{{-- Variables esperadas: $alumno (opcional, para edit) --}}
+{{-- Variables esperadas: $alumno (con ->user cargado, para edit) --}}
 
-@php $editing = isset($alumno); @endphp
+@php
+    $editing  = isset($alumno);
+    $userName = $editing ? $alumno->user->name : '';
+    // Separar nombre: todo antes del último espacio = nombres, último word = apellido
+    $nameParts      = explode(' ', $userName, 2);
+    $defaultNombres = $nameParts[0] ?? '';
+    $defaultApell   = $nameParts[1] ?? '';
+    $defaultEmail   = $editing ? ($alumno->user->email ?? '') : '';
+@endphp
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-5"
      x-data="{
@@ -15,7 +23,7 @@
              this.reniecOk = false;
              this.reniecError = '';
              try {
-                 const res = await fetch('{{ route('alumnos.dni', '') }}/' + this.dni);
+                 const res = await fetch('{{ url('/alumnos/dni') }}/' + this.dni);
                  const data = await res.json();
                  if (!res.ok || data.error) {
                      this.reniecError = data.error ?? 'No se encontró el DNI.';
@@ -49,7 +57,6 @@
                        'border-red-400 bg-red-50' => $errors->has('dni'),
                        'border-gray-200'           => !$errors->has('dni'),
                    ])>
-            {{-- Spinner / estado --}}
             <div class="absolute right-3 top-1/2 -translate-y-1/2">
                 <svg x-show="buscando" class="w-4 h-4 text-accent animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -70,7 +77,7 @@
     {{-- Tipo --}}
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">
-            Tipo de alumno <span class="text-red-500">*</span>
+            Nivel <span class="text-red-500">*</span>
         </label>
         <select name="tipo"
                 @class([
@@ -79,11 +86,11 @@
                     'border-red-400 bg-red-50' => $errors->has('tipo'),
                     'border-gray-200'           => !$errors->has('tipo'),
                 ])>
-            <option value="vip"     {{ old('tipo', $alumno->tipo ?? 'vip') === 'vip'     ? 'selected' : '' }}>
-                VIP
+            <option value="pollito"   {{ old('tipo', $alumno->tipo ?? 'pollito') === 'pollito'   ? 'selected' : '' }}>
+                Pollito (Nivelación secundaria)
             </option>
-            <option value="premium" {{ old('tipo', $alumno->tipo ?? '') === 'premium' ? 'selected' : '' }}>
-                ⭐ Premium
+            <option value="intermedio" {{ old('tipo', $alumno->tipo ?? '') === 'intermedio' ? 'selected' : '' }}>
+                Intermedio (Preuniversitario)
             </option>
         </select>
         @error('tipo')
@@ -98,7 +105,7 @@
         </label>
         <input type="text" name="nombres"
                id="input-nombres"
-               value="{{ old('nombres', $alumno->nombres ?? '') }}"
+               value="{{ old('nombres', $defaultNombres) }}"
                placeholder="Juan Carlos"
                @class([
                    'w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all',
@@ -118,7 +125,7 @@
         </label>
         <input type="text" name="apellidos"
                id="input-apellidos"
-               value="{{ old('apellidos', $alumno->apellidos ?? '') }}"
+               value="{{ old('apellidos', $defaultApell) }}"
                placeholder="Pérez García"
                @class([
                    'w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all',
@@ -137,7 +144,7 @@
             Correo electrónico <span class="text-red-500">*</span>
         </label>
         <input type="email" name="email"
-               value="{{ old('email', $alumno->email ?? '') }}"
+               value="{{ old('email', $defaultEmail) }}"
                placeholder="correo@ejemplo.com"
                @class([
                    'w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all',
@@ -169,55 +176,42 @@
         @enderror
     </div>
 
-    {{-- Fecha de nacimiento --}}
+    {{-- Estado --}}
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">
-            Fecha de nacimiento
+            Estado <span class="text-red-500">*</span>
         </label>
-        <input type="date" name="fecha_nacimiento"
-               value="{{ old('fecha_nacimiento', isset($alumno->fecha_nacimiento) ? $alumno->fecha_nacimiento->format('Y-m-d') : '') }}"
-               max="{{ now()->subDay()->format('Y-m-d') }}"
-               @class([
-                   'w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all',
-                   'focus:border-accent focus:ring-2 focus:ring-accent/20',
-                   'border-red-400 bg-red-50' => $errors->has('fecha_nacimiento'),
-                   'border-gray-200'           => !$errors->has('fecha_nacimiento'),
-               ])>
-        @error('fecha_nacimiento')
+        <select name="estado"
+                @class([
+                    'w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all bg-white',
+                    'focus:border-accent focus:ring-2 focus:ring-accent/20',
+                    'border-red-400 bg-red-50' => $errors->has('estado'),
+                    'border-gray-200'           => !$errors->has('estado'),
+                ])>
+            @php $estadoActual = old('estado', $editing ? ($alumno->estado ? 'activo' : 'inactivo') : 'activo'); @endphp
+            <option value="activo"   {{ $estadoActual === 'activo'   ? 'selected' : '' }}>Activo</option>
+            <option value="inactivo" {{ $estadoActual === 'inactivo' ? 'selected' : '' }}>Inactivo</option>
+        </select>
+        @error('estado')
             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
         @enderror
     </div>
 
-    {{-- Estado --}}
-    <div class="flex items-center gap-3 pt-6">
-        <label class="relative inline-flex items-center cursor-pointer">
-            <input type="hidden" name="estado" value="0">
-            <input type="checkbox" name="estado" value="1"
-                   class="sr-only peer"
-                   {{ old('estado', $alumno->estado ?? true) ? 'checked' : '' }}>
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer
-                        peer-checked:after:translate-x-full peer-checked:after:border-white
-                        after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                        after:bg-white after:border-gray-300 after:border after:rounded-full
-                        after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
-        </label>
-        <span class="text-sm font-semibold text-gray-700">Alumno activo</span>
-    </div>
-
-    {{-- Dirección (ancho completo) --}}
-    <div class="md:col-span-2">
+    {{-- Origen de registro --}}
+    <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">
-            Dirección
+            Origen de registro
         </label>
-        <textarea name="direccion" rows="2"
-                  placeholder="Av. Los Álamos 123, San Isidro, Lima"
-                  @class([
-                      'w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all resize-none',
-                      'focus:border-accent focus:ring-2 focus:ring-accent/20',
-                      'border-red-400 bg-red-50' => $errors->has('direccion'),
-                      'border-gray-200'           => !$errors->has('direccion'),
-                  ])>{{ old('direccion', $alumno->direccion ?? '') }}</textarea>
-        @error('direccion')
+        <input type="text" name="origen_registro"
+               value="{{ old('origen_registro', $alumno->origen_registro ?? 'manual') }}"
+               placeholder="manual, web, referido..."
+               @class([
+                   'w-full px-4 py-2.5 rounded-xl border text-sm outline-none transition-all',
+                   'focus:border-accent focus:ring-2 focus:ring-accent/20',
+                   'border-red-400 bg-red-50' => $errors->has('origen_registro'),
+                   'border-gray-200'           => !$errors->has('origen_registro'),
+               ])>
+        @error('origen_registro')
             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
         @enderror
     </div>

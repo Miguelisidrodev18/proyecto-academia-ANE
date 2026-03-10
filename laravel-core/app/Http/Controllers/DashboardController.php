@@ -9,10 +9,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalAlumnos   = Alumno::count();
-        $alumnosPremium = Alumno::where('tipo', 'premium')->count();
+        $totalAlumnos      = Alumno::count();
+        $alumnosIntermedio = Alumno::where('tipo', 'intermedio')->count();
 
-        return view('dashboard.index', compact('totalAlumnos', 'alumnosPremium'));
+        return view('dashboard.index', compact('totalAlumnos', 'alumnosIntermedio'));
     }
 
     public function alumnos()

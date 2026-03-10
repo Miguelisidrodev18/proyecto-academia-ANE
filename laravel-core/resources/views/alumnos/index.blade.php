@@ -8,8 +8,7 @@
     <div>
         <h1 class="text-2xl font-black text-primary-dark">Alumnos</h1>
         <p class="text-gray-500 text-sm mt-0.5">
-            {{ $total }} registrados &middot;
-            <span class="text-amber-600 font-semibold">{{ $premium }} premium</span>
+            {{ $alumnos->total() }} registrados
         </p>
     </div>
     <a href="{{ route('alumnos.create') }}"
@@ -47,9 +46,9 @@
         <select name="tipo"
                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm
                        focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none bg-white">
-            <option value="">Todos los tipos</option>
-            <option value="regular"  {{ request('tipo') === 'regular'  ? 'selected' : '' }}>Regular</option>
-            <option value="premium"  {{ request('tipo') === 'premium'  ? 'selected' : '' }}>⭐ Premium</option>
+            <option value="">Todos los niveles</option>
+            <option value="pollito"   {{ request('tipo') === 'pollito'   ? 'selected' : '' }}>Pollito</option>
+            <option value="intermedio" {{ request('tipo') === 'intermedio' ? 'selected' : '' }}>Intermedio</option>
         </select>
 
         {{-- Filtro estado + botón --}}
@@ -58,8 +57,8 @@
                     class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm
                            focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none bg-white">
                 <option value="">Todos los estados</option>
-                <option value="1" {{ request('estado') === '1' ? 'selected' : '' }}>Activos</option>
-                <option value="0" {{ request('estado') === '0' ? 'selected' : '' }}>Inactivos</option>
+                <option value="activo"   {{ request('estado') === 'activo'   ? 'selected' : '' }}>Activos</option>
+                <option value="inactivo" {{ request('estado') === 'inactivo' ? 'selected' : '' }}>Inactivos</option>
             </select>
             <button type="submit"
                     class="px-4 py-2.5 rounded-xl bg-primary-dark text-white text-sm font-semibold
@@ -111,7 +110,7 @@
                         <th class="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Alumno</th>
                         <th class="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Email</th>
                         <th class="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Teléfono</th>
-                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Tipo</th>
+                        <th class="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Nivel</th>
                         <th class="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Estado</th>
                         <th class="px-5 py-3 font-semibold text-gray-500 text-xs uppercase tracking-wider">Acciones</th>
                     </tr>
@@ -123,13 +122,13 @@
                         <td class="px-5 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-xs
-                                            {{ $alumno->esPremium() ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700' }}">
+                                            {{ $alumno->esIntermedio() ? 'bg-purple-100 text-purple-700' : 'bg-sky-100 text-sky-700' }}">
                                     {{ $alumno->inicial() }}
                                 </div>
                                 <span class="font-semibold text-gray-800">{{ $alumno->nombreCompleto() }}</span>
                             </div>
                         </td>
-                        <td class="px-5 py-4 text-gray-600">{{ $alumno->email }}</td>
+                        <td class="px-5 py-4 text-gray-600">{{ $alumno->user->email ?? '—' }}</td>
                         <td class="px-5 py-4 text-gray-600">{{ $alumno->telefono ?? '—' }}</td>
                         <td class="px-5 py-4">
                             @include('alumnos._badge', ['tipo' => $alumno->tipo])
@@ -168,7 +167,7 @@
                                     </svg>
                                 </a>
                                 <form method="POST" action="{{ route('alumnos.destroy', $alumno) }}"
-                                      onsubmit="return confirm('¿Eliminar a {{ $alumno->nombres }}?')">
+                                      onsubmit="return confirm('¿Eliminar a {{ $alumno->nombreCompleto() }}?')">
                                     @csrf @method('DELETE')
                                     <button type="submit"
                                             class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50
@@ -194,7 +193,7 @@
                 <div class="flex items-start justify-between gap-3 mb-3">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold
-                                    {{ $alumno->esPremium() ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700' }}">
+                                    {{ $alumno->esIntermedio() ? 'bg-purple-100 text-purple-700' : 'bg-sky-100 text-sky-700' }}">
                             {{ $alumno->inicial() }}
                         </div>
                         <div>
@@ -204,7 +203,7 @@
                     </div>
                     @include('alumnos._badge', ['tipo' => $alumno->tipo])
                 </div>
-                <p class="text-xs text-gray-500 mb-1">{{ $alumno->email }}</p>
+                <p class="text-xs text-gray-500 mb-1">{{ $alumno->user->email ?? '—' }}</p>
                 @if($alumno->telefono)
                     <p class="text-xs text-gray-500 mb-3">{{ $alumno->telefono }}</p>
                 @endif

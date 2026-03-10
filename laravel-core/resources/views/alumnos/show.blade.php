@@ -15,6 +15,16 @@
         </a>
         <h1 class="text-2xl font-black text-primary-dark">Perfil del Alumno</h1>
         <div class="ml-auto flex gap-2">
+            <form method="POST" action="{{ route('alumnos.cambiarEstado', $alumno) }}">
+                @csrf @method('PATCH')
+                <button type="submit"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all
+                               {{ $alumno->estado
+                                   ? 'border border-gray-200 text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
+                                   : 'border border-gray-200 text-gray-600 hover:bg-green-50 hover:text-green-600 hover:border-green-200' }}">
+                    {{ $alumno->estado ? 'Desactivar' : 'Activar' }}
+                </button>
+            </form>
             <a href="{{ route('alumnos.edit', $alumno) }}"
                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm
                       border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all">
@@ -24,16 +34,6 @@
                 </svg>
                 Editar
             </a>
-            <a href="{{ route('alumnos.documentos', $alumno) }}"
-               class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm text-white
-                      bg-gradient-to-r from-primary-dark to-primary-light hover:from-accent hover:to-secondary
-                      transition-all duration-300 shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Documentos
-            </a>
         </div>
     </div>
 
@@ -42,9 +42,8 @@
     {{-- Tarjeta de perfil --}}
     <div class="bg-gradient-to-br from-primary-dark to-[#30A9D9] rounded-2xl p-6 mb-5 text-white">
         <div class="flex items-center gap-5 flex-wrap">
-            {{-- Avatar --}}
             <div class="w-20 h-20 rounded-2xl flex items-center justify-center font-black text-3xl flex-shrink-0
-                        {{ $alumno->esPremium() ? 'bg-amber-400/30 text-amber-200' : 'bg-white/20 text-white' }}">
+                        {{ $alumno->esIntermedio() ? 'bg-purple-400/30 text-purple-200' : 'bg-white/20 text-white' }}">
                 {{ $alumno->inicial() }}
             </div>
             <div class="flex-1 min-w-0">
@@ -73,7 +72,7 @@
         </div>
     </div>
 
-    {{-- Datos personales --}}
+    {{-- Datos --}}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
@@ -88,7 +87,7 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-400">Email</p>
-                        <p class="text-sm font-semibold text-gray-700">{{ $alumno->email }}</p>
+                        <p class="text-sm font-semibold text-gray-700">{{ $alumno->user->email ?? '—' }}</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -103,22 +102,6 @@
                         <p class="text-sm font-semibold text-gray-700">{{ $alumno->telefono ?? '—' }}</p>
                     </div>
                 </div>
-                @if($alumno->direccion)
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400">Dirección</p>
-                        <p class="text-sm font-semibold text-gray-700">{{ $alumno->direccion }}</p>
-                    </div>
-                </div>
-                @endif
             </div>
         </div>
 
@@ -129,7 +112,7 @@
                     <div class="w-8 h-8 rounded-lg bg-primary-dark/10 flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                  d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2"/>
                         </svg>
                     </div>
                     <div>
@@ -137,7 +120,34 @@
                         <p class="text-sm font-mono font-bold text-gray-700">{{ $alumno->dni }}</p>
                     </div>
                 </div>
-                @if($alumno->fecha_nacimiento)
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-primary-dark/10 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400">Racha actual</p>
+                        <p class="text-sm font-bold text-gray-700">
+                            {{ $alumno->racha_actual }}
+                            <span class="font-normal text-gray-400">día(s)</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-primary-dark/10 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400">Origen de registro</p>
+                        <p class="text-sm font-semibold text-gray-700 capitalize">{{ $alumno->origen_registro ?? '—' }}</p>
+                    </div>
+                </div>
+                @if($alumno->ultimo_acceso)
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-lg bg-primary-dark/10 flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,57 +156,45 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-400">Fecha de nacimiento</p>
-                        <p class="text-sm font-semibold text-gray-700">
-                            {{ $alumno->fecha_nacimiento->format('d/m/Y') }}
-                            <span class="text-gray-400 text-xs">({{ $alumno->fecha_nacimiento->age }} años)</span>
-                        </p>
+                        <p class="text-xs text-gray-400">Último acceso</p>
+                        <p class="text-sm font-semibold text-gray-700">{{ $alumno->ultimo_acceso->format('d/m/Y') }}</p>
                     </div>
                 </div>
                 @endif
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-primary-dark/10 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-400">Documentos</p>
-                        <p class="text-sm font-semibold text-gray-700">
-                            {{ count($alumno->documentos ?? []) }} archivo(s) subidos
-                        </p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
-    {{-- Preview documentos --}}
-    @if(!empty($alumno->documentos))
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Documentos</h3>
-            <a href="{{ route('alumnos.documentos', $alumno) }}"
-               class="text-xs text-accent font-semibold hover:underline">
-                Gestionar →
-            </a>
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            @foreach($alumno->documentos as $doc)
-            <div class="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
-                            {{ in_array($doc['extension'], ['jpg','jpeg','png']) ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600' }}">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
+    {{-- Matrículas --}}
+    @if($alumno->matriculas->isNotEmpty())
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Matrículas</h3>
+        <div class="space-y-2">
+            @foreach($alumno->matriculas as $matricula)
+            <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
+                <div>
+                    <p class="text-sm font-semibold text-gray-700">{{ $matricula->plan->nombre ?? 'Plan sin nombre' }}</p>
+                    <p class="text-xs text-gray-400">Desde {{ $matricula->fecha_inicio?->format('d/m/Y') ?? '—' }}</p>
                 </div>
-                <div class="min-w-0">
-                    <p class="text-xs font-semibold text-gray-700 truncate">{{ $doc['nombre'] }}</p>
-                    <p class="text-[10px] text-gray-400">{{ strtoupper($doc['extension']) }} · {{ $doc['fecha'] }}</p>
-                </div>
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full
+                             {{ $matricula->estado === 'activa' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500' }}">
+                    {{ ucfirst($matricula->estado) }}
+                </span>
             </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- Cursos inscritos --}}
+    @if($alumno->cursos->isNotEmpty())
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Cursos inscritos</h3>
+        <div class="flex flex-wrap gap-2">
+            @foreach($alumno->cursos as $curso)
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-primary-dark/10 text-primary-dark">
+                {{ $curso->nombre }}
+            </span>
             @endforeach
         </div>
     </div>
