@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Alumnos\AlumnoController;
 use App\Http\Controllers\Matriculas\MatriculaController;
+use App\Http\Controllers\Pagos\PagoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -19,6 +20,9 @@ Route::middleware(['auth'])->group(function () {
 
     // ── Módulo Matrículas ──────────────────────────────────────────────────────
     Route::resource('matriculas', MatriculaController::class);
+
+    // ── Módulo Pagos ───────────────────────────────────────────────────────────
+    Route::resource('pagos', PagoController::class);
 
     // ── Dashboard stubs (próximamente) ─────────────────────────────────────────
     Route::get('/dashboard/pagos',           [DashboardController::class, 'pagos'])->name('dashboard.pagos');

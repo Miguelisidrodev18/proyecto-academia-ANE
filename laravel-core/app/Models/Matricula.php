@@ -59,7 +59,7 @@ class Matricula extends Model
 
     public function totalPagado(): float
     {
-        return (float) $this->pagos()->where('estado', 'verificado')->sum('monto');
+        return (float) $this->pagos()->where('estado', 'confirmado')->sum('monto');
     }
 
     public function saldoPendiente(): float

@@ -24,6 +24,7 @@ class Pago extends Model
     public function matricula(): BelongsTo { return $this->belongsTo(Matricula::class); }
     public function user(): BelongsTo      { return $this->belongsTo(User::class); }
 
-    public function estaVerificado(): bool   { return $this->estado === 'verificado'; }
+    public function estaConfirmado(): bool   { return $this->estado === 'confirmado'; }
+    public function estaVerificado(): bool   { return $this->estaConfirmado(); } // alias retrocompatible
     public function montoFormateado(): string { return 'S/. ' . number_format($this->monto, 2); }
 }
