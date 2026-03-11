@@ -35,7 +35,15 @@ class AlumnoController extends Controller
 
         $alumnos = $query->paginate(15)->withQueryString();
 
-        return view('alumnos.index', compact('alumnos'));
+        $stats = Alumno::selectRaw('
+            COUNT(*) as total,
+            SUM(estado = 1) as activos,
+            SUM(estado = 0) as inactivos,
+            SUM(tipo = "pollito") as pollitos,
+            SUM(tipo = "intermedio") as intermedios
+        ')->first();
+
+        return view('alumnos.index', compact('alumnos', 'stats'));
     }
 
     public function create(): View

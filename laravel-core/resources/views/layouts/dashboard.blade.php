@@ -9,7 +9,7 @@
 </head>
 <body class="bg-brand-bg font-sans antialiased">
 
-<div x-data="{ sidebarOpen: false }" class="flex h-screen overflow-hidden">
+<div x-data="{ sidebarOpen: false }" class="min-h-screen">
 
     {{-- Overlay oscuro (solo móvil) --}}
     <div x-show="sidebarOpen"
@@ -27,15 +27,11 @@
     {{-- Sidebar --}}
     <x-sidebar />
 
-    {{-- Spacer desktop: reserva el espacio del sidebar (w-64) en el flujo --}}
-    {{-- safelist: -translate-x-full --}}
-    <div class="hidden md:block w-64 flex-shrink-0"></div>
-
-    {{-- Área principal --}}
-    <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
+    {{-- Área principal (offset del sidebar en desktop) --}}
+    <div class="md:pl-64">
 
         {{-- Topbar móvil --}}
-        <header class="md:hidden flex items-center h-14 px-4 bg-white border-b border-gray-200 shadow-sm flex-shrink-0 gap-3">
+        <header class="md:hidden flex items-center h-14 px-4 bg-white border-b border-gray-200 shadow-sm gap-3 sticky top-0 z-10">
             <button @click="sidebarOpen = !sidebarOpen"
                     class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,7 +44,7 @@
         </header>
 
         {{-- Contenido de página --}}
-        <main class="flex-1 overflow-y-auto p-4 md:p-6">
+        <main class="p-4 md:p-6">
             @yield('content')
         </main>
 

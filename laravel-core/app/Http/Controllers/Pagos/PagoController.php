@@ -33,13 +33,21 @@ class PagoController extends Controller
             $query->where('estado', $request->estado);
         }
 
-        if ($request->filled('metodo_pago') && in_array($request->metodo_pago, ['efectivo', 'transferencia', 'yape', 'plin', 'tarjeta'])) {
+        if ($request->filled('metodo_pago') && in_array($request->metodo_pago, ['efectivo', 'transferencia', 'yape', 'plin', 'tarjeta', 'mixto'])) {
             $query->where('metodo_pago', $request->metodo_pago);
         }
 
         $pagos = $query->paginate(15)->withQueryString();
 
-        return view('pagos.index', compact('pagos'));
+        $stats = Pago::selectRaw('
+            COUNT(*) as total,
+            SUM(estado = "confirmado") as confirmados,
+            SUM(estado = "pendiente") as pendientes,
+            SUM(estado = "anulado") as anulados,
+            SUM(CASE WHEN estado = "confirmado" THEN monto ELSE 0 END) as monto_total
+        ')->first();
+
+        return view('pagos.index', compact('pagos', 'stats'));
     }
 
     public function create(Request $request): View

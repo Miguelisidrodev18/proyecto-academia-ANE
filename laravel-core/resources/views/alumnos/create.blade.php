@@ -6,43 +6,51 @@
 <div class="max-w-3xl mx-auto">
 
     {{-- Header --}}
-    <div class="flex items-center gap-3 mb-6">
+    <div class="flex items-center gap-3 mb-6 flex-wrap">
         <a href="{{ route('alumnos.index') }}"
-           class="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-primary-dark hover:border-gray-300 transition-all">
+           class="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-primary-dark hover:border-primary-dark/30 hover:bg-primary-dark/5 transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
             </svg>
         </a>
-        <div>
-            <h1 class="text-2xl font-black text-primary-dark">Nuevo Alumno</h1>
-            <p class="text-gray-400 text-sm">Completa los datos para registrar al alumno</p>
+        <div class="flex-1">
+            <nav class="text-xs text-gray-400 mb-0.5">
+                <a href="{{ route('alumnos.index') }}" class="hover:text-accent transition-colors">Alumnos</a>
+                <span class="mx-1">/</span><span class="text-gray-600">Nuevo</span>
+            </nav>
+            <h1 class="text-xl font-black text-primary-dark leading-none">Nuevo Alumno</h1>
         </div>
+        <span class="text-xs text-amber-700 font-medium flex items-center gap-1 bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-full">
+            <svg class="w-3 h-3 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            El DNI busca en RENIEC automáticamente
+        </span>
     </div>
 
     @include('alumnos._flash')
 
-    {{-- Formulario --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <form method="POST" action="{{ route('alumnos.store') }}">
-            @csrf
-            @include('alumnos._form')
+    <form method="POST" action="{{ route('alumnos.store') }}">
+        @csrf
+        @include('alumnos._form')
 
-            <div class="flex items-center gap-3 mt-6 pt-5 border-t border-gray-100">
-                <button type="submit"
-                        class="px-6 py-2.5 rounded-xl font-bold text-sm text-white
-                               bg-gradient-to-r from-primary-dark to-primary-light
-                               hover:from-accent hover:to-secondary
-                               transition-all duration-300 shadow-md">
-                    Registrar alumno
-                </button>
-                <a href="{{ route('alumnos.index') }}"
-                   class="px-6 py-2.5 rounded-xl font-semibold text-sm text-gray-600
-                          border border-gray-200 hover:bg-gray-50 transition-all">
-                    Cancelar
-                </a>
-            </div>
-        </form>
-    </div>
+        <div class="flex items-center gap-3 mt-5">
+            <button type="submit"
+                    class="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-bold text-sm text-white
+                           bg-gradient-to-r from-primary-dark to-primary-light
+                           hover:from-accent hover:to-secondary hover:shadow-lg hover:-translate-y-0.5
+                           transition-all duration-300 shadow-md">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                </svg>
+                Registrar alumno
+            </button>
+            <a href="{{ route('alumnos.index') }}"
+               class="px-6 py-3 rounded-xl font-semibold text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all">
+                Cancelar
+            </a>
+        </div>
+    </form>
 
 </div>
 

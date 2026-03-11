@@ -12,7 +12,7 @@ class UpdatePagoRequest extends FormRequest
     {
         return [
             'monto'        => ['required', 'numeric', 'min:1'],
-            'metodo_pago'  => ['required', 'in:efectivo,transferencia,yape,plin,tarjeta'],
+            'metodo_pago'  => ['required', 'in:efectivo,transferencia,yape,plin,tarjeta,mixto'],
             'estado'       => ['required', 'in:confirmado,pendiente,anulado'],
             'fecha_pago'   => ['required', 'date'],
             'referencia'   => ['nullable', 'string', 'max:100'],

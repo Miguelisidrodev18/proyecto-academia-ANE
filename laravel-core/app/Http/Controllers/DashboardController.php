@@ -3,16 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alumno;
+use App\Models\Matricula;
+use App\Models\Pago;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $totalAlumnos      = Alumno::count();
-        $alumnosIntermedio = Alumno::where('tipo', 'intermedio')->count();
+        $totalAlumnos       = Alumno::count();
+        $alumnosActivos     = Alumno::where('estado', 1)->count();
+        $matriculasActivas  = Matricula::where('estado', 'activa')->count();
+        $ingresosMes        = Pago::where('estado', 'confirmado')
+                                ->whereMonth('fecha_pago', Carbon::now()->month)
+                                ->whereYear('fecha_pago', Carbon::now()->year)
+                                ->sum('monto');
+        $pagosPendientes    = Pago::where('estado', 'pendiente')->count();
 
-        return view('dashboard.index', compact('totalAlumnos', 'alumnosIntermedio'));
+        return view('dashboard.index', compact(
+            'totalAlumnos', 'alumnosActivos',
+            'matriculasActivas', 'ingresosMes', 'pagosPendientes'
+        ));
     }
 
     public function alumnos()

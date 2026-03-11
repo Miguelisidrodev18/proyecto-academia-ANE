@@ -20,49 +20,55 @@
 
     {{-- Alumnos --}}
     <a href="{{ route('alumnos.index') }}"
-       class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 block">
+       class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 block group">
         <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
             </div>
-            <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Activo</span>
+            <span class="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">{{ $alumnosActivos }} activos</span>
         </div>
         <p class="text-3xl font-black text-gray-800">{{ $totalAlumnos }}</p>
         <p class="text-xs text-gray-400 font-medium mt-0.5">Alumnos registrados</p>
     </a>
 
     {{-- Matrículas --}}
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <a href="{{ route('matriculas.index') }}"
+       class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 block group">
         <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                 </svg>
             </div>
-            <span class="text-xs font-semibold text-indigo-400 bg-indigo-50 px-2 py-0.5 rounded-full">Pronto</span>
+            <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Activas</span>
         </div>
-        <p class="text-3xl font-black text-gray-800">0</p>
+        <p class="text-3xl font-black text-gray-800">{{ $matriculasActivas }}</p>
         <p class="text-xs text-gray-400 font-medium mt-0.5">Matrículas activas</p>
-    </div>
+    </a>
 
-    {{-- Pagos --}}
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    {{-- Ingresos del mes --}}
+    <a href="{{ route('pagos.index') }}"
+       class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 block group">
         <div class="flex items-center justify-between mb-3">
-            <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <span class="text-xs font-semibold text-green-400 bg-green-50 px-2 py-0.5 rounded-full">Pronto</span>
+            @if($pagosPendientes > 0)
+                <span class="text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">{{ $pagosPendientes }} pendientes</span>
+            @else
+                <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Al día</span>
+            @endif
         </div>
-        <p class="text-3xl font-black text-gray-800">S/. 0</p>
-        <p class="text-xs text-gray-400 font-medium mt-0.5">Ingresos del mes</p>
-    </div>
+        <p class="text-3xl font-black text-gray-800">S/. {{ number_format($ingresosMes, 0) }}</p>
+        <p class="text-xs text-gray-400 font-medium mt-0.5">Ingresos confirmados este mes</p>
+    </a>
 
     {{-- Módulos --}}
     <div class="bg-gradient-to-br from-[#082B59] to-[#30A9D9] rounded-2xl p-5 shadow-sm">
@@ -74,7 +80,7 @@
                 </svg>
             </div>
         </div>
-        <p class="text-3xl font-black text-white">1 / 10</p>
+        <p class="text-3xl font-black text-white">3 / 9</p>
         <p class="text-xs text-white/60 font-medium mt-0.5">Módulos activos</p>
     </div>
 
@@ -88,7 +94,7 @@
     $modulos = [
         ['nombre' => 'Alumnos',          'ruta' => 'alumnos.index',             'bg' => 'bg-blue-50',   'text' => 'text-blue-600',   'active' => true,  'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>'],
         ['nombre' => 'Matrículas',       'ruta' => 'matriculas.index',          'bg' => 'bg-indigo-50', 'text' => 'text-indigo-600', 'active' => true, 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>'],
-        ['nombre' => 'Pagos',            'ruta' => 'dashboard.pagos',           'bg' => 'bg-green-50',  'text' => 'text-green-600',  'active' => false, 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'],
+        ['nombre' => 'Pagos',            'ruta' => 'pagos.index',               'bg' => 'bg-green-50',  'text' => 'text-green-600',  'active' => true,  'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'],
         ['nombre' => 'Asistencia',       'ruta' => 'dashboard.asistencia',      'bg' => 'bg-yellow-50', 'text' => 'text-yellow-600', 'active' => false, 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>'],
         ['nombre' => 'Aula Virtual',     'ruta' => 'dashboard.aula-virtual',    'bg' => 'bg-purple-50', 'text' => 'text-purple-600', 'active' => false, 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>'],
         ['nombre' => 'Bazar',            'ruta' => 'dashboard.bazar',           'bg' => 'bg-orange-50', 'text' => 'text-orange-600', 'active' => false, 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>'],
@@ -128,9 +134,9 @@
         </svg>
     </div>
     <div>
-        <p class="text-white font-bold text-sm">Sistema en construcción</p>
+        <p class="text-white font-bold text-sm">Módulos activos: Alumnos · Matrículas · Pagos</p>
         <p class="text-white/60 text-xs mt-0.5">
-            Los módulos se irán habilitando progresivamente. Actualmente puedes gestionar usuarios y explorar el panel.
+            Los demás módulos se irán habilitando progresivamente. Usa el panel para gestionar la academia.
         </p>
     </div>
 </div>

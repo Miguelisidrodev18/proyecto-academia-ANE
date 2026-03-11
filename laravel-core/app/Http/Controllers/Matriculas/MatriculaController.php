@@ -42,7 +42,15 @@ class MatriculaController extends Controller
         $matriculas = $query->paginate(15)->withQueryString();
         $planes     = Plan::where('activo', true)->orderBy('nombre')->get();
 
-        return view('matriculas.index', compact('matriculas', 'planes'));
+        $stats = Matricula::selectRaw('
+            COUNT(*) as total,
+            SUM(estado = "activa") as activas,
+            SUM(estado = "vencida") as vencidas,
+            SUM(estado = "pendiente") as pendientes,
+            SUM(estado = "suspendida") as suspendidas
+        ')->first();
+
+        return view('matriculas.index', compact('matriculas', 'planes', 'stats'));
     }
 
     public function create(Request $request): View
