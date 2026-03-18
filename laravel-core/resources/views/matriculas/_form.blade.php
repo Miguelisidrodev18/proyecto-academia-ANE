@@ -5,16 +5,6 @@
     $editing     = isset($matricula);
     $defaultTipo = old('tipo_pago', $editing ? $matricula->tipo_pago : 'completo');
     $defaultEst  = old('estado', $editing ? $matricula->estado : 'activa');
-    $alumnosJson = '[]';
-    if (!$editing && isset($alumnos)) {
-        $alumnosJson = $alumnos->map(fn($a) => [
-            'id'      => $a->id,
-            'nombre'  => $a->nombreCompleto(),
-            'dni'     => $a->dni,
-            'tipo'    => $a->tipo,
-            'inicial' => $a->inicial(),
-        ])->toJson();
-    }
     $alumnoSeleccionado = $alumnoSeleccionado ?? null;
     $initialAlumnoId    = old('alumno_id', isset($alumnoSeleccionado) ? ($alumnoSeleccionado->id ?? '') : '');
     $initialAlumnoLabel = isset($alumnoSeleccionado) && $alumnoSeleccionado
@@ -47,96 +37,133 @@
                 <input type="hidden" name="alumno_id" value="{{ $matricula->alumno_id }}">
             </div>
         @else
-            {{-- Dropdown con búsqueda dinámica --}}
-            <div x-data="{
-                     open: false,
-                     search: '',
-                     selected: { id: '{{ $initialAlumnoId }}', nombre: '{{ addslashes($initialAlumnoLabel) }}', dni: '', tipo: '', inicial: '' },
-                     options: {{ $alumnosJson }},
-                     get filtered() {
-                         if (!this.search) return this.options;
-                         const s = this.search.toLowerCase();
-                         return this.options.filter(o =>
-                             o.nombre.toLowerCase().includes(s) || o.dni.includes(s)
-                         );
-                     },
-                     select(opt) { this.selected = opt; this.open = false; this.search = ''; }
-                 }"
-                 @click.outside="open = false"
-                 class="relative">
+            {{-- Búsqueda AJAX de alumno --}}
+            <div
+                x-data="alumnoSearch"
+                data-url-buscar="{{ route('alumnos.buscar') }}"
+                data-url-base="{{ url('/alumnos') }}"
+                data-initial-id="{{ $initialAlumnoId }}"
+                data-initial-label="{{ $initialAlumnoLabel }}"
+                @click.outside="open = false"
+                class="relative">
 
                 <input type="hidden" name="alumno_id" :value="selected.id">
+                <input type="hidden" name="confirmar_duplicada" :value="confirmar ? '1' : '0'">
+
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                     Alumno <span class="text-red-500">*</span>
                 </label>
 
-                <button type="button" @click="open = !open"
-                        class="w-full px-4 py-3 rounded-xl border text-sm text-left flex items-center
-                               justify-between gap-2 bg-gray-50 hover:border-accent transition-all
-                               {{ $errors->has('alumno_id') ? 'border-red-400' : 'border-gray-200' }}">
-                    <div class="flex items-center gap-2 flex-1 min-w-0">
-                        <template x-if="selected.id">
-                            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-dark to-primary-light
-                                        flex items-center justify-center text-white text-xs font-black flex-shrink-0"
-                                 x-text="selected.inicial || selected.nombre?.charAt(0)?.toUpperCase()"></div>
-                        </template>
-                        <span :class="selected.id ? 'text-gray-800 font-semibold' : 'text-gray-400'"
-                              x-text="selected.id
-                                  ? (selected.nombre + (selected.dni ? ' — DNI ' + selected.dni : ''))
-                                  : '— Busca y selecciona un alumno —'"></span>
+                {{-- Alumno seleccionado (se muestra cuando hay uno) --}}
+                <div x-show="selected.id" x-cloak
+                     class="flex items-center gap-3 mb-2 p-3 bg-primary-dark/5 border border-primary-dark/15 rounded-xl">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-dark to-primary-light
+                                flex items-center justify-center text-white text-sm font-black flex-shrink-0"
+                         x-text="selected.inicial || (selected.nombre || 'A').charAt(0).toUpperCase()"></div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-primary-dark truncate" x-text="selected.nombre"></p>
+                        <p class="text-xs text-gray-400 font-mono" x-text="'DNI: ' + selected.dni"></p>
                     </div>
-                    <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 text-gray-400 transition-transform flex-shrink-0"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </button>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <svg x-show="checking" class="w-4 h-4 text-accent animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <button type="button" @click="selected = { id:'', nombre:'', dni:'', tipo:'', inicial:'' }; query = ''; advertencia = null; confirmar = false; $dispatch('bloquear-submit', { bloqueado: false })"
+                                class="text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50">
+                            Cambiar
+                        </button>
+                    </div>
+                </div>
 
-                {{-- Panel desplegable --}}
-                <div x-show="open" x-cloak
+                {{-- Input de búsqueda (siempre visible cuando no hay seleccionado) --}}
+                <div x-show="!selected.id" class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-colors"
+                         :class="loading ? 'text-accent' : 'text-gray-400'"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path x-show="!loading" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        <circle x-show="loading" class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path x-show="loading" class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    <input x-model="query" type="text"
+                           placeholder="Escribe nombre o DNI para buscar..."
+                           @focus="doFetch()"
+                           @keydown.enter.prevent
+                           @keydown.escape="open = false"
+                           autocomplete="off"
+                           class="w-full pl-10 pr-4 py-3 rounded-xl border text-sm outline-none transition-all
+                                  bg-gray-50 focus:bg-white focus:ring-2 focus:ring-accent/20
+                                  {{ $errors->has('alumno_id') ? 'border-red-400 focus:border-red-400' : 'border-gray-200 focus:border-accent' }}">
+                </div>
+
+                {{-- Lista de resultados --}}
+                <div x-show="open && !selected.id" x-cloak
                      x-transition:enter="transition ease-out duration-100"
-                     x-transition:enter-start="opacity-0 translate-y-1"
+                     x-transition:enter-start="opacity-0 -translate-y-1"
                      x-transition:enter-end="opacity-100 translate-y-0"
                      class="absolute z-30 w-full mt-1 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-                    <div class="p-2 border-b border-gray-100">
-                        <div class="relative">
-                            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    <div class="max-h-64 overflow-y-auto">
+
+                        {{-- Buscando... --}}
+                        <div x-show="loading" class="flex items-center gap-3 px-4 py-4 text-sm text-gray-500">
+                            <svg class="w-4 h-4 animate-spin text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                             </svg>
-                            <input x-model="search" type="text"
-                                   placeholder="Buscar por nombre o DNI..."
-                                   @click.stop
-                                   x-init="$watch('open', v => v && $nextTick(() => $el.focus()))"
-                                   class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm
-                                          outline-none focus:border-accent transition-all">
+                            Buscando alumnos...
                         </div>
-                    </div>
-                    <div class="max-h-60 overflow-y-auto">
-                        <template x-if="filtered.length === 0">
-                            <p class="text-center text-gray-400 text-sm py-6">No se encontraron alumnos</p>
-                        </template>
-                        <template x-for="opt in filtered" :key="opt.id">
-                            <button type="button" @click="select(opt)"
-                                    class="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors
-                                           flex items-center gap-3 border-b border-gray-50 last:border-0"
-                                    :class="{ 'bg-accent/5': selected.id == opt.id }">
+
+                        {{-- Sin resultados --}}
+                        <div x-show="!loading && results.length === 0"
+                             class="px-4 py-4 text-sm text-gray-400 text-center">
+                            No se encontraron alumnos
+                        </div>
+
+                        {{-- Resultados --}}
+                        <template x-for="opt in results" :key="opt.id">
+                            <button type="button" @click="pick(opt)"
+                                    class="w-full px-4 py-3 text-left hover:bg-gray-50 active:bg-accent/10
+                                           transition-colors flex items-center gap-3 border-b border-gray-50 last:border-0">
                                 <div class="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-black flex-shrink-0"
                                      :class="opt.tipo === 'intermedio'
                                          ? 'bg-gradient-to-br from-violet-400 to-purple-500'
                                          : 'bg-gradient-to-br from-sky-400 to-cyan-500'"
                                      x-text="opt.inicial"></div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-semibold text-gray-800" x-text="opt.nombre"></p>
-                                    <p class="text-xs text-gray-400" x-text="'DNI: ' + opt.dni"></p>
+                                <div class="flex-1 text-left min-w-0">
+                                    <p class="text-sm font-semibold text-gray-800 truncate" x-text="opt.nombre"></p>
+                                    <p class="text-xs text-gray-400 font-mono" x-text="'DNI: ' + opt.dni"></p>
                                 </div>
-                                <template x-if="selected.id == opt.id">
-                                    <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </template>
+                                <span class="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+                                      :class="opt.tipo === 'intermedio'
+                                          ? 'bg-violet-100 text-violet-600'
+                                          : 'bg-sky-100 text-sky-600'"
+                                      x-text="opt.tipo"></span>
                             </button>
                         </template>
+                    </div>
+                </div>
+
+                {{-- Advertencia matrícula activa --}}
+                <div x-show="advertencia" x-cloak
+                     x-transition:enter="transition ease-out duration-150"
+                     x-transition:enter-start="opacity-0 translate-y-1"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <div class="flex gap-3">
+                        <span class="text-xl flex-shrink-0">⚠️</span>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-amber-800">Este alumno ya tiene una matrícula activa</p>
+                            <p class="text-xs text-amber-600 mt-1">
+                                Plan: <span class="font-semibold" x-text="advertencia?.plan_nombre"></span><br>
+                                Vigencia: <span x-text="advertencia?.fecha_inicio"></span> hasta <span x-text="advertencia?.fecha_fin"></span>
+                            </p>
+                            <label class="flex items-center gap-2 mt-3 cursor-pointer">
+                                <input type="checkbox" x-model="confirmar"
+                                       class="w-4 h-4 rounded border-amber-400 text-accent accent-amber-500">
+                                <span class="text-xs text-amber-700 font-medium">Confirmo que deseo crear una matrícula adicional</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 

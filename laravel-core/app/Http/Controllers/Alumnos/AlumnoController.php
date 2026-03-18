@@ -133,6 +133,49 @@ class AlumnoController extends Controller
         return back()->with('success', $mensaje);
     }
 
+    public function matriculasActivas(Alumno $alumno)
+    {
+        $matricula = $alumno->matriculas()
+            ->with('plan')
+            ->where('estado', 'activa')
+            ->where('fecha_fin', '>=', now())
+            ->latest()
+            ->first();
+
+        if ($matricula) {
+            return response()->json([
+                'tieneActiva' => true,
+                'matricula'   => [
+                    'plan_nombre' => $matricula->plan->nombre,
+                    'fecha_inicio' => $matricula->fecha_inicio->format('d/m/Y'),
+                    'fecha_fin'    => $matricula->fecha_fin->format('d/m/Y'),
+                ],
+            ]);
+        }
+
+        return response()->json(['tieneActiva' => false]);
+    }
+
+    public function buscar(Request $request)
+    {
+        $q = trim($request->get('q', ''));
+
+        $alumnos = Alumno::with('user')
+            ->when($q, fn ($query) => $query->buscar($q))
+            ->orderBy('id')
+            ->limit(30)
+            ->get()
+            ->map(fn ($a) => [
+                'id'      => $a->id,
+                'nombre'  => $a->nombreCompleto(),
+                'dni'     => $a->dni,
+                'tipo'    => $a->tipo,
+                'inicial' => $a->inicial(),
+            ]);
+
+        return response()->json($alumnos);
+    }
+
     public function buscarDni(string $numero)
     {
         if (!preg_match('/^\d{8}$/', $numero)) {

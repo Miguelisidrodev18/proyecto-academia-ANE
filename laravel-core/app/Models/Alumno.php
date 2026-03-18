@@ -86,11 +86,13 @@ class Alumno extends Model
 
     public function scopeBuscar($query, string $texto)
     {
-        return $query->where('dni', 'like', "%{$texto}%")
-                     ->orWhereHas('user', fn ($q) =>
-                         $q->where('name', 'like', "%{$texto}%")
-                           ->orWhere('email', 'like', "%{$texto}%")
-                     );
+        return $query->where(function ($q) use ($texto) {
+            $q->where('dni', 'like', "%{$texto}%")
+              ->orWhereHas('user', fn ($u) =>
+                  $u->where('name', 'like', "%{$texto}%")
+                    ->orWhere('email', 'like', "%{$texto}%")
+              );
+        });
     }
 
     public function scopeActivos($query)

@@ -14,8 +14,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // ── Módulo Alumnos ─────────────────────────────────────────────────────────
-    Route::get('/alumnos/dni/{numero}',      [AlumnoController::class, 'buscarDni'])->name('alumnos.dni');
-    Route::patch('/alumnos/{alumno}/estado', [AlumnoController::class, 'cambiarEstado'])->name('alumnos.cambiarEstado');
+    Route::get('/alumnos/dni/{numero}',            [AlumnoController::class, 'buscarDni'])->name('alumnos.dni');
+    Route::get('/alumnos/buscar',                  [AlumnoController::class, 'buscar'])->name('alumnos.buscar');
+    Route::get('/alumnos/{alumno}/matriculas-activas', [AlumnoController::class, 'matriculasActivas'])->name('alumnos.matriculas-activas');
+    Route::patch('/alumnos/{alumno}/estado',       [AlumnoController::class, 'cambiarEstado'])->name('alumnos.cambiarEstado');
     Route::resource('alumnos', AlumnoController::class);
 
     // ── Módulo Matrículas ──────────────────────────────────────────────────────

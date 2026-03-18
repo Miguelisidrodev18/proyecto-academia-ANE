@@ -24,19 +24,24 @@
         </span>
     </div>
     @include('matriculas._flash')
-    <form method="POST" action="{{ route('matriculas.store') }}">
+    <form method="POST" action="{{ route('matriculas.store') }}"
+          x-data="{ bloqueado: false }"
+          @bloquear-submit.window="bloqueado = $event.detail.bloqueado">
         @csrf
         @include('matriculas._form')
         <div class="flex items-center gap-3 mt-5">
             <button type="submit"
+                    :disabled="bloqueado"
+                    :class="bloqueado
+                        ? 'opacity-50 cursor-not-allowed from-gray-400 to-gray-500'
+                        : 'hover:from-accent hover:to-secondary hover:shadow-lg hover:-translate-y-0.5'"
                     class="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-bold text-sm text-white
                            bg-gradient-to-r from-primary-dark to-primary-light
-                           hover:from-accent hover:to-secondary hover:shadow-lg hover:-translate-y-0.5
                            transition-all duration-300 shadow-md">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                 </svg>
-                Registrar matrícula
+                <span x-text="bloqueado ? 'Confirma la advertencia para continuar' : 'Registrar matrícula'"></span>
             </button>
             <a href="{{ route('matriculas.index') }}"
                class="px-6 py-3 rounded-xl font-semibold text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all">

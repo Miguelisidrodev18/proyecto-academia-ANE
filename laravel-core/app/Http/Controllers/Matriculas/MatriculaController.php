@@ -55,7 +55,7 @@ class MatriculaController extends Controller
 
     public function create(Request $request): View
     {
-        $alumnos = Alumno::with('user')->activos()->orderBy('id')->get();
+        $alumnos = Alumno::with('user')->orderBy('id')->get();
         $planes  = Plan::where('activo', true)->orderBy('nombre')->get();
 
         $alumnoSeleccionado = $request->filled('alumno_id')

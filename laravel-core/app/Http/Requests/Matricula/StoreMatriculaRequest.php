@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Matricula;
 
+use App\Models\Matricula;
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMatriculaRequest extends FormRequest
@@ -14,22 +16,41 @@ class StoreMatriculaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'alumno_id'      => ['required', 'integer', 'exists:alumnos,id'],
-            'plan_id'        => ['required', 'integer', 'exists:planes,id'],
-            'fecha_inicio'   => ['required', 'date'],
-            'tipo_pago'      => ['required', 'in:completo,mensual,cuotas'],
-            'dias_cortesia'  => ['nullable', 'integer', 'min:0', 'max:30'],
-            'observaciones'  => ['nullable', 'string', 'max:500'],
+            'alumno_id' => [
+                'required',
+                'integer',
+                'exists:alumnos,id',
+                function ($attribute, $value, $fail) {
+                    // Solo validar si no se forzó la confirmación
+                    if ($this->boolean('confirmar_duplicada')) {
+                        return;
+                    }
+                    $fechaInicio = Carbon::parse($this->fecha_inicio ?? now());
+                    $existe = Matricula::where('alumno_id', $value)
+                        ->where('estado', 'activa')
+                        ->where('fecha_fin', '>=', $fechaInicio)
+                        ->exists();
+                    if ($existe) {
+                        $fail('Este alumno ya tiene una matrícula activa para este período.');
+                    }
+                },
+            ],
+            'plan_id'           => ['required', 'integer', 'exists:planes,id'],
+            'fecha_inicio'      => ['required', 'date'],
+            'tipo_pago'         => ['required', 'in:completo,mensual,cuotas'],
+            'dias_cortesia'     => ['nullable', 'integer', 'min:0', 'max:30'],
+            'observaciones'     => ['nullable', 'string', 'max:500'],
+            'confirmar_duplicada' => ['nullable', 'boolean'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'alumno_id.required' => 'Debes seleccionar un alumno.',
-            'alumno_id.exists'   => 'El alumno seleccionado no existe.',
-            'plan_id.required'   => 'Debes seleccionar un plan.',
-            'plan_id.exists'     => 'El plan seleccionado no existe.',
+            'alumno_id.required'    => 'Debes seleccionar un alumno.',
+            'alumno_id.exists'      => 'El alumno seleccionado no existe.',
+            'plan_id.required'      => 'Debes seleccionar un plan.',
+            'plan_id.exists'        => 'El plan seleccionado no existe.',
             'fecha_inicio.required' => 'La fecha de inicio es obligatoria.',
             'fecha_inicio.date'     => 'La fecha de inicio no es válida.',
             'dias_cortesia.min'     => 'Los días de cortesía no pueden ser negativos.',
