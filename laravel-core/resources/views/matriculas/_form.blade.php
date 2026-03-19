@@ -88,11 +88,15 @@
 {{-- SECCIÓN 2: Plan y vigencia --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4"
      x-data="{
-         planId: '{{ old('plan_id', $matricula->plan_id ?? '') }}',
-         planes: {{ $planes->map(fn($p) => ['id'=>$p->id,'nombre'=>$p->nombre,'precio'=>$p->precio,'duracion'=>$p->duracion_meses])->toJson() }},
-         get planSel() { return this.planes.find(p => p.id == this.planId) ?? null; }
+         planId: '{{ old('plan_id', $editing ? $matricula->plan_id : '') }}',
+         modalOpen: false,
+         planes: {{ $planes->map(fn($p) => ['id'=>$p->id,'nombre'=>$p->nombre,'precio'=>$p->precio,'duracion'=>$p->duracion_meses,'descripcion'=>$p->descripcion ?? '','acceso'=>(bool)$p->acceso_ilimitado])->toJson() }},
+         get planSel() { return this.planes.find(p => p.id == this.planId) ?? null; },
+         selectPlan(id) { this.planId = id; this.modalOpen = false; }
      }">
-    <div class="px-5 py-3.5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex items-center gap-2.5">
+
+    {{-- Header --}}
+    <div class="px-5 py-3.5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex items-center gap-2.5 rounded-t-2xl">
         <div class="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
             <svg class="w-3.5 h-3.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -100,51 +104,113 @@
             </svg>
         </div>
         <h3 class="text-sm font-bold text-gray-700">Plan y vigencia</h3>
+        <button type="button" @click="modalOpen = true"
+                class="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold
+                       text-accent border border-accent/30 hover:bg-accent hover:text-white hover:border-accent
+                       transition-all duration-150">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span x-text="planSel ? 'Cambiar plan' : 'Seleccionar plan'"></span>
+        </button>
     </div>
+
     <div class="p-5">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="hidden" name="plan_id" :value="planId">
+        @error('plan_id') <p class="text-red-500 text-xs mb-4 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            {{ $message }}
+        </p> @enderror
 
-            <div class="md:col-span-2">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                    Plan <span class="text-red-500">*</span>
-                </label>
-                <select name="plan_id" x-model="planId"
-                        class="w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all
-                               bg-gray-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20
-                               {{ $errors->has('plan_id') ? 'border-red-400' : 'border-gray-200' }}">
-                    <option value="">— Selecciona un plan —</option>
-                    @foreach($planes as $plan)
-                        <option value="{{ $plan->id }}"
-                            {{ old('plan_id', $editing ? $matricula->plan_id : '') == $plan->id ? 'selected' : '' }}>
-                            {{ $plan->nombre }} — {{ $plan->precioFormateado() }} · {{ $plan->duracion_meses }} mes(es)
-                        </option>
-                    @endforeach
-                </select>
-                @error('plan_id') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+        {{-- ── ESTADO: Plan seleccionado ── --}}
+        <div x-show="planSel" x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="relative mb-5 rounded-2xl overflow-hidden border border-accent/20
+                    bg-gradient-to-br from-primary-dark/5 via-accent/5 to-primary-light/5">
 
-                {{-- Preview plan --}}
-                <div x-show="planSel" x-cloak
-                     x-transition:enter="transition ease-out duration-150"
-                     x-transition:enter-start="opacity-0 translate-y-1"
-                     x-transition:enter-end="opacity-100 translate-y-0"
-                     class="mt-3 grid grid-cols-3 gap-3 p-4 bg-gradient-to-r from-accent/5 to-primary-light/5
-                            border border-accent/20 rounded-xl">
-                    <div class="text-center">
-                        <p class="text-xs text-gray-400 mb-0.5">Precio</p>
-                        <p class="font-black text-gray-800 text-sm">S/. <span x-text="parseFloat(planSel?.precio ?? 0).toFixed(2)"></span></p>
-                    </div>
-                    <div class="text-center border-x border-accent/20">
-                        <p class="text-xs text-gray-400 mb-0.5">Duración</p>
-                        <p class="font-black text-gray-800 text-sm"><span x-text="planSel?.duracion"></span> mes(es)</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-400 mb-0.5">Plan</p>
-                        <p class="font-bold text-accent text-xs" x-text="planSel?.nombre"></p>
-                    </div>
-                </div>
+            {{-- Fondo decorativo --}}
+            <div class="absolute inset-0 pointer-events-none overflow-hidden">
+                <div class="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-accent/10 blur-2xl"></div>
+                <div class="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-primary-light/10 blur-xl"></div>
             </div>
 
-            {{-- Fecha de inicio --}}
+            <div class="relative p-5">
+                {{-- Fila superior --}}
+                <div class="flex items-start justify-between gap-3 mb-4">
+                    <div>
+                        <p class="text-xs font-bold text-accent/70 uppercase tracking-widest mb-0.5">Plan activo</p>
+                        <h4 class="text-xl font-black text-primary-dark leading-tight" x-text="planSel?.nombre"></h4>
+                    </div>
+                    <div x-show="planSel?.acceso" x-cloak
+                         class="flex-shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full
+                                bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-bold">
+                        <span>♾️</span> <span>Ilimitado</span>
+                    </div>
+                </div>
+
+                {{-- Stats --}}
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/50">
+                        <p class="text-xs text-gray-400 mb-1">Precio</p>
+                        <p class="text-lg font-black text-primary-dark">
+                            S/. <span x-text="parseFloat(planSel?.precio ?? 0).toFixed(2)"></span>
+                        </p>
+                    </div>
+                    <div class="bg-white/70 backdrop-blur-sm rounded-xl p-3 border border-white/50">
+                        <p class="text-xs text-gray-400 mb-1">Duración</p>
+                        <p class="text-lg font-black text-primary-dark">
+                            <span x-text="planSel?.duracion"></span>
+                            <span class="text-sm font-semibold text-gray-500"> mes(es)</span>
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Descripción --}}
+                <p x-show="planSel?.descripcion" x-cloak
+                   class="text-xs text-gray-500 leading-relaxed mb-3"
+                   x-text="planSel?.descripcion"></p>
+
+                {{-- Botón cambiar --}}
+                <button type="button" @click="modalOpen = true"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold
+                               bg-white border border-accent/30 text-accent hover:bg-accent hover:text-white
+                               hover:border-accent transition-all duration-200 shadow-sm hover:shadow-md">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                    </svg>
+                    Cambiar plan
+                </button>
+            </div>
+        </div>
+
+        {{-- ── ESTADO: Sin plan ── --}}
+        <div x-show="!planSel"
+             class="mb-5 border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center
+                    hover:border-accent/40 hover:bg-accent/2 transition-all duration-200 cursor-pointer group"
+             @click="modalOpen = true">
+            <div class="w-14 h-14 rounded-2xl bg-gray-100 group-hover:bg-accent/10 flex items-center justify-center mx-auto mb-3 transition-colors">
+                <svg class="w-7 h-7 text-gray-300 group-hover:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 16.477 5.754 16 7.5 16s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 16.477 18.247 16 16.5 16c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+            </div>
+            <p class="text-sm font-bold text-gray-500 group-hover:text-gray-700 mb-1 transition-colors">Ningún plan seleccionado</p>
+            <p class="text-xs text-gray-400 mb-4">Haz clic para elegir el plan de membresía</p>
+            <span class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold
+                         bg-gradient-to-r from-primary-dark to-primary-light text-white
+                         shadow-md group-hover:shadow-lg group-hover:-translate-y-0.5 transition-all duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                </svg>
+                Seleccionar plan
+            </span>
+        </div>
+
+        {{-- ── Fecha de inicio + Días cortesía ── --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                     Fecha de inicio <span class="text-red-500">*</span>
@@ -157,7 +223,6 @@
                 @error('fecha_inicio') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
             </div>
 
-            {{-- Días cortesía --}}
             <div>
                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
                     Días de cortesía
@@ -176,6 +241,123 @@
             </div>
         </div>
     </div>
+
+    {{-- ── MODAL: Seleccionar plan ── --}}
+    <template x-teleport="body">
+        <div x-show="modalOpen" x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click.self="modalOpen = false"
+             @keydown.escape.window="modalOpen = false"
+             class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+
+            <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+
+                {{-- Modal header --}}
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0
+                            bg-gradient-to-r from-primary-dark/3 to-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center">
+                            <svg class="w-4.5 h-4.5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 16.477 5.754 16 7.5 16s3.332.477 4.5 1.253"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-black text-primary-dark">Seleccionar Plan</h2>
+                            <p class="text-xs text-gray-400">Elige el plan de membresía para esta matrícula</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="modalOpen = false"
+                            class="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500
+                                   hover:bg-red-100 hover:text-red-500 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                {{-- Modal body --}}
+                <div class="overflow-y-auto p-6 flex-1">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <template x-for="plan in planes" :key="plan.id">
+                            <button type="button"
+                                    @click="selectPlan(plan.id)"
+                                    :class="planId == plan.id
+                                        ? 'border-accent ring-2 ring-accent/25 bg-gradient-to-br from-accent/8 to-primary-light/8 shadow-md'
+                                        : 'border-gray-200 bg-white hover:border-accent/50 hover:shadow-md'"
+                                    class="relative text-left rounded-2xl border-2 p-5 transition-all duration-200 group overflow-hidden">
+
+                                {{-- Fondo decorativo al seleccionar --}}
+                                <div x-show="planId == plan.id"
+                                     class="absolute -top-4 -right-4 w-20 h-20 rounded-full bg-accent/10 blur-xl pointer-events-none"></div>
+
+                                {{-- Checkmark --}}
+                                <div x-show="planId == plan.id"
+                                     class="absolute top-3.5 right-3.5 w-6 h-6 rounded-full bg-accent flex items-center justify-center shadow-sm">
+                                    <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+
+                                {{-- Badge ilimitado --}}
+                                <div x-show="plan.acceso"
+                                     class="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5
+                                            bg-emerald-100 text-emerald-600 rounded-full mb-3">
+                                    <span>♾️</span><span>Acceso ilimitado</span>
+                                </div>
+                                <div x-show="!plan.acceso" class="h-5 mb-3"></div>
+
+                                {{-- Nombre --}}
+                                <h4 class="font-black text-gray-800 text-base leading-tight mb-2" x-text="plan.nombre"></h4>
+
+                                {{-- Precio --}}
+                                <div class="flex items-baseline gap-0.5 mb-3">
+                                    <span class="text-lg font-black text-primary-dark/60">S/.</span>
+                                    <span class="text-3xl font-black text-primary-dark"
+                                          x-text="parseFloat(plan.precio).toFixed(2)"></span>
+                                </div>
+
+                                {{-- Duración --}}
+                                <div class="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
+                                    <svg class="w-3.5 h-3.5 flex-shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span x-text="plan.duracion + ' mes' + (plan.duracion > 1 ? 'es' : '') + ' de duración'"></span>
+                                </div>
+
+                                {{-- Descripción --}}
+                                <p x-show="plan.descripcion"
+                                   class="text-xs text-gray-400 leading-relaxed line-clamp-2 mb-3"
+                                   x-text="plan.descripcion"></p>
+
+                                {{-- CTA footer --}}
+                                <div class="pt-3 border-t border-gray-100">
+                                    <span class="text-xs font-bold transition-colors"
+                                          :class="planId == plan.id ? 'text-accent' : 'text-gray-400 group-hover:text-accent'"
+                                          x-text="planId == plan.id ? '✓ Plan seleccionado' : 'Seleccionar →'"></span>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Modal footer --}}
+                <div class="px-6 py-4 border-t border-gray-100 flex-shrink-0 flex justify-end">
+                    <button type="button" @click="modalOpen = false"
+                            class="px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-600
+                                   border border-gray-200 hover:bg-gray-50 transition-colors">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>
 
 {{-- SECCIÓN 3: Modalidad de pago --}}
