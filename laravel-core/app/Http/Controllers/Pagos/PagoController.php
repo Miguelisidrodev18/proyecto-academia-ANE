@@ -7,13 +7,15 @@ use App\Http\Requests\Pago\StorePagoRequest;
 use App\Http\Requests\Pago\UpdatePagoRequest;
 use App\Models\Matricula;
 use App\Models\Pago;
+use App\Services\PagoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class PagoController extends Controller
 {
+    public function __construct(private PagoService $pagoService) {}
+
     public function index(Request $request): View
     {
         $query = Pago::with(['matricula.alumno.user', 'matricula.plan', 'user'])->latest();
@@ -62,7 +64,7 @@ class PagoController extends Controller
             'label'         => $m->alumno->nombreCompleto() . ' — ' . $m->plan->nombre . ' (DNI: ' . $m->alumno->dni . ')',
             'precio_pagado' => (float) $m->precio_pagado,
             'total_pagado'  => (float) $m->pagos->where('estado', 'confirmado')->sum('monto'),
-            'saldo'         => (float) ($m->precio_pagado - $m->pagos->where('estado', 'confirmado')->sum('monto')),
+            'saldo'         => (float) $this->pagoService->calcularSaldoPendiente($m),
         ])->toJson();
 
         $matriculaSeleccionada = $request->filled('matricula_id')
@@ -75,8 +77,8 @@ class PagoController extends Controller
     public function store(StorePagoRequest $request): RedirectResponse
     {
         $data      = $request->validated();
-        $matricula = Matricula::with('pagos')->findOrFail($data['matricula_id']);
-        $saldo     = (float) ($matricula->precio_pagado - $matricula->pagos->where('estado', 'confirmado')->sum('monto'));
+        $matricula = Matricula::findOrFail($data['matricula_id']);
+        $saldo     = $this->pagoService->calcularSaldoPendiente($matricula);
 
         if ($saldo > 0 && (float) $data['monto'] > $saldo) {
             return back()
@@ -84,22 +86,8 @@ class PagoController extends Controller
                 ->withInput();
         }
 
-        $comprobanteUrl = null;
-        if ($request->hasFile('comprobante')) {
-            $comprobanteUrl = $request->file('comprobante')->store('comprobantes', 'public');
-        }
-
-        $pago = Pago::create([
-            'matricula_id'    => $data['matricula_id'],
-            'user_id'         => auth()->id(),
-            'monto'           => $data['monto'],
-            'metodo_pago'     => $data['metodo_pago'],
-            'estado'          => $data['estado'],
-            'fecha_pago'      => $data['fecha_pago'],
-            'referencia'      => $data['referencia'] ?? null,
-            'notas'           => $data['notas'] ?? null,
-            'comprobante_url' => $comprobanteUrl,
-        ]);
+        $data['user_id'] = auth()->id();
+        $pago = $this->pagoService->procesarPago($data, $request->file('comprobante'));
 
         return redirect()->route('pagos.show', $pago)
             ->with('success', 'Pago registrado correctamente.');
@@ -116,13 +104,7 @@ class PagoController extends Controller
     {
         $pago->load(['matricula.alumno.user', 'matricula.plan', 'matricula.pagos']);
 
-        $saldoDisponible = (float) (
-            $pago->matricula->precio_pagado -
-            $pago->matricula->pagos
-                ->where('estado', 'confirmado')
-                ->where('id', '!=', $pago->id)
-                ->sum('monto')
-        );
+        $saldoDisponible = $this->pagoService->calcularSaldoPendiente($pago->matricula, $pago->id);
 
         return view('pagos.edit', compact('pago', 'saldoDisponible'));
     }
@@ -130,17 +112,10 @@ class PagoController extends Controller
     public function update(UpdatePagoRequest $request, Pago $pago): RedirectResponse
     {
         $data = $request->validated();
-        unset($data['comprobante']); // manejado por separado
+        unset($data['comprobante']);
 
-        $pago->load('matricula.pagos');
-
-        $saldoDisponible = (float) (
-            $pago->matricula->precio_pagado -
-            $pago->matricula->pagos
-                ->where('estado', 'confirmado')
-                ->where('id', '!=', $pago->id)
-                ->sum('monto')
-        );
+        $pago->load('matricula');
+        $saldoDisponible = $this->pagoService->calcularSaldoPendiente($pago->matricula, $pago->id);
 
         if ($saldoDisponible > 0 && (float) $data['monto'] > $saldoDisponible) {
             return back()
@@ -148,14 +123,7 @@ class PagoController extends Controller
                 ->withInput();
         }
 
-        if ($request->hasFile('comprobante')) {
-            if ($pago->comprobante_url) {
-                Storage::disk('public')->delete($pago->comprobante_url);
-            }
-            $data['comprobante_url'] = $request->file('comprobante')->store('comprobantes', 'public');
-        }
-
-        $pago->update($data);
+        $this->pagoService->actualizarPago($pago, $data, $request->file('comprobante'));
 
         return redirect()->route('pagos.show', $pago)
             ->with('success', 'Pago actualizado correctamente.');
@@ -163,7 +131,7 @@ class PagoController extends Controller
 
     public function destroy(Pago $pago): RedirectResponse
     {
-        $pago->update(['estado' => 'anulado']);
+        $this->pagoService->anularPago($pago);
 
         return redirect()->route('pagos.index')
             ->with('success', 'Pago anulado correctamente.');

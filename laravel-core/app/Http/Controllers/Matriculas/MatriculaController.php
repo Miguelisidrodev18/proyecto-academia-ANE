@@ -8,14 +8,15 @@ use App\Http\Requests\Matricula\UpdateMatriculaRequest;
 use App\Models\Alumno;
 use App\Models\Matricula;
 use App\Models\Plan;
-use Carbon\Carbon;
+use App\Services\MatriculaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class MatriculaController extends Controller
 {
+    public function __construct(private MatriculaService $matriculaService) {}
+
     public function index(Request $request): View
     {
         $query = Matricula::with(['alumno.user', 'plan'])->latest();
@@ -67,26 +68,7 @@ class MatriculaController extends Controller
 
     public function store(StoreMatriculaRequest $request): RedirectResponse
     {
-        $data = $request->validated();
-
-        $matricula = DB::transaction(function () use ($data) {
-            $plan         = Plan::findOrFail($data['plan_id']);
-            $fechaInicio  = Carbon::parse($data['fecha_inicio']);
-            $diasCortesia = (int) ($data['dias_cortesia'] ?? 0);
-            $fechaFin     = $fechaInicio->copy()->addMonths($plan->duracion_meses)->addDays($diasCortesia);
-
-            return Matricula::create([
-                'alumno_id'     => $data['alumno_id'],
-                'plan_id'       => $plan->id,
-                'precio_pagado' => $plan->precio,
-                'tipo_pago'     => $data['tipo_pago'],
-                'fecha_inicio'  => $fechaInicio,
-                'fecha_fin'     => $fechaFin,
-                'estado'        => 'activa',
-                'dias_cortesia' => $diasCortesia,
-                'observaciones' => $data['observaciones'] ?? null,
-            ]);
-        });
+        $matricula = $this->matriculaService->crear($request->validated());
 
         return redirect()->route('matriculas.show', $matricula)
             ->with('success', 'Matrícula registrada correctamente.');
@@ -109,27 +91,7 @@ class MatriculaController extends Controller
 
     public function update(UpdateMatriculaRequest $request, Matricula $matricula): RedirectResponse
     {
-        $data = $request->validated();
-
-        DB::transaction(function () use ($data, $matricula) {
-            $plan         = Plan::findOrFail($data['plan_id']);
-            $fechaInicio  = Carbon::parse($data['fecha_inicio']);
-            $diasCortesia = (int) ($data['dias_cortesia'] ?? 0);
-            $fechaFin     = $fechaInicio->copy()
-                ->addMonths($plan->duracion_meses)
-                ->addDays($diasCortesia);
-
-            $matricula->update([
-                'plan_id'       => $plan->id,
-                'precio_pagado' => $plan->precio,
-                'fecha_inicio'  => $fechaInicio,
-                'fecha_fin'     => $fechaFin,
-                'tipo_pago'     => $data['tipo_pago'],
-                'dias_cortesia' => $diasCortesia,
-                'observaciones' => $data['observaciones'] ?? null,
-                'estado'        => $data['estado'],
-            ]);
-        });
+        $this->matriculaService->actualizar($matricula, $request->validated());
 
         return redirect()->route('matriculas.show', $matricula)
             ->with('success', 'Matrícula actualizada correctamente.');
@@ -137,16 +99,12 @@ class MatriculaController extends Controller
 
     public function destroy(Matricula $matricula): RedirectResponse
     {
-        if ($matricula->pagos()->exists()) {
-            $matricula->update(['estado' => 'suspendida']);
+        $resultado = $this->matriculaService->eliminarOSuspender($matricula);
 
-            return redirect()->route('matriculas.index')
-                ->with('success', 'La matrícula tiene pagos y fue suspendida en lugar de eliminada.');
-        }
+        $mensaje = $resultado === 'suspendida'
+            ? 'La matrícula tiene pagos y fue suspendida en lugar de eliminada.'
+            : 'Matrícula eliminada correctamente.';
 
-        $matricula->delete();
-
-        return redirect()->route('matriculas.index')
-            ->with('success', 'Matrícula eliminada correctamente.');
+        return redirect()->route('matriculas.index')->with('success', $mensaje);
     }
 }
