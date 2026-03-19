@@ -1,38 +1,34 @@
 @extends('layouts.dashboard')
-@section('title', 'Nuevo Alumno')
+@section('title', 'Editar Curso')
 
 @section('content')
 
-<div class="max-w-3xl mx-auto">
+<div class="max-w-2xl mx-auto">
 
-    {{-- Header --}}
-    <div class="flex items-center gap-3 mb-5 flex-wrap">
-        <a href="{{ route('alumnos.index') }}"
+    <div class="flex items-center gap-3 mb-6 flex-wrap">
+        <a href="{{ route('cursos.show', $curso) }}"
            class="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-primary-dark hover:border-primary-dark/30 hover:bg-primary-dark/5 transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
             </svg>
         </a>
         <div class="flex-1">
-            <h1 class="text-xl font-black text-primary-dark leading-none">Nuevo Alumno</h1>
-            <p class="text-xs text-gray-400 mt-0.5">Paso 1 de 3 · Luego podrás matricular y registrar el pago</p>
+            <nav class="text-xs text-gray-400 mb-0.5">
+                <a href="{{ route('cursos.index') }}" class="hover:text-accent transition-colors">Cursos</a>
+                <span class="mx-1">/</span>
+                <a href="{{ route('cursos.show', $curso) }}" class="hover:text-accent transition-colors">{{ $curso->nombre }}</a>
+                <span class="mx-1">/</span><span class="text-gray-600">Editar</span>
+            </nav>
+            <h1 class="text-xl font-black text-primary-dark leading-none">Editar Curso</h1>
         </div>
-        <span class="text-xs text-amber-700 font-medium flex items-center gap-1 bg-amber-50 border border-amber-100 px-3 py-1.5 rounded-full">
-            <svg class="w-3 h-3 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            El DNI busca en RENIEC
-        </span>
     </div>
 
-    {{-- Stepper --}}
-    @include('partials.flow-stepper', ['flowStep' => 1])
+    @include('cursos._flash')
 
-    @include('alumnos._flash')
-
-    <form method="POST" action="{{ route('alumnos.store') }}">
+    <form method="POST" action="{{ route('cursos.update', $curso) }}">
         @csrf
-        @include('alumnos._form')
+        @method('PUT')
+        @include('cursos._form')
 
         <div class="flex items-center gap-3 mt-5">
             <button type="submit"
@@ -43,9 +39,9 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                 </svg>
-                Registrar alumno y continuar
+                Guardar cambios
             </button>
-            <a href="{{ route('alumnos.index') }}"
+            <a href="{{ route('cursos.show', $curso) }}"
                class="px-6 py-3 rounded-xl font-semibold text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all">
                 Cancelar
             </a>

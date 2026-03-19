@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 class MatriculaService
 {
+    public function __construct(private CuotaService $cuotaService) {}
+
     public function calcularFechaFin(Carbon $fechaInicio, int $duracionMeses, int $diasCortesia = 0): Carbon
     {
         return $fechaInicio->copy()->addMonths($duracionMeses)->addDays($diasCortesia);
@@ -31,7 +33,7 @@ class MatriculaService
             $fechaInicio  = Carbon::parse($data['fecha_inicio']);
             $diasCortesia = (int) ($data['dias_cortesia'] ?? 0);
 
-            return Matricula::create([
+            $matricula = Matricula::create([
                 'alumno_id'     => $data['alumno_id'],
                 'plan_id'       => $plan->id,
                 'precio_pagado' => $plan->precio,
@@ -42,6 +44,10 @@ class MatriculaService
                 'dias_cortesia' => $diasCortesia,
                 'observaciones' => $data['observaciones'] ?? null,
             ]);
+
+            $this->cuotaService->generarCuotas($matricula);
+
+            return $matricula;
         });
     }
 

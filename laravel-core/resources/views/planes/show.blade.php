@@ -195,6 +195,57 @@
             </div>
         </div>
 
+        {{-- Cursos del plan --}}
+        <div class="lg:col-span-2 mb-4">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-gray-700">Cursos incluidos</h3>
+                    </div>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-accent/10 text-accent">
+                        {{ $plan->cursos->count() }}
+                    </span>
+                </div>
+                @if($plan->cursos->isEmpty())
+                    <div class="py-10 text-center">
+                        <p class="text-gray-400 text-sm">No hay cursos asignados a este plan.</p>
+                        <a href="{{ route('planes.edit', $plan) }}" class="text-xs text-accent font-semibold hover:underline mt-1 inline-block">
+                            Agregar cursos →
+                        </a>
+                    </div>
+                @else
+                    <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        @foreach($plan->cursos as $curso)
+                            <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50/50">
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
+                                    {{ $curso->nivel === 'pollito' ? 'bg-blue-100' : 'bg-primary-dark/10' }}">
+                                    <svg class="w-4 h-4 {{ $curso->nivel === 'pollito' ? 'text-blue-600' : 'text-primary-dark' }}"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-semibold text-gray-700 truncate">{{ $curso->nombre }}</p>
+                                    <p class="text-xs text-gray-400">{{ $curso->nivelLabel() }}{{ $curso->grado ? ' · ' . $curso->gradoLabel() : '' }}</p>
+                                </div>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0
+                                             {{ $curso->tipo === 'preuniversitario' ? 'bg-violet-100 text-violet-600' : 'bg-blue-100 text-blue-600' }}">
+                                    {{ $curso->tipoLabel() }}
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
+
         {{-- Matrículas activas --}}
         <div class="lg:col-span-2">
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

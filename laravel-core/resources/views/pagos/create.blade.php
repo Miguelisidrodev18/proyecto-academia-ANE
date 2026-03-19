@@ -5,17 +5,8 @@
 
 <div class="max-w-3xl mx-auto">
 
-    {{-- Breadcrumb --}}
-    <nav class="flex items-center gap-2 text-xs text-gray-400 mb-5">
-        <a href="{{ route('pagos.index') }}" class="hover:text-primary-dark transition-colors font-medium">Pagos</a>
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
-        <span class="text-gray-600 font-semibold">Registrar pago</span>
-    </nav>
-
     {{-- Header --}}
-    <div class="flex items-center gap-4 mb-6">
+    <div class="flex items-center gap-4 mb-5">
         <a href="{{ route('pagos.index') }}"
            class="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400
                   hover:text-primary-dark hover:border-gray-300 hover:-translate-y-0.5 transition-all flex-shrink-0">
@@ -24,8 +15,12 @@
             </svg>
         </a>
         <div class="flex-1">
-            <h1 class="text-2xl font-black text-primary-dark leading-tight">Registrar Pago</h1>
-            <p class="text-gray-400 text-sm mt-0.5">Selecciona la matrícula y completa los datos del pago</p>
+            <h1 class="text-xl font-black text-primary-dark leading-tight">Registrar Pago</h1>
+            @if(request()->boolean('flow'))
+                <p class="text-xs text-gray-400 mt-0.5">Paso 3 de 3 · Último paso del registro rápido</p>
+            @else
+                <p class="text-gray-400 text-sm mt-0.5">Selecciona la matrícula y completa los datos del pago</p>
+            @endif
         </div>
         <div class="hidden sm:flex items-center gap-2 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold px-3 py-2 rounded-xl">
             <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,10 +31,27 @@
         </div>
     </div>
 
+    @if(request()->boolean('flow'))
+        @php
+            $flowMatricula = isset($matriculaSeleccionada) && $matriculaSeleccionada
+                ? $matriculaSeleccionada
+                : null;
+            $flowAlumno = $flowMatricula?->alumno ?? null;
+        @endphp
+        @include('partials.flow-stepper', [
+            'flowStep'      => 3,
+            'flowAlumno'    => $flowAlumno,
+            'flowMatricula' => $flowMatricula,
+        ])
+    @endif
+
     @include('pagos._flash')
 
     <form method="POST" action="{{ route('pagos.store') }}" enctype="multipart/form-data">
         @csrf
+        @if(request()->boolean('flow'))
+            <input type="hidden" name="flow" value="1">
+        @endif
 
         @include('pagos._form')
 
@@ -51,10 +63,9 @@
                            hover:from-accent hover:to-secondary hover:-translate-y-0.5
                            transition-all duration-300 shadow-md hover:shadow-lg active:translate-y-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                          d="M5 13l4 4L19 7"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                 </svg>
-                Registrar pago
+                {{ request()->boolean('flow') ? 'Completar registro' : 'Registrar pago' }}
             </button>
             <a href="{{ route('pagos.index') }}"
                class="px-6 py-3 rounded-xl font-semibold text-sm text-gray-600

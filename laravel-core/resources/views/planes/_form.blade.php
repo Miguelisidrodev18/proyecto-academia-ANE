@@ -6,6 +6,7 @@
     $descripcion     = old('descripcion',    $editing ? $plan->descripcion    : '');
     $accesoIlimitado = old('acceso_ilimitado', $editing ? ($plan->acceso_ilimitado ? '1' : '0') : '0');
     $activo          = old('activo',           $editing ? ($plan->activo ? '1' : '0') : '1');
+    $selectedCursos  = old('cursos', $editing ? $plan->cursos->pluck('id')->toArray() : []);
 @endphp
 
 {{-- Sección 1: Información del plan --}}
@@ -84,6 +85,63 @@
 
     </div>
 </div>
+
+{{-- Sección 2: Cursos del plan --}}
+@if(isset($cursos) && $cursos->isNotEmpty())
+<div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4"
+     x-data="{
+         selected: {{ json_encode(array_map('intval', (array) $selectedCursos)) }},
+         toggle(id) {
+             const idx = this.selected.indexOf(id);
+             idx === -1 ? this.selected.push(id) : this.selected.splice(idx, 1);
+         },
+         isSelected(id) { return this.selected.includes(id); }
+     }">
+    <div class="px-5 py-3.5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+            </svg>
+        </div>
+        <h3 class="text-sm font-bold text-gray-700">Cursos incluidos en este plan</h3>
+        <span class="ml-auto text-xs text-gray-400 font-medium" x-text="selected.length + ' seleccionados'"></span>
+    </div>
+    <div class="p-5">
+        <template x-for="id in selected" :key="id">
+            <input type="hidden" name="cursos[]" :value="id">
+        </template>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
+            @foreach($cursos as $curso)
+                <div @click="toggle({{ $curso->id }})"
+                     :class="isSelected({{ $curso->id }})
+                         ? 'border-accent bg-accent/5 ring-1 ring-accent/30'
+                         : 'border-gray-200 bg-gray-50/50 hover:border-gray-300'"
+                     class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-150 select-none">
+                    <div :class="isSelected({{ $curso->id }}) ? 'bg-accent' : 'bg-gray-200'"
+                         class="w-5 h-5 rounded flex items-center justify-center flex-shrink-0 transition-colors">
+                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                             x-show="isSelected({{ $curso->id }})">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-gray-700 leading-tight truncate">{{ $curso->nombre }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            {{ $curso->nivelLabel() }}
+                            @if($curso->grado) · {{ $curso->gradoLabel() }} @endif
+                        </p>
+                    </div>
+                    <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded-full font-bold flex-shrink-0
+                                 {{ $curso->tipo === 'preuniversitario' ? 'bg-violet-100 text-violet-600' : 'bg-blue-100 text-blue-600' }}">
+                        {{ $curso->tipoLabel() }}
+                    </span>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
 
 {{-- Sección 2: Configuración --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4"

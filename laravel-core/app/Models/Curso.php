@@ -11,9 +11,12 @@ class Curso extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'descripcion', 'nivel', 'activo'];
+    protected $fillable = ['nombre', 'descripcion', 'nivel', 'grado', 'tipo', 'activo'];
 
-    protected $casts = ['activo' => 'boolean'];
+    protected $casts = [
+        'activo' => 'boolean',
+        'grado'  => 'integer',
+    ];
 
     public function clases(): HasMany     { return $this->hasMany(Clase::class); }
     public function materiales(): HasMany { return $this->hasMany(Material::class); }
@@ -25,8 +28,40 @@ class Curso extends Model
                     ->withTimestamps();
     }
 
+    public function planes(): BelongsToMany
+    {
+        return $this->belongsToMany(Plan::class, 'plan_curso');
+    }
+
     public function proximaClase(): ?Clase
     {
         return $this->clases()->where('fecha', '>', now())->orderBy('fecha')->first();
+    }
+
+    public function nivelLabel(): string
+    {
+        return match($this->nivel) {
+            'pollito'     => 'Pollito (Escolar)',
+            'intermedio'  => 'Intermedio (Pre-Universitario)',
+            'ambos'       => 'Todos los niveles',
+            default       => ucfirst($this->nivel),
+        };
+    }
+
+    public function tipoLabel(): string
+    {
+        return match($this->tipo) {
+            'reforzamiento'    => 'Reforzamiento',
+            'preuniversitario' => 'Pre-Universitario',
+            default            => ucfirst($this->tipo),
+        };
+    }
+
+    public function gradoLabel(): string
+    {
+        if (!$this->grado) {
+            return '—';
+        }
+        return $this->grado . '.° grado';
     }
 }

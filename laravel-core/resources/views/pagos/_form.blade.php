@@ -11,6 +11,7 @@
     $initialFecha      = old('fecha_pago',  $editing ? $pago->fecha_pago?->format('Y-m-d') : date('Y-m-d'));
     $initialReferencia = old('referencia',  $editing ? ($pago->referencia ?? '')  : '');
     $initialNotas      = old('notas',       $editing ? ($pago->notas ?? '')       : '');
+    $initialCuota      = old('cuota_id',   $editing ? ($pago->cuota_id ?? '')    : '');
 
     $saldoEdit      = $editing ? (float) $saldoDisponible : 0;
     $matriculasData = $editing ? '[]' : ($matriculasJson ?? '[]');
@@ -58,6 +59,13 @@
         get montoNum() { return parseFloat(this.monto || 0); },
         get excedeSaldo() {
             return this.montoNum > 0 && this.saldoDisponible > 0 && this.montoNum > this.saldoDisponible;
+        },
+
+        /* ── cuota selector ── */
+        cuota_id: '{{ $initialCuota }}',
+        get cuotasPendientes() {
+            if (!this.selected.id || !this.selected.cuotas) return [];
+            return this.selected.cuotas;
         },
 
         /* ── metodo & estado ── */
@@ -196,6 +204,94 @@
             @endif
         </div>
     </div>
+
+    {{-- ══════════════════════════════════════════
+         CARD 1b · Cuota (opcional)
+    ══════════════════════════════════════════ --}}
+    @if(!$editing)
+    <div x-show="cuotasPendientes.length > 0" x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="flex items-center gap-3 px-5 py-3.5 bg-gradient-to-r from-teal-600 to-cyan-500">
+            <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center text-white text-sm">📅</div>
+            <h3 class="font-bold text-white text-sm tracking-wide">Cuota a pagar <span class="font-normal opacity-70 text-xs">(opcional)</span></h3>
+        </div>
+        <div class="p-5">
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+                Asociar a una cuota específica
+            </label>
+            <div class="space-y-2">
+                {{-- Opción "Sin cuota" --}}
+                <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all"
+                       :class="cuota_id === '' ? 'border-accent bg-accent/5' : 'border-gray-200 hover:border-gray-300'">
+                    <input type="radio" name="cuota_id" value=""
+                           x-model="cuota_id"
+                           class="sr-only">
+                    <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 text-gray-400 text-sm font-bold">—</div>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-gray-700">Sin cuota específica</p>
+                        <p class="text-xs text-gray-400">Pago libre / parcial</p>
+                    </div>
+                    <div x-show="cuota_id === ''"
+                         class="w-5 h-5 rounded-full bg-accent flex items-center justify-center">
+                        <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                </label>
+                {{-- Cuotas pendientes --}}
+                <template x-for="c in cuotasPendientes" :key="c.id">
+                    <label class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all"
+                           :class="cuota_id == c.id ? 'border-teal-400 bg-teal-50' : 'border-gray-200 hover:border-gray-300'">
+                        <input type="radio" name="cuota_id" :value="c.id"
+                               x-model="cuota_id"
+                               class="sr-only">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-black"
+                             :class="c.estado === 'vencida' ? 'bg-red-100 text-red-600' : 'bg-teal-100 text-teal-700'"
+                             x-text="'#' + c.numero"></div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-semibold text-gray-700">
+                                Cuota <span x-text="c.numero"></span>
+                                <span class="ml-1 text-xs px-1.5 py-0.5 rounded-md font-bold uppercase"
+                                      :class="c.estado === 'vencida' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700'"
+                                      x-text="c.estado"></span>
+                            </p>
+                            <p class="text-xs text-gray-400">Vence: <span x-text="c.fecha_vencimiento"></span></p>
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-sm font-black text-gray-800">S/. <span x-text="c.monto.toFixed(2)"></span></p>
+                        </div>
+                        <div x-show="cuota_id == c.id"
+                             class="w-5 h-5 rounded-full bg-teal-500 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                    </label>
+                </template>
+            </div>
+            @error('cuota_id')
+                <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+            @enderror
+        </div>
+    </div>
+    @else
+        {{-- Edit mode: show linked cuota if any --}}
+        @if($pago->cuota_id)
+        <div class="bg-teal-50 rounded-2xl border border-teal-100 p-4 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-teal-100 flex items-center justify-center flex-shrink-0 font-black text-teal-700">
+                #{{ $pago->cuota->numero ?? '?' }}
+            </div>
+            <div class="flex-1">
+                <p class="text-sm font-bold text-teal-800">Cuota #{{ $pago->cuota->numero ?? '?' }} asociada</p>
+                <p class="text-xs text-teal-600">Vence: {{ $pago->cuota?->fecha_vencimiento?->format('d/m/Y') ?? '—' }}</p>
+            </div>
+            <input type="hidden" name="cuota_id" value="{{ $pago->cuota_id }}">
+        </div>
+        @endif
+    @endif
 
     {{-- ══════════════════════════════════════════
          CARD 2 · Monto y Fecha

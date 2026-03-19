@@ -5,14 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\User;
 
 class Pago extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'matricula_id', 'user_id', 'monto', 'metodo_pago', 'comprobante_url',
+        'matricula_id', 'cuota_id', 'user_id', 'monto', 'metodo_pago', 'comprobante_url',
         'estado', 'fecha_pago', 'referencia', 'notas',
     ];
 
@@ -22,6 +21,7 @@ class Pago extends Model
     ];
 
     public function matricula(): BelongsTo { return $this->belongsTo(Matricula::class); }
+    public function cuota(): BelongsTo     { return $this->belongsTo(Cuota::class); }
     public function user(): BelongsTo      { return $this->belongsTo(User::class); }
 
     public function estaConfirmado(): bool   { return $this->estado === 'confirmado'; }

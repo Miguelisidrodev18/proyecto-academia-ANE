@@ -203,6 +203,75 @@
     </div>
     @endif
 
+    {{-- Cuotas timeline --}}
+    @if($matricula->cuotas->isNotEmpty())
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <span class="w-5 h-5 rounded-md bg-teal-100 flex items-center justify-center">
+                <svg class="w-3 h-3 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                </svg>
+            </span>
+            Cuotas
+            <span class="text-xs bg-gray-100 text-gray-600 font-semibold px-2 py-0.5 rounded-full">{{ $matricula->cuotas->count() }}</span>
+        </h3>
+        <div class="space-y-2">
+            @foreach($matricula->cuotas as $cuota)
+            @php
+                $badgeClass = match($cuota->estado) {
+                    'pagada'   => 'bg-emerald-100 text-emerald-700',
+                    'vencida'  => 'bg-red-100 text-red-700',
+                    default    => 'bg-amber-100 text-amber-700',
+                };
+                $rowClass = match($cuota->estado) {
+                    'pagada'   => 'border-emerald-100 bg-emerald-50',
+                    'vencida'  => 'border-red-100 bg-red-50',
+                    default    => 'border-gray-100 bg-gray-50',
+                };
+                $numClass = match($cuota->estado) {
+                    'pagada'   => 'bg-emerald-200 text-emerald-700',
+                    'vencida'  => 'bg-red-200 text-red-700',
+                    default    => 'bg-amber-100 text-amber-700',
+                };
+            @endphp
+            <div class="flex items-center gap-3 p-3.5 rounded-xl border {{ $rowClass }}">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-sm {{ $numClass }}">
+                    #{{ $cuota->numero }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <p class="text-sm font-bold text-gray-700">Cuota {{ $cuota->numero }}</p>
+                        <span class="text-xs px-2 py-0.5 rounded-full font-bold uppercase {{ $badgeClass }}">
+                            {{ $cuota->estado }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        Vence: {{ $cuota->fecha_vencimiento->format('d/m/Y') }}
+                        @if($cuota->fecha_pago)
+                            · Pagada: {{ $cuota->fecha_pago->format('d/m/Y') }}
+                        @endif
+                    </p>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <p class="text-base font-black text-gray-800">S/. {{ number_format($cuota->monto, 2) }}</p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @php
+            $cuotasPagadas = $matricula->cuotas->where('estado', 'pagada')->count();
+            $totalCuotas   = $matricula->cuotas->count();
+        @endphp
+        <div class="mt-3 flex items-center gap-3">
+            <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-teal-400 to-emerald-500 rounded-full"
+                     style="width: {{ $totalCuotas > 0 ? ($cuotasPagadas / $totalCuotas * 100) : 0 }}%"></div>
+            </div>
+            <span class="text-xs text-gray-500 font-semibold flex-shrink-0">{{ $cuotasPagadas }}/{{ $totalCuotas }} pagadas</span>
+        </div>
+    </div>
+    @endif
+
     {{-- Historial de pagos --}}
     <div id="pagos" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <div class="flex items-center justify-between mb-5">

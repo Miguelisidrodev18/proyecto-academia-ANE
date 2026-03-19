@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Plan extends Model
@@ -32,6 +33,11 @@ class Plan extends Model
     public function matriculas(): HasMany
     {
         return $this->hasMany(Matricula::class);
+    }
+
+    public function cursos(): BelongsToMany
+    {
+        return $this->belongsToMany(Curso::class, 'plan_curso');
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

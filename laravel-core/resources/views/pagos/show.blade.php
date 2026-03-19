@@ -52,6 +52,40 @@
 
     @include('pagos._flash')
 
+    {{-- Banner de flujo completo --}}
+    @if(session('flow_complete'))
+    <div class="flex items-center gap-4 p-5 mb-5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl shadow-md text-white">
+        <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <div class="flex-1">
+            <p class="font-black text-base leading-tight">¡Registro completo!</p>
+            <p class="text-emerald-100 text-sm mt-0.5">Alumno, matrícula y pago registrados correctamente en 3 pasos.</p>
+        </div>
+        <div class="flex gap-2 flex-shrink-0">
+            <a href="{{ route('alumnos.create') }}"
+               class="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 font-bold text-sm transition-colors">
+                + Nuevo alumno
+            </a>
+            <a href="{{ route('alumnos.show', $pago->matricula->alumno) }}"
+               class="px-4 py-2 rounded-xl bg-white text-emerald-700 hover:bg-emerald-50 font-bold text-sm transition-colors">
+                Ver alumno
+            </a>
+        </div>
+    </div>
+    @endif
+
+    {{-- Stepper completado --}}
+    @if(session('flow_complete'))
+        @include('partials.flow-stepper', [
+            'flowStep'      => 4,
+            'flowAlumno'    => $pago->matricula->alumno,
+            'flowMatricula' => $pago->matricula,
+        ])
+    @endif
+
     {{-- Hero card --}}
     <div class="relative bg-gradient-to-br from-primary-dark via-[#0e3d7a] to-[#30A9D9] rounded-3xl p-6 mb-5 text-white overflow-hidden">
         <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>

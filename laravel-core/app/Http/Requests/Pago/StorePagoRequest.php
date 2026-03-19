@@ -12,6 +12,7 @@ class StorePagoRequest extends FormRequest
     {
         return [
             'matricula_id' => ['required', 'integer', 'exists:matriculas,id'],
+            'cuota_id'     => ['nullable', 'integer', 'exists:cuotas,id'],
             'monto'        => ['required', 'numeric', 'min:1'],
             'metodo_pago'  => ['required', 'in:efectivo,transferencia,yape,plin,tarjeta,mixto'],
             'estado'       => ['required', 'in:confirmado,pendiente,anulado'],

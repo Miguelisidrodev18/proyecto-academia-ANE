@@ -68,7 +68,15 @@ class MatriculaController extends Controller
 
     public function store(StoreMatriculaRequest $request): RedirectResponse
     {
+        $flow      = $request->boolean('flow');
         $matricula = $this->matriculaService->crear($request->validated());
+
+        if ($flow) {
+            return redirect()->route('pagos.create', [
+                'matricula_id' => $matricula->id,
+                'flow'         => 1,
+            ])->with('success', 'Matrícula registrada. Ahora registra el primer pago.');
+        }
 
         return redirect()->route('matriculas.show', $matricula)
             ->with('success', 'Matrícula registrada correctamente.');
@@ -76,7 +84,7 @@ class MatriculaController extends Controller
 
     public function show(Matricula $matricula): View
     {
-        $matricula->load(['alumno.user', 'plan', 'pagos']);
+        $matricula->load(['alumno.user', 'plan', 'pagos.cuota', 'cuotas']);
 
         return view('matriculas.show', compact('matricula'));
     }

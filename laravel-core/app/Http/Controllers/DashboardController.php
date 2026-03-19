@@ -12,19 +12,61 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalAlumnos       = Alumno::count();
-        $alumnosActivos     = Alumno::where('estado', 1)->count();
-        $matriculasActivas  = Matricula::where('estado', 'activa')->count();
-        $ingresosMes        = Pago::where('estado', 'confirmado')
+        $user = auth()->user();
+
+        if ($user->isAlumno()) {
+            return $this->alumnoIndex($user);
+        }
+
+        if ($user->isDocente()) {
+            return $this->docenteIndex($user);
+        }
+
+        if ($user->isRepresentante()) {
+            return view('dashboard.representante');
+        }
+
+        // Admin
+        $totalAlumnos      = Alumno::count();
+        $alumnosActivos    = Alumno::where('estado', 1)->count();
+        $matriculasActivas = Matricula::where('estado', 'activa')->count();
+        $ingresosMes       = Pago::where('estado', 'confirmado')
                                 ->whereMonth('fecha_pago', Carbon::now()->month)
                                 ->whereYear('fecha_pago', Carbon::now()->year)
                                 ->sum('monto');
-        $pagosPendientes    = Pago::where('estado', 'pendiente')->count();
+        $pagosPendientes   = Pago::where('estado', 'pendiente')->count();
 
         return view('dashboard.index', compact(
             'totalAlumnos', 'alumnosActivos',
             'matriculasActivas', 'ingresosMes', 'pagosPendientes'
         ));
+    }
+
+    private function alumnoIndex($user)
+    {
+        $alumno    = $user->alumno;
+        $matricula = null;
+        $cursos    = collect();
+
+        if ($alumno) {
+            $matricula = $alumno->matriculaActiva();
+            if ($matricula && $matricula->plan) {
+                $cursos = $matricula->plan
+                    ->cursos()
+                    ->where('activo', true)
+                    ->orderBy('nivel')
+                    ->orderBy('grado')
+                    ->orderBy('nombre')
+                    ->get();
+            }
+        }
+
+        return view('dashboard.alumno', compact('alumno', 'matricula', 'cursos'));
+    }
+
+    private function docenteIndex($user)
+    {
+        return view('dashboard.docente', compact('user'));
     }
 
     public function alumnos()

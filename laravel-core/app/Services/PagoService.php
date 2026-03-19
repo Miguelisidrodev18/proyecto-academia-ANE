@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\Cuota;
 use App\Models\Matricula;
 use App\Models\Pago;
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,8 +28,9 @@ class PagoService
             $comprobanteUrl = $comprobante->store('comprobantes', 'public');
         }
 
-        return Pago::create([
+        $pago = Pago::create([
             'matricula_id'    => $data['matricula_id'],
+            'cuota_id'        => $data['cuota_id'] ?? null,
             'user_id'         => $data['user_id'],
             'monto'           => $data['monto'],
             'metodo_pago'     => $data['metodo_pago'],
@@ -37,6 +40,14 @@ class PagoService
             'notas'           => $data['notas'] ?? null,
             'comprobante_url' => $comprobanteUrl,
         ]);
+
+        // Si el pago ya viene confirmado y tiene cuota, marcarla pagada
+        if ($pago->estado === 'confirmado' && $pago->cuota_id) {
+            $cuota = Cuota::find($pago->cuota_id);
+            $cuota?->update(['estado' => 'pagada', 'fecha_pago' => Carbon::parse($pago->fecha_pago)]);
+        }
+
+        return $pago;
     }
 
     public function actualizarPago(Pago $pago, array $data, ?UploadedFile $comprobante = null): void
@@ -54,10 +65,22 @@ class PagoService
     public function confirmarPago(Pago $pago): void
     {
         $pago->update(['estado' => 'confirmado']);
+
+        if ($pago->cuota_id) {
+            Cuota::where('id', $pago->cuota_id)
+                ->update(['estado' => 'pagada', 'fecha_pago' => $pago->fecha_pago]);
+        }
     }
 
     public function anularPago(Pago $pago): void
     {
         $pago->update(['estado' => 'anulado']);
+
+        // Revertir cuota a pendiente si aplica
+        if ($pago->cuota_id) {
+            Cuota::where('id', $pago->cuota_id)
+                ->where('estado', 'pagada')
+                ->update(['estado' => 'pendiente', 'fecha_pago' => null]);
+        }
     }
 }

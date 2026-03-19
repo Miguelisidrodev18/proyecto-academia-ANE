@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Planes;
 
 use App\Http\Controllers\Controller;
+use App\Models\Curso;
 use App\Models\Plan;
 use App\Services\PlanService;
 use Illuminate\Http\RedirectResponse;
@@ -32,7 +33,8 @@ class PlanController extends Controller
 
     public function create(): View
     {
-        return view('planes.create');
+        $cursos = Curso::where('activo', true)->orderBy('nivel')->orderBy('grado')->orderBy('nombre')->get();
+        return view('planes.create', compact('cursos'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -44,6 +46,8 @@ class PlanController extends Controller
             'acceso_ilimitado' => ['nullable', 'boolean'],
             'descripcion'      => ['nullable', 'string', 'max:500'],
             'activo'           => ['nullable', 'boolean'],
+            'cursos'           => ['nullable', 'array'],
+            'cursos.*'         => ['integer', 'exists:cursos,id'],
         ]);
 
         $plan = $this->planService->crear($data);
@@ -54,7 +58,7 @@ class PlanController extends Controller
 
     public function show(Plan $plan): View
     {
-        $plan->load(['matriculas.alumno.user']);
+        $plan->load(['matriculas.alumno.user', 'cursos']);
 
         $matriculasActivas = $plan->matriculas()
             ->with('alumno.user')
@@ -68,7 +72,9 @@ class PlanController extends Controller
 
     public function edit(Plan $plan): View
     {
-        return view('planes.edit', compact('plan'));
+        $cursos = Curso::where('activo', true)->orderBy('nivel')->orderBy('grado')->orderBy('nombre')->get();
+        $plan->load('cursos');
+        return view('planes.edit', compact('plan', 'cursos'));
     }
 
     public function update(Request $request, Plan $plan): RedirectResponse
@@ -80,6 +86,8 @@ class PlanController extends Controller
             'acceso_ilimitado' => ['nullable', 'boolean'],
             'descripcion'      => ['nullable', 'string', 'max:500'],
             'activo'           => ['nullable', 'boolean'],
+            'cursos'           => ['nullable', 'array'],
+            'cursos.*'         => ['integer', 'exists:cursos,id'],
         ]);
 
         $this->planService->actualizar($plan, $data);

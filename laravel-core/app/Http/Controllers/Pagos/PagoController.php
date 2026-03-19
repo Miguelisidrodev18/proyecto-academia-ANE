@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pagos;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Pago\StorePagoRequest;
 use App\Http\Requests\Pago\UpdatePagoRequest;
+use App\Models\Cuota;
 use App\Models\Matricula;
 use App\Models\Pago;
 use App\Services\PagoService;
@@ -54,7 +55,7 @@ class PagoController extends Controller
 
     public function create(Request $request): View
     {
-        $matriculas = Matricula::with(['alumno.user', 'plan', 'pagos'])
+        $matriculas = Matricula::with(['alumno.user', 'plan', 'pagos', 'cuotas'])
             ->whereIn('estado', ['activa', 'pendiente'])
             ->orderBy('id', 'desc')
             ->get();
@@ -65,6 +66,13 @@ class PagoController extends Controller
             'precio_pagado' => (float) $m->precio_pagado,
             'total_pagado'  => (float) $m->pagos->where('estado', 'confirmado')->sum('monto'),
             'saldo'         => (float) $this->pagoService->calcularSaldoPendiente($m),
+            'cuotas'        => $m->cuotas->whereIn('estado', ['pendiente', 'vencida'])->values()->map(fn ($c) => [
+                'id'                => $c->id,
+                'numero'            => $c->numero,
+                'monto'             => (float) $c->monto,
+                'estado'            => $c->estado,
+                'fecha_vencimiento' => $c->fecha_vencimiento->format('d/m/Y'),
+            ]),
         ])->toJson();
 
         $matriculaSeleccionada = $request->filled('matricula_id')
@@ -76,6 +84,7 @@ class PagoController extends Controller
 
     public function store(StorePagoRequest $request): RedirectResponse
     {
+        $flow      = $request->boolean('flow');
         $data      = $request->validated();
         $matricula = Matricula::findOrFail($data['matricula_id']);
         $saldo     = $this->pagoService->calcularSaldoPendiente($matricula);
@@ -89,13 +98,18 @@ class PagoController extends Controller
         $data['user_id'] = auth()->id();
         $pago = $this->pagoService->procesarPago($data, $request->file('comprobante'));
 
+        $mensaje = $flow
+            ? '¡Registro completo! Alumno, matrícula y pago registrados correctamente.'
+            : 'Pago registrado correctamente.';
+
         return redirect()->route('pagos.show', $pago)
-            ->with('success', 'Pago registrado correctamente.');
+            ->with('success', $mensaje)
+            ->with('flow_complete', $flow);
     }
 
     public function show(Pago $pago): View
     {
-        $pago->load(['matricula.alumno.user', 'matricula.plan', 'matricula.pagos', 'user']);
+        $pago->load(['matricula.alumno.user', 'matricula.plan', 'matricula.pagos', 'user', 'cuota']);
 
         return view('pagos.show', compact('pago'));
     }

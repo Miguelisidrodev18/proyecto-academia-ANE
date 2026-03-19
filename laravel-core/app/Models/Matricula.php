@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Matricula extends Model
 {
@@ -26,29 +27,30 @@ class Matricula extends Model
     public function alumno(): BelongsTo { return $this->belongsTo(Alumno::class); }
     public function plan(): BelongsTo   { return $this->belongsTo(Plan::class); }
     public function pagos(): HasMany    { return $this->hasMany(Pago::class); }
+    public function cuotas(): HasMany   { return $this->hasMany(Cuota::class)->orderBy('numero'); }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    // Método helper para saber si tiene acceso hoy
     public function tieneAcceso(): bool
     {
-        if ($this->tipo_pago === 'completo') {
-            return $this->estado === 'activa' && $this->fecha_fin->isFuture();
+        if ($this->estado !== 'activa') {
+            return false;
         }
-        
-        if ($this->tipo_pago === 'mensual') {
-            // Lógica: verificar si pagó el mes actual
-            return $this->pagos()
-                ->where('estado', 'pagado')
-                ->whereMonth('fecha_pago', now()->month)
-                ->exists();
+
+        if ($this->plan?->acceso_ilimitado) {
+            return true;
         }
-        
-        // tipo_pago === 'cuotas'
-        // Lógica más compleja, depende de cuántas cuotas pagó
-        return $this->pagos()
-            ->where('estado', 'pagado')
-            ->sum('monto') >= $this->precio_pagado / 2; // ej: mínimo 50%
+
+        if ($this->fecha_fin && $this->fecha_fin->isPast()) {
+            return false;
+        }
+
+        // Si tiene cuotas vencidas sin pagar → no tiene acceso
+        if ($this->cuotas()->where('estado', 'vencida')->exists()) {
+            return false;
+        }
+
+        return true;
     }
     public function estaActiva(): bool   { return $this->estado === 'activa'; }
 

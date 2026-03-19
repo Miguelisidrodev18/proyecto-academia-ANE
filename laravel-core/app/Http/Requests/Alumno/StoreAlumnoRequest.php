@@ -22,6 +22,12 @@ class StoreAlumnoRequest extends FormRequest
             'tipo'       => ['required', 'in:pollito,intermedio'],
             'estado'     => ['required', 'in:activo,inactivo'],
             'origen_registro' => ['nullable', 'string', 'max:100'],
+
+            // Representante (opcional)
+            'nombre_rep'    => ['nullable', 'string', 'max:100', 'required_with:email_rep'],
+            'apellidos_rep' => ['nullable', 'string', 'max:100', 'required_with:email_rep'],
+            'email_rep'     => ['nullable', 'email', 'max:255', 'different:email', 'unique:users,email'],
+            'telefono_rep'  => ['nullable', 'string', 'max:20'],
         ];
     }
 
@@ -36,7 +42,11 @@ class StoreAlumnoRequest extends FormRequest
             'dni.digits'         => 'El DNI debe tener exactamente 8 dígitos.',
             'dni.unique'         => 'Este DNI ya está registrado.',
             'tipo.in'            => 'El tipo debe ser Pollito o Intermedio.',
-            'estado.in'          => 'El estado debe ser activo o inactivo.',
+            'estado.in'              => 'El estado debe ser activo o inactivo.',
+            'nombre_rep.required_with'    => 'El nombre del representante es obligatorio si ingresa su correo.',
+            'apellidos_rep.required_with' => 'Los apellidos del representante son obligatorios si ingresa su correo.',
+            'email_rep.unique'            => 'Este correo de representante ya está registrado.',
+            'email_rep.different'         => 'El correo del representante debe ser diferente al del alumno.',
         ];
     }
 }

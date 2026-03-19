@@ -53,30 +53,70 @@ class AlumnoController extends Controller
 
     public function store(StoreAlumnoRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data            = $request->validated();
+        $alumnoPassword  = $data['dni'];
+        $repPassword     = null;
+        $alumno          = null;
 
-        DB::transaction(function () use ($data) {
-            $user = User::create([
+        DB::transaction(function () use ($data, $alumnoPassword, &$repPassword, &$alumno) {
+            $userAlumno = User::create([
                 'name'     => trim($data['nombres'] . ' ' . $data['apellidos']),
                 'email'    => $data['email'],
-                'password' => Hash::make($data['dni']),
+                'password' => Hash::make($alumnoPassword),
                 'role'     => 'alumno',
             ]);
 
-            Alumno::create([
-                'user_id'         => $user->id,
-                'dni'             => $data['dni'],
-                'telefono'        => $data['telefono'] ?? null,
-                'tipo'            => $data['tipo'],
-                'estado'          => $data['estado'] === 'activo',
-                'origen_registro' => $data['origen_registro'] ?? 'manual',
-                'acceso_activo'   => true,
-                'racha_actual'    => 0,
+            $representanteId = null;
+            if (!empty($data['email_rep'])) {
+                $repPassword = 'Acad' . rand(1000, 9999);
+                $userRep = User::create([
+                    'name'     => trim(($data['nombre_rep'] ?? '') . ' ' . ($data['apellidos_rep'] ?? '')),
+                    'email'    => $data['email_rep'],
+                    'password' => Hash::make($repPassword),
+                    'role'     => 'representante',
+                ]);
+                $representanteId = $userRep->id;
+            }
+
+            $alumno = Alumno::create([
+                'user_id'          => $userAlumno->id,
+                'representante_id' => $representanteId,
+                'dni'              => $data['dni'],
+                'telefono'         => $data['telefono'] ?? null,
+                'tipo'             => $data['tipo'],
+                'estado'           => $data['estado'] === 'activo',
+                'origen_registro'  => $data['origen_registro'] ?? 'manual',
+                'acceso_activo'    => true,
+                'racha_actual'     => 0,
             ]);
         });
 
-        return redirect()->route('alumnos.index')
-            ->with('success', 'Alumno registrado correctamente.');
+        session()->flash('credenciales', [
+            'alumno' => [
+                'nombre'   => trim($data['nombres'] . ' ' . $data['apellidos']),
+                'email'    => $data['email'],
+                'password' => $alumnoPassword,
+            ],
+            'representante' => !empty($data['email_rep']) ? [
+                'nombre'   => trim(($data['nombre_rep'] ?? '') . ' ' . ($data['apellidos_rep'] ?? '')),
+                'email'    => $data['email_rep'],
+                'password' => $repPassword,
+            ] : null,
+        ]);
+
+        return redirect()->route('alumnos.credenciales', $alumno);
+    }
+
+    public function credenciales(Alumno $alumno): View
+    {
+        $alumno->load(['user', 'representante']);
+        $credenciales = session('credenciales');
+
+        if (!$credenciales) {
+            return redirect()->route('alumnos.show', $alumno);
+        }
+
+        return view('alumnos.credenciales', compact('alumno', 'credenciales'));
     }
 
     public function show(Alumno $alumno): View

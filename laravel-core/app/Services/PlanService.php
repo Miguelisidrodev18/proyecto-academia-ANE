@@ -10,7 +10,7 @@ class PlanService
     public function crear(array $data): Plan
     {
         return DB::transaction(function () use ($data) {
-            return Plan::create([
+            $plan = Plan::create([
                 'nombre'           => $data['nombre'],
                 'precio'           => $data['precio'],
                 'duracion_meses'   => $data['duracion_meses'],
@@ -18,6 +18,12 @@ class PlanService
                 'descripcion'      => $data['descripcion'] ?? null,
                 'activo'           => (bool) ($data['activo'] ?? true),
             ]);
+
+            if (! empty($data['cursos'])) {
+                $plan->cursos()->sync($data['cursos']);
+            }
+
+            return $plan;
         });
     }
 
@@ -32,6 +38,8 @@ class PlanService
                 'descripcion'      => $data['descripcion'] ?? null,
                 'activo'           => (bool) ($data['activo'] ?? false),
             ]);
+
+            $plan->cursos()->sync($data['cursos'] ?? []);
         });
     }
 

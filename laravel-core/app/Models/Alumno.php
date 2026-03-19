@@ -15,6 +15,7 @@ class Alumno extends Model
 
     protected $fillable = [
         'user_id',
+        'representante_id',
         'dni',
         'telefono',
         'origen_registro',
@@ -36,6 +37,11 @@ class Alumno extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function representante(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'representante_id');
     }
 
     public function matriculas(): HasMany

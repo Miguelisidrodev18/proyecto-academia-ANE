@@ -11,6 +11,7 @@ class UpdatePagoRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'cuota_id'     => ['nullable', 'integer', 'exists:cuotas,id'],
             'monto'        => ['required', 'numeric', 'min:1'],
             'metodo_pago'  => ['required', 'in:efectivo,transferencia,yape,plin,tarjeta,mixto'],
             'estado'       => ['required', 'in:confirmado,pendiente,anulado'],
