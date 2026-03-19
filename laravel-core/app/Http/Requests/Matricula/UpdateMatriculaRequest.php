@@ -14,6 +14,7 @@ class UpdateMatriculaRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'plan_id'       => ['required', 'exists:planes,id'],
             'fecha_inicio'  => ['required', 'date'],
             'tipo_pago'     => ['required', 'in:completo,mensual,cuotas'],
             'dias_cortesia' => ['nullable', 'integer', 'min:0', 'max:30'],

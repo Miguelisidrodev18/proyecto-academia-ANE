@@ -167,6 +167,7 @@ class AlumnoController extends Controller
             ->get()
             ->map(fn ($a) => [
                 'id'      => $a->id,
+                'text'    => $a->nombreCompleto() . ' - ' . $a->dni,
                 'nombre'  => $a->nombreCompleto(),
                 'dni'     => $a->dni,
                 'tipo'    => $a->tipo,

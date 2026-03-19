@@ -112,13 +112,16 @@ class MatriculaController extends Controller
         $data = $request->validated();
 
         DB::transaction(function () use ($data, $matricula) {
+            $plan         = Plan::findOrFail($data['plan_id']);
             $fechaInicio  = Carbon::parse($data['fecha_inicio']);
             $diasCortesia = (int) ($data['dias_cortesia'] ?? 0);
             $fechaFin     = $fechaInicio->copy()
-                ->addMonths($matricula->plan->duracion_meses)
+                ->addMonths($plan->duracion_meses)
                 ->addDays($diasCortesia);
 
             $matricula->update([
+                'plan_id'       => $plan->id,
+                'precio_pagado' => $plan->precio,
                 'fecha_inicio'  => $fechaInicio,
                 'fecha_fin'     => $fechaFin,
                 'tipo_pago'     => $data['tipo_pago'],
