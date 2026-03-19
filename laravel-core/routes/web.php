@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Alumnos\AlumnoController;
 use App\Http\Controllers\Matriculas\MatriculaController;
 use App\Http\Controllers\Pagos\PagoController;
+use App\Http\Controllers\Planes\PlanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -25,6 +26,10 @@ Route::middleware(['auth'])->group(function () {
 
     // ── Módulo Pagos ───────────────────────────────────────────────────────────
     Route::resource('pagos', PagoController::class);
+
+    // ── Módulo Planes ──────────────────────────────────────────────────────────
+    Route::patch('/planes/{plan}/toggle', [PlanController::class, 'toggle'])->name('planes.toggle');
+    Route::resource('planes', PlanController::class);
 
     // ── Dashboard stubs (próximamente) ─────────────────────────────────────────
     Route::get('/dashboard/pagos',           [DashboardController::class, 'pagos'])->name('dashboard.pagos');

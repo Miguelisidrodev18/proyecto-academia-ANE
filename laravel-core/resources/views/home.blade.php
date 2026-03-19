@@ -137,40 +137,24 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-
-                <x-price-card
-                    plan="Premium"
-                    price="250"
-                    period="3 meses"
-                    badge="Popular"
-                    :features="[
-                        'Matemática, Álgebra y Geometría',
-                        'Física, Química y Biología',
-                        'Lenguaje, Literatura e Historia',
-                        '4 simulacros de examen al mes',
-                        'Material de estudio descargable',
-                        'Ranking de rendimiento semanal',
-                    ]"
-                />
-
-                <x-price-card
-                    plan="VIP"
-                    price="500"
-                    period="Acceso ilimitado"
-                    badge="Mejor opción"
-                    :featured="true"
-                    :features="[
-                        'Todo lo del plan Premium',
-                        'Clases en vivo con docentes',
-                        'Simulacros ilimitados 24/7',
-                        'Tutoría personalizada semanal',
-                        'Preparación para UNMSM, PUCP, UNI',
-                        'Acceso de por vida + actualizaciones',
-                    ]"
-                />
-
+            @if($planes->isEmpty())
+            <div class="text-center py-10 text-gray-400 text-sm">
+                Próximamente publicaremos nuestros planes. ¡Contáctanos para más información!
             </div>
+            @else
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-{{ min($planes->count(), 3) }} gap-8 max-w-5xl mx-auto">
+                @foreach($planes as $index => $plan)
+                    <x-price-card
+                        :plan="$plan->nombre"
+                        :price="number_format($plan->precio, 0)"
+                        :period="$plan->acceso_ilimitado ? 'Acceso ilimitado' : $plan->duracion_meses . ' ' . ($plan->duracion_meses == 1 ? 'mes' : 'meses')"
+                        :badge="$plan->acceso_ilimitado ? 'Mejor opción' : ($index === 0 && $planes->count() > 1 ? 'Popular' : null)"
+                        :featured="$plan->acceso_ilimitado"
+                        :features="$plan->descripcion ? [$plan->descripcion] : []"
+                    />
+                @endforeach
+            </div>
+            @endif
         </div>
     </section>
 
