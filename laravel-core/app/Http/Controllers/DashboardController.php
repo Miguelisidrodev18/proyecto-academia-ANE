@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Alumno;
 use App\Models\Matricula;
 use App\Models\Pago;
+use App\Services\AccesoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {
+    public function __construct(private AccesoService $accesoService) {}
+
     public function index()
     {
         $user = auth()->user();
@@ -44,11 +47,24 @@ class DashboardController extends Controller
 
     private function alumnoIndex($user)
     {
-        $alumno    = $user->alumno;
-        $matricula = null;
-        $cursos    = collect();
+        $alumno         = $user->alumno;
+        $matricula      = null;
+        $cursos         = collect();
+        $rachaInfo      = null;
+        $mostrarOverlay = false;
 
         if ($alumno) {
+            $rachaInfo = $this->accesoService->registrarAcceso($alumno->id);
+
+            if ($rachaInfo['si_subio_racha'] || $rachaInfo['si_perdio_racha']) {
+                $sessionKey     = 'racha_overlay_' . $alumno->id;
+                $ultimaMostrada = session($sessionKey);
+                if ($ultimaMostrada !== Carbon::today()->toDateString()) {
+                    $mostrarOverlay = true;
+                    session([$sessionKey => Carbon::today()->toDateString()]);
+                }
+            }
+
             $matricula = $alumno->matriculaActiva();
             if ($matricula && $matricula->plan) {
                 $cursos = $matricula->plan
@@ -61,7 +77,9 @@ class DashboardController extends Controller
             }
         }
 
-        return view('dashboard.alumno', compact('alumno', 'matricula', 'cursos'));
+        return view('dashboard.alumno', compact(
+            'alumno', 'matricula', 'cursos', 'rachaInfo', 'mostrarOverlay'
+        ));
     }
 
     private function docenteIndex($user)

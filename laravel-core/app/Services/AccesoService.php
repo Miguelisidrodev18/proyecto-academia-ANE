@@ -21,35 +21,57 @@ class AccesoService
             ->exists();
     }
 
-    public function registrarAcceso(int $alumnoId): void
+    public function registrarAcceso(int $alumnoId): array
     {
-        $alumno = Alumno::findOrFail($alumnoId);
-
-        $this->actualizarRacha($alumnoId);
-
-        $alumno->update([
-            'acceso_activo' => true,
-            'ultimo_acceso' => Carbon::today(),
-        ]);
-    }
-
-    public function actualizarRacha(int $alumnoId): void
-    {
-        $alumno = Alumno::findOrFail($alumnoId);
-        $hoy    = Carbon::today();
-        $ayer   = Carbon::yesterday();
+        $alumno        = Alumno::findOrFail($alumnoId);
+        $hoy           = Carbon::today();
+        $rachaAnterior = (int) ($alumno->racha_actual ?? 0);
+        $subioRacha    = false;
+        $perdioRacha   = false;
+        $mismoDia      = false;
 
         if ($alumno->ultimo_acceso === null) {
             $alumno->racha_actual = 1;
-        } elseif ($alumno->ultimo_acceso->equalTo($ayer)) {
-            $alumno->racha_actual += 1;
+            $subioRacha           = true;
         } elseif ($alumno->ultimo_acceso->equalTo($hoy)) {
-            return;
+            $mismoDia = true;
+        } elseif ($alumno->ultimo_acceso->equalTo($hoy->copy()->subDay())) {
+            $alumno->racha_actual += 1;
+            $subioRacha            = true;
         } else {
+            $perdioRacha          = true;
             $alumno->racha_actual = 1;
         }
 
-        $alumno->ultimo_acceso = $hoy;
-        $alumno->save();
+        if (! $mismoDia) {
+            $alumno->ultimo_acceso = $hoy;
+            $alumno->acceso_activo = true;
+            $alumno->save();
+        }
+
+        return [
+            'racha_actual'    => (int) $alumno->racha_actual,
+            'si_subio_racha'  => $subioRacha,
+            'si_perdio_racha' => $perdioRacha,
+            'racha_anterior'  => $rachaAnterior,
+            'mismo_dia'       => $mismoDia,
+        ];
+    }
+
+    public function calcularRacha(Alumno $alumno): array
+    {
+        $hoy = Carbon::today();
+
+        if ($alumno->ultimo_acceso === null) {
+            return ['racha_actual' => 0, 'activa' => false];
+        }
+
+        $diff  = $alumno->ultimo_acceso->diffInDays($hoy);
+        $activa = $diff <= 1;
+
+        return [
+            'racha_actual' => (int) $alumno->racha_actual,
+            'activa'       => $activa,
+        ];
     }
 }

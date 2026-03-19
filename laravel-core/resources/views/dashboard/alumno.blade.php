@@ -3,14 +3,41 @@
 
 @section('content')
 
+{{-- Overlay de racha (fullscreen, solo primera vez del día) --}}
+@if($mostrarOverlay && $rachaInfo)
+    @include('partials.racha-overlay')
+@endif
+
 {{-- Bienvenida --}}
-<div class="mb-6">
-    <h1 class="text-2xl font-black text-primary-dark">
-        ¡Bienvenido, {{ explode(' ', auth()->user()->name)[0] }}!
-    </h1>
-    <p class="text-gray-500 text-sm mt-1">
-        Panel del alumno — Academia Nueva Era
-    </p>
+<div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
+    <div>
+        <h1 class="text-2xl font-black text-primary-dark">
+            ¡Bienvenido, {{ explode(' ', auth()->user()->name)[0] }}!
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">
+            Panel del alumno — Academia Nueva Era
+        </p>
+    </div>
+    {{-- Mini racha badge --}}
+    @if($rachaInfo && $rachaInfo['racha_actual'] > 0)
+    @php
+        $r = $rachaInfo['racha_actual'];
+        if ($r <= 7)       { $rBg = 'bg-blue-100';   $rText = 'text-blue-700';   $rBorder = 'border-blue-200'; }
+        elseif ($r <= 30)  { $rBg = 'bg-emerald-100'; $rText = 'text-emerald-700'; $rBorder = 'border-emerald-200'; }
+        elseif ($r <= 50)  { $rBg = 'bg-violet-100';  $rText = 'text-violet-700';  $rBorder = 'border-violet-200'; }
+        elseif ($r <= 75)  { $rBg = 'bg-orange-100';  $rText = 'text-orange-700';  $rBorder = 'border-orange-200'; }
+        else               { $rBg = 'bg-amber-100';   $rText = 'text-amber-700';   $rBorder = 'border-amber-200'; }
+    @endphp
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border {{ $rBg }} {{ $rText }} {{ $rBorder }} flex-shrink-0">
+        <span class="text-lg leading-none">{{ $r >= 75 ? '💎' : '🔥' }}</span>
+        <div>
+            <p class="text-lg font-black leading-none">{{ $r }}</p>
+            <p class="text-[10px] font-semibold uppercase tracking-wide leading-none opacity-70">
+                {{ $r === 1 ? 'día' : 'días' }}
+            </p>
+        </div>
+    </div>
+    @endif
 </div>
 
 {{-- Estado de matrícula --}}
@@ -40,7 +67,7 @@
     </div>
 @else
     {{-- Stats --}}
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {{-- Plan --}}
         @if($matricula->plan->esVip())
         <div class="relative rounded-2xl p-5 shadow-lg col-span-2 lg:col-span-1 overflow-hidden"
@@ -97,6 +124,27 @@
             </span>
             <p class="text-xs text-gray-400 font-medium mt-2">Acceso habilitado</p>
         </div>
+
+        {{-- Racha --}}
+        @if($rachaInfo)
+        @php
+            $rr = $rachaInfo['racha_actual'];
+            if ($rr <= 7)      { $rStyle = 'background:linear-gradient(135deg,#1d4ed8,#3b82f6)'; $rGlow = 'shadow-blue-200'; }
+            elseif ($rr <= 30) { $rStyle = 'background:linear-gradient(135deg,#065f46,#10b981)'; $rGlow = 'shadow-emerald-200'; }
+            elseif ($rr <= 50) { $rStyle = 'background:linear-gradient(135deg,#4c1d95,#8b5cf6)'; $rGlow = 'shadow-violet-200'; }
+            elseif ($rr <= 75) { $rStyle = 'background:linear-gradient(135deg,#7c2d12,#f97316)'; $rGlow = 'shadow-orange-200'; }
+            else               { $rStyle = 'background:linear-gradient(135deg,#78350f,#fbbf24)'; $rGlow = 'shadow-amber-200'; }
+            $rEmoji = $rr >= 75 ? '💎' : '🔥';
+        @endphp
+        <div class="rounded-2xl p-5 shadow-md {{ $rGlow }} text-white relative overflow-hidden col-span-2 lg:col-span-1"
+             style="{{ $rStyle }};">
+            <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full opacity-10 bg-white"></div>
+            <div class="text-2xl mb-2 leading-none">{{ $rEmoji }}</div>
+            <p class="text-white/60 text-xs font-semibold uppercase tracking-wide mb-0.5">Racha actual</p>
+            <p class="text-3xl font-black text-white leading-none">{{ $rr }}</p>
+            <p class="text-white/60 text-xs mt-1">{{ $rr === 1 ? 'día consecutivo' : 'días consecutivos' }}</p>
+        </div>
+        @endif
     </div>
 @endif
 
