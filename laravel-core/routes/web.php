@@ -46,7 +46,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('pagos', PagoController::class);
 
         Route::patch('/planes/{plan}/toggle', [PlanController::class, 'toggle'])->name('planes.toggle');
-        Route::resource('planes', PlanController::class);
+        Route::resource('planes', PlanController::class)->parameters(['planes' => 'plan']);
     });
 
     // ── Módulo Cursos: Admin y Docente ──────────────────────────────────────

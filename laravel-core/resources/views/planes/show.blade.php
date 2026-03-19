@@ -18,7 +18,18 @@
                 <a href="{{ route('planes.index') }}" class="hover:text-accent transition-colors">Planes</a>
                 <span class="mx-1">/</span><span class="text-gray-600">{{ $plan->nombre }}</span>
             </nav>
-            <h1 class="text-xl font-black text-primary-dark leading-none">{{ $plan->nombre }}</h1>
+            <div class="flex items-center gap-2">
+                <h1 class="text-xl font-black text-primary-dark leading-none">{{ $plan->nombre }}</h1>
+                @if($plan->esVip())
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-yellow-300 text-amber-900 shadow-sm">
+                        💎 VIP
+                    </span>
+                @else
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                        ⭐ Premium
+                    </span>
+                @endif
+            </div>
         </div>
         <div class="flex items-center gap-2">
             <form method="POST" action="{{ route('planes.toggle', $plan) }}">
@@ -60,19 +71,36 @@
 
         {{-- Card principal --}}
         <div class="lg:col-span-1">
-            <div class="bg-gradient-to-b from-primary-dark to-primary-light rounded-2xl shadow-lg overflow-hidden">
+            <div class="rounded-2xl shadow-lg overflow-hidden"
+                 @if($plan->esVip())
+                     style="background: linear-gradient(160deg, #1a0a00 0%, #3d1f00 50%, #6b3500 100%);
+                            box-shadow: 0 8px 32px rgba(251,191,36,0.3);"
+                 @else
+                     style="background: linear-gradient(160deg, #082B59 0%, #30A9D9 100%);"
+                 @endif>
+                @if($plan->esVip())
+                    <div class="absolute pointer-events-none inset-0"
+                         style="background: radial-gradient(ellipse at 80% 0%, rgba(251,191,36,0.15) 0%, transparent 60%);"></div>
+                @endif
                 {{-- Header card --}}
                 <div class="px-6 pt-6 pb-4 relative">
-                    @if($plan->acceso_ilimitado)
-                        <span class="absolute top-4 right-4 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-bold border border-amber-400/30">
-                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                            </svg>
-                            Ilimitado
-                        </span>
-                    @endif
-                    <p class="text-white/60 text-xs font-semibold uppercase tracking-widest mb-1">Plan</p>
-                    <h2 class="text-2xl font-black text-white">{{ $plan->nombre }}</h2>
+                    <div class="absolute top-4 right-4 flex flex-col items-end gap-1">
+                        @if($plan->esVip())
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 text-amber-900 text-xs font-black shadow-lg shadow-amber-400/40">
+                                💎 VIP
+                            </span>
+                        @endif
+                        @if($plan->acceso_ilimitado)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-bold border border-amber-400/30">
+                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                </svg>
+                                Ilimitado
+                            </span>
+                        @endif
+                    </div>
+                    <p class="{{ $plan->esVip() ? 'text-amber-300/60' : 'text-white/60' }} text-xs font-semibold uppercase tracking-widest mb-1">Plan</p>
+                    <h2 class="text-2xl font-black {{ $plan->esVip() ? 'text-amber-200' : 'text-white' }}">{{ $plan->nombre }}</h2>
                 </div>
 
                 {{-- Precio --}}

@@ -38,16 +38,33 @@
     </div>
 @else
     {{-- Info de matrícula --}}
-    <div class="bg-gradient-to-r from-primary-dark to-primary-light rounded-2xl p-5 mb-6 flex items-center gap-4">
+    <div class="rounded-2xl p-5 mb-6 flex items-center gap-4 relative overflow-hidden"
+         @if($matricula->plan->esVip())
+             style="background: linear-gradient(135deg, #1a0a00 0%, #3d1f00 50%, #6b3500 100%);
+                    box-shadow: 0 8px 32px rgba(251,191,36,0.25);"
+         @else
+             style="background: linear-gradient(to right, #082B59, #30A9D9);"
+         @endif>
+        @if($matricula->plan->esVip())
+            <div class="absolute inset-0 pointer-events-none"
+                 style="background: radial-gradient(ellipse at 90% 0%, rgba(251,191,36,0.18) 0%, transparent 55%);"></div>
+            <div class="absolute top-3 right-3">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-yellow-300 text-amber-900 shadow">
+                    💎 VIP
+                </span>
+            </div>
+        @endif
         <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 {{ $matricula->plan->esVip() ? 'text-amber-300' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
         </div>
         <div class="flex-1 min-w-0">
-            <p class="text-white font-bold text-sm">Plan: {{ $matricula->plan->nombre }}</p>
-            <p class="text-white/70 text-xs mt-0.5">
+            <p class="{{ $matricula->plan->esVip() ? 'text-amber-200' : 'text-white' }} font-bold text-sm">
+                {{ $matricula->plan->tipoIcono() }} Plan: {{ $matricula->plan->nombre }}
+            </p>
+            <p class="{{ $matricula->plan->esVip() ? 'text-amber-300/70' : 'text-white/70' }} text-xs mt-0.5">
                 Matrícula activa ·
                 @if($matricula->plan->acceso_ilimitado)
                     Acceso ilimitado
@@ -58,8 +75,8 @@
             </p>
         </div>
         <div class="text-right flex-shrink-0">
-            <p class="text-white font-black text-xl">{{ $cursos->count() }}</p>
-            <p class="text-white/60 text-xs">cursos</p>
+            <p class="{{ $matricula->plan->esVip() ? 'text-amber-200' : 'text-white' }} font-black text-xl">{{ $cursos->count() }}</p>
+            <p class="{{ $matricula->plan->esVip() ? 'text-amber-300/60' : 'text-white/60' }} text-xs">cursos</p>
         </div>
     </div>
 @endif

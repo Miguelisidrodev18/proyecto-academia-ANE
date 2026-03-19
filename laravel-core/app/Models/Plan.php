@@ -15,6 +15,7 @@ class Plan extends Model
 
     protected $fillable = [
         'nombre',
+        'tipo_plan',
         'precio',
         'duracion_meses',
         'acceso_ilimitado',
@@ -41,6 +42,26 @@ class Plan extends Model
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    public function esVip(): bool
+    {
+        return $this->tipo_plan === 'vip';
+    }
+
+    public function esPremium(): bool
+    {
+        return $this->tipo_plan === 'premium';
+    }
+
+    public function tipoIcono(): string
+    {
+        return $this->esVip() ? '💎' : '⭐';
+    }
+
+    public function tipoLabel(): string
+    {
+        return $this->esVip() ? 'VIP' : 'Premium';
+    }
 
     public function precioFormateado(): string
     {

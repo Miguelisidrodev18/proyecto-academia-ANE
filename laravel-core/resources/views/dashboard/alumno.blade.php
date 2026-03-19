@@ -42,6 +42,26 @@
     {{-- Stats --}}
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {{-- Plan --}}
+        @if($matricula->plan->esVip())
+        <div class="relative rounded-2xl p-5 shadow-lg col-span-2 lg:col-span-1 overflow-hidden"
+             style="background: linear-gradient(135deg, #1a0a00 0%, #3d1f00 50%, #6b3500 100%);
+                    box-shadow: 0 8px 32px rgba(251,191,36,0.3);">
+            <div class="absolute inset-0 pointer-events-none"
+                 style="background: radial-gradient(ellipse at 80% 0%, rgba(251,191,36,0.2) 0%, transparent 60%);"></div>
+            <div class="absolute top-3 right-3">
+                <span class="px-2 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-yellow-300 text-amber-900 shadow">
+                    💎 VIP
+                </span>
+            </div>
+            <p class="text-amber-300/70 text-xs font-semibold uppercase tracking-wide mb-1">Plan activo</p>
+            <p class="text-amber-200 font-black text-xl leading-tight">{{ $matricula->plan->nombre }}</p>
+            @if($matricula->plan->acceso_ilimitado)
+                <p class="text-amber-300/60 text-xs mt-1">Acceso ilimitado</p>
+            @else
+                <p class="text-amber-300/60 text-xs mt-1">Vence en {{ $matricula->diasRestantes() }} días</p>
+            @endif
+        </div>
+        @else
         <div class="bg-gradient-to-br from-primary-dark to-primary-light rounded-2xl p-5 shadow-sm col-span-2 lg:col-span-1">
             <p class="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Plan activo</p>
             <p class="text-white font-black text-xl leading-tight">{{ $matricula->plan->nombre }}</p>
@@ -51,6 +71,7 @@
                 <p class="text-white/70 text-xs mt-1">Vence en {{ $matricula->diasRestantes() }} días</p>
             @endif
         </div>
+        @endif
         {{-- Cursos --}}
         <a href="{{ route('alumno.mis-cursos') }}"
            class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 block group">

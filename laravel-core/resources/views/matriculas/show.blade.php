@@ -38,10 +38,27 @@
     @include('matriculas._flash')
 
     {{-- Hero card --}}
-    @php $dias = $matricula->diasRestantes(); @endphp
-    <div class="relative bg-gradient-to-br from-primary-dark via-[#0e3d7a] to-[#30A9D9] rounded-3xl p-6 mb-5 text-white overflow-hidden">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+    @php $dias = $matricula->diasRestantes(); $esVip = $matricula->plan->esVip(); @endphp
+    <div class="relative rounded-3xl p-6 mb-5 text-white overflow-hidden"
+         @if($esVip)
+             style="background: linear-gradient(135deg, #1a0a00 0%, #3d1f00 40%, #6b3500 100%);
+                    box-shadow: 0 12px 40px rgba(251,191,36,0.25);"
+         @else
+             style="background: linear-gradient(135deg, #082B59 0%, #0e3d7a 50%, #30A9D9 100%);"
+         @endif>
+        @if($esVip)
+            <div class="absolute inset-0 pointer-events-none"
+                 style="background: radial-gradient(ellipse at 85% 0%, rgba(251,191,36,0.2) 0%, transparent 55%),
+                                    radial-gradient(ellipse at 5% 100%, rgba(217,119,6,0.12) 0%, transparent 50%);"></div>
+            <div class="absolute top-4 right-4">
+                <span class="px-3 py-1 rounded-full text-xs font-black bg-gradient-to-r from-amber-400 to-yellow-300 text-amber-900 shadow-lg shadow-amber-400/40">
+                    💎 VIP
+                </span>
+            </div>
+        @else
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+        @endif
 
         <div class="relative grid grid-cols-2 sm:grid-cols-4 gap-6">
             <div>
@@ -51,7 +68,9 @@
             </div>
             <div>
                 <p class="text-white/50 text-xs uppercase tracking-wide mb-1">Plan</p>
-                <p class="font-bold text-lg leading-tight">{{ $matricula->plan->nombre }}</p>
+                <p class="font-bold text-lg leading-tight {{ $esVip ? 'text-amber-300' : '' }}">
+                    {{ $matricula->plan->tipoIcono() }} {{ $matricula->plan->nombre }}
+                </p>
                 <p class="text-white/50 text-xs mt-0.5">{{ $matricula->plan->duracion_meses }} mes(es)</p>
             </div>
             <div>

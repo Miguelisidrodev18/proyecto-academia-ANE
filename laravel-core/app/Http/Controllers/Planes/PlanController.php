@@ -41,6 +41,7 @@ class PlanController extends Controller
     {
         $data = $request->validate([
             'nombre'           => ['required', 'string', 'max:100'],
+            'tipo_plan'        => ['required', 'in:premium,vip'],
             'precio'           => ['required', 'numeric', 'min:0'],
             'duracion_meses'   => ['required', 'integer', 'min:1', 'max:36'],
             'acceso_ilimitado' => ['nullable', 'boolean'],
@@ -81,6 +82,7 @@ class PlanController extends Controller
     {
         $data = $request->validate([
             'nombre'           => ['required', 'string', 'max:100'],
+            'tipo_plan'        => ['required', 'in:premium,vip'],
             'precio'           => ['required', 'numeric', 'min:0'],
             'duracion_meses'   => ['required', 'integer', 'min:1', 'max:36'],
             'acceso_ilimitado' => ['nullable', 'boolean'],

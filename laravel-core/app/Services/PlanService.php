@@ -12,6 +12,7 @@ class PlanService
         return DB::transaction(function () use ($data) {
             $plan = Plan::create([
                 'nombre'           => $data['nombre'],
+                'tipo_plan'        => $data['tipo_plan'] ?? 'premium',
                 'precio'           => $data['precio'],
                 'duracion_meses'   => $data['duracion_meses'],
                 'acceso_ilimitado' => (bool) ($data['acceso_ilimitado'] ?? false),
@@ -32,6 +33,7 @@ class PlanService
         DB::transaction(function () use ($plan, $data) {
             $plan->update([
                 'nombre'           => $data['nombre'],
+                'tipo_plan'        => $data['tipo_plan'] ?? 'premium',
                 'precio'           => $data['precio'],
                 'duracion_meses'   => $data['duracion_meses'],
                 'acceso_ilimitado' => (bool) ($data['acceso_ilimitado'] ?? false),

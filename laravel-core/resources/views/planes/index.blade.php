@@ -95,26 +95,43 @@
                         {{ !$plan->activo ? 'opacity-60' : '' }}">
 
                 {{-- Header de la card --}}
-                <div class="bg-gradient-to-r from-primary-dark to-primary-light px-5 py-5 relative">
-
-                    {{-- Badge ilimitado --}}
-                    @if($plan->acceso_ilimitado)
-                        <span class="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-0.5 rounded-full
-                                     bg-amber-400/20 text-amber-300 text-[10px] font-bold border border-amber-400/30 uppercase tracking-wide">
-                            <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                            </svg>
-                            Ilimitado
-                        </span>
+                <div class="px-5 py-5 relative"
+                     @if($plan->esVip())
+                         style="background: linear-gradient(135deg, #1a0a00 0%, #3d1f00 50%, #6b3500 100%);"
+                     @else
+                         style="background: linear-gradient(to right, #082B59, #30A9D9);"
+                     @endif>
+                    @if($plan->esVip())
+                        <div class="absolute inset-0 pointer-events-none"
+                             style="background: radial-gradient(ellipse at 90% 0%, rgba(251,191,36,0.2) 0%, transparent 60%);"></div>
                     @endif
 
-                    <p class="text-white/60 text-xs font-semibold uppercase tracking-widest mb-1">Plan</p>
-                    <h2 class="text-xl font-black text-white leading-tight">{{ $plan->nombre }}</h2>
+                    {{-- Badges top-right --}}
+                    <div class="absolute top-3 right-3 flex flex-col items-end gap-1">
+                        @if($plan->esVip())
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+                                         bg-gradient-to-r from-amber-400 to-yellow-300 text-amber-900 text-[10px] font-black uppercase tracking-wide shadow-sm">
+                                💎 VIP
+                            </span>
+                        @endif
+                        @if($plan->acceso_ilimitado)
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+                                         bg-amber-400/20 text-amber-300 text-[10px] font-bold border border-amber-400/30 uppercase tracking-wide">
+                                <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                </svg>
+                                Ilimitado
+                            </span>
+                        @endif
+                    </div>
+
+                    <p class="{{ $plan->esVip() ? 'text-amber-300/60' : 'text-white/60' }} text-xs font-semibold uppercase tracking-widest mb-1">Plan</p>
+                    <h2 class="text-xl font-black {{ $plan->esVip() ? 'text-amber-200' : 'text-white' }} leading-tight">{{ $plan->nombre }}</h2>
 
                     {{-- Precio --}}
                     <div class="flex items-end gap-1 mt-3">
-                        <span class="text-3xl font-black text-white">S/. {{ number_format($plan->precio, 0) }}</span>
-                        <span class="text-white/50 text-xs mb-1">
+                        <span class="text-3xl font-black {{ $plan->esVip() ? 'text-amber-100' : 'text-white' }}">S/. {{ number_format($plan->precio, 0) }}</span>
+                        <span class="{{ $plan->esVip() ? 'text-amber-300/50' : 'text-white/50' }} text-xs mb-1">
                             /
                             @if($plan->acceso_ilimitado)
                                 acceso ilimitado

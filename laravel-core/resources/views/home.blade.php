@@ -148,8 +148,9 @@
                         :plan="$plan->nombre"
                         :price="number_format($plan->precio, 0)"
                         :period="$plan->acceso_ilimitado ? 'Acceso ilimitado' : $plan->duracion_meses . ' ' . ($plan->duracion_meses == 1 ? 'mes' : 'meses')"
-                        :badge="$plan->acceso_ilimitado ? 'Mejor opción' : ($index === 0 && $planes->count() > 1 ? 'Popular' : null)"
-                        :featured="$plan->acceso_ilimitado"
+                        :badge="!$plan->esVip() && $plan->acceso_ilimitado ? 'Mejor opción' : (!$plan->esVip() && $index === 0 && $planes->count() > 1 ? 'Popular' : null)"
+                        :featured="$plan->acceso_ilimitado && !$plan->esVip()"
+                        :vip="$plan->esVip()"
                         :features="$plan->descripcion ? [$plan->descripcion] : []"
                     />
                 @endforeach

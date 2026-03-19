@@ -1,6 +1,7 @@
 @php
     $editing = isset($plan);
     $nombre          = old('nombre',         $editing ? $plan->nombre         : '');
+    $tipoPlan        = old('tipo_plan',      $editing ? $plan->tipo_plan      : 'premium');
     $precio          = old('precio',         $editing ? $plan->precio         : '');
     $duracionMeses   = old('duracion_meses', $editing ? $plan->duracion_meses : '');
     $descripcion     = old('descripcion',    $editing ? $plan->descripcion    : '');
@@ -21,6 +22,62 @@
         <h3 class="text-sm font-bold text-gray-700">Información del plan</h3>
     </div>
     <div class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        {{-- Tipo de plan --}}
+        <div class="sm:col-span-2"
+             x-data="{ tipo: '{{ $tipoPlan }}' }">
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                Tipo de plan <span class="text-red-400">*</span>
+            </label>
+            <input type="hidden" name="tipo_plan" :value="tipo">
+            <div class="grid grid-cols-2 gap-3">
+                {{-- Premium --}}
+                <div @click="tipo='premium'"
+                     :class="tipo === 'premium'
+                         ? 'border-blue-400 bg-blue-50 ring-2 ring-blue-200'
+                         : 'border-gray-200 bg-gray-50 hover:border-gray-300'"
+                     class="flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all select-none">
+                    <div :class="tipo === 'premium' ? 'bg-blue-500' : 'bg-gray-200'"
+                         class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors text-lg">
+                        ⭐
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold" :class="tipo === 'premium' ? 'text-blue-700' : 'text-gray-600'">Premium</p>
+                        <p class="text-xs text-gray-400">Plan estándar</p>
+                    </div>
+                    <div class="ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                         :class="tipo === 'premium' ? 'border-blue-500 bg-blue-500' : 'border-gray-300'">
+                        <svg x-show="tipo === 'premium'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                </div>
+                {{-- VIP --}}
+                <div @click="tipo='vip'"
+                     :class="tipo === 'vip'
+                         ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-200'
+                         : 'border-gray-200 bg-gray-50 hover:border-gray-300'"
+                     class="flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all select-none">
+                    <div :class="tipo === 'vip' ? 'bg-amber-500' : 'bg-gray-200'"
+                         class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors text-lg">
+                        💎
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold" :class="tipo === 'vip' ? 'text-amber-700' : 'text-gray-600'">VIP</p>
+                        <p class="text-xs text-gray-400">Acceso exclusivo</p>
+                    </div>
+                    <div class="ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                         :class="tipo === 'vip' ? 'border-amber-500 bg-amber-500' : 'border-gray-300'">
+                        <svg x-show="tipo === 'vip'" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            @error('tipo_plan')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
 
         {{-- Nombre --}}
         <div class="sm:col-span-2">
