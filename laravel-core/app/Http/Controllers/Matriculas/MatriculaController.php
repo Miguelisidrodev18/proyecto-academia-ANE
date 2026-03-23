@@ -40,6 +40,12 @@ class MatriculaController extends Controller
             $query->where('plan_id', $request->plan_id);
         }
 
+        // Auto-vencer matrículas activas cuya fecha_fin ya pasó
+        Matricula::where('estado', 'activa')
+            ->whereNotNull('fecha_fin')
+            ->where('fecha_fin', '<', now()->startOfDay())
+            ->update(['estado' => 'vencida']);
+
         $matriculas = $query->paginate(15)->withQueryString();
         $planes     = Plan::where('activo', true)->orderBy('nombre')->get();
 

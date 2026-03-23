@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php write_pagos.php)",
+      "Bash(grep -l \"alumnoSearch\" \"c:/xampp/htdocs/proyecto-academia/academia-nueva-era/laravel-core/public/build/assets/\"*.js)",
+      "Bash(xargs grep:*)",
+      "Bash(xargs cat:*)",
+      "Read(//c/xampp/htdocs/proyecto-academia/academia-nueva-era/**)",
+      "Bash(ls \"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\app\\\\Http\\\\Controllers\\\\Cursos\"\" 2>/dev/null || echo \"DIR_NOT_EXIST \")",
+      "Bash(icacls \"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\" /grant Everyone:F /T)",
+      "Bash(cmd /c \"icacls \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\"\" /grant Everyone:\\(OI\\)\\(CI\\)F /T 2>&1\")",
+      "Bash(cmd /c \"icacls \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\"\" /grant Everyone:\\(OI\\)\\(CI\\)F /T\")",
+      "Bash(cmd /c \"icacls \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\"\" /grant \"\"NETWORK SERVICE\"\":\\(OI\\)\\(CI\\)F /T & icacls \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\"\" /grant \"\"Users\"\":\\(OI\\)\\(CI\\)F /T\")",
+      "Bash(php -r \"echo php_uname\\(''s''\\) . '' - '' . get_current_user\\(\\) . '' / '' . getmyuid\\(\\);\")",
+      "Bash(cmd /c \"del /Q \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\\\\*.tmp\"\" 2>&1 & del /Q \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\\\\*.php\"\" 2>&1 && echo Limpio\")",
+      "Bash(cmd /c \"dir \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\"\"\")",
+      "Bash(cmd /c \"dir /a \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\"\"\")"
+    ]
+  }
+}

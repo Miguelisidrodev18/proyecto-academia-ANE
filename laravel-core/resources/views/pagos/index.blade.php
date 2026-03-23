@@ -177,18 +177,18 @@
                             <div class="flex items-center gap-2.5">
                                 <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-dark to-primary-light flex items-center justify-center
                                             text-xs font-black text-white flex-shrink-0 shadow-sm">
-                                    {{ $pago->matricula->alumno->inicial() }}
+                                    {{ $pago->matricula?->alumno?->inicial() ?? '?' }}
                                 </div>
                                 <div>
                                     <p class="font-semibold text-gray-800 leading-none group-hover:text-primary-dark transition-colors">
-                                        {{ $pago->matricula->alumno->nombreCompleto() }}
+                                        {{ $pago->matricula?->alumno?->nombreCompleto() ?? '(alumno eliminado)' }}
                                     </p>
-                                    <p class="text-xs text-gray-400 font-mono mt-0.5">{{ $pago->matricula->alumno->dni }}</p>
+                                    <p class="text-xs text-gray-400 font-mono mt-0.5">{{ $pago->matricula?->alumno?->dni ?? '—' }}</p>
                                 </div>
                             </div>
                         </td>
                         <td class="px-5 py-4">
-                            <p class="text-gray-700 font-medium text-xs">{{ $pago->matricula->plan->nombre }}</p>
+                            <p class="text-gray-700 font-medium text-xs">{{ $pago->matricula?->plan?->nombre ?? '—' }}</p>
                         </td>
                         <td class="px-5 py-4">
                             <span class="font-black text-gray-800 font-mono text-base">S/. {{ number_format($pago->monto, 2) }}</span>
@@ -260,9 +260,9 @@
             <div class="p-4 hover:bg-gray-50/50 transition-colors">
                 <div class="flex items-start justify-between gap-3 mb-2">
                     <div>
-                        <p class="font-semibold text-gray-800 text-sm">{{ $pago->matricula->alumno->nombreCompleto() }}</p>
-                        <p class="text-xs text-gray-400 font-mono">{{ $pago->matricula->alumno->dni }}</p>
-                        <p class="text-xs text-primary-dark font-semibold mt-0.5">{{ $pago->matricula->plan->nombre }}</p>
+                        <p class="font-semibold text-gray-800 text-sm">{{ $pago->matricula?->alumno?->nombreCompleto() ?? '(alumno eliminado)' }}</p>
+                        <p class="text-xs text-gray-400 font-mono">{{ $pago->matricula?->alumno?->dni ?? '—' }}</p>
+                        <p class="text-xs text-primary-dark font-semibold mt-0.5">{{ $pago->matricula?->plan?->nombre ?? '—' }}</p>
                     </div>
                     @include('pagos._badge', ['estado' => $pago->estado])
                 </div>

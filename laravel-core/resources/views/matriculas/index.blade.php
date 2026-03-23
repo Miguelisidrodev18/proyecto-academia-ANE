@@ -180,11 +180,11 @@
                             <div class="flex items-center gap-2.5">
                                 <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-dark to-primary-light flex items-center justify-center
                                             text-xs font-black text-white flex-shrink-0 shadow-sm">
-                                    {{ $matricula->alumno->inicial() }}
+                                    {{ $matricula->alumno?->inicial() ?? '?' }}
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-gray-800 leading-none group-hover:text-primary-dark transition-colors">{{ $matricula->alumno->nombreCompleto() }}</p>
-                                    <p class="text-xs text-gray-400 font-mono mt-0.5">{{ $matricula->alumno->dni }}</p>
+                                    <p class="font-semibold text-gray-800 leading-none group-hover:text-primary-dark transition-colors">{{ $matricula->alumno?->nombreCompleto() ?? '(alumno eliminado)' }}</p>
+                                    <p class="text-xs text-gray-400 font-mono mt-0.5">{{ $matricula->alumno?->dni ?? '—' }}</p>
                                 </div>
                             </div>
                         </td>
