@@ -265,8 +265,8 @@
             <div class="p-4 hover:bg-gray-50/50 transition-colors">
                 <div class="flex items-start justify-between gap-3 mb-2">
                     <div>
-                        <p class="font-semibold text-gray-800 text-sm">{{ $matricula->alumno->nombreCompleto() }}</p>
-                        <p class="text-xs text-gray-400 font-mono">{{ $matricula->alumno->dni }}</p>
+                        <p class="font-semibold text-gray-800 text-sm">{{ $matricula->alumno?->nombreCompleto() ?? '(alumno eliminado)' }}</p>
+                        <p class="text-xs text-gray-400 font-mono">{{ $matricula->alumno?->dni ?? '—' }}</p>
                         <p class="text-xs text-primary-dark font-semibold mt-0.5">{{ $matricula->plan->nombre }}</p>
                     </div>
                     @include('matriculas._badge', ['estado' => $matricula->estado])
