@@ -42,10 +42,19 @@ class ClaseController extends Controller
 
     public function create(Request $request): View
     {
-        $cursos            = Curso::where('activo', true)->orderBy('nombre')->get();
-        $cursoSeleccionado = $request->filled('curso_id') ? Curso::find($request->curso_id) : null;
+        $cursos = Curso::where('activo', true)
+            ->with([
+                'planes'  => fn ($q) => $q->select('planes.id', 'nombre', 'tipo_plan'),
+                'clases'  => fn ($q) => $q->where('fecha', '>', now())->orderBy('fecha')->limit(3),
+            ])
+            ->withCount(['clases as proximas_count' => fn ($q) => $q->where('fecha', '>', now())])
+            ->orderBy('nivel')
+            ->orderBy('nombre')
+            ->get();
 
-        return view('clases.create', compact('cursos', 'cursoSeleccionado'));
+        $cursoSeleccionadoId = old('curso_id', $request->curso_id);
+
+        return view('clases.create', compact('cursos', 'cursoSeleccionadoId'));
     }
 
     public function store(Request $request): RedirectResponse

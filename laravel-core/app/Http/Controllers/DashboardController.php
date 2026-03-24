@@ -70,6 +70,9 @@ class DashboardController extends Controller
                 $cursos = $matricula->plan
                     ->cursos()
                     ->where('activo', true)
+                    ->with([
+                        'clases' => fn ($q) => $q->where('fecha', '>', now())->orderBy('fecha'),
+                    ])
                     ->orderBy('nivel')
                     ->orderBy('grado')
                     ->orderBy('nombre')
@@ -77,8 +80,20 @@ class DashboardController extends Controller
             }
         }
 
+        // Próximas clases de todos los cursos del plan (próximas 5)
+        $proximasClases = collect();
+        if ($matricula && $cursos->isNotEmpty()) {
+            $cursoIds = $cursos->pluck('id');
+            $proximasClases = \App\Models\Clase::whereIn('curso_id', $cursoIds)
+                ->where('fecha', '>', now())
+                ->orderBy('fecha')
+                ->limit(5)
+                ->with('curso')
+                ->get();
+        }
+
         return view('dashboard.alumno', compact(
-            'alumno', 'matricula', 'cursos', 'rachaInfo', 'mostrarOverlay'
+            'alumno', 'matricula', 'cursos', 'rachaInfo', 'mostrarOverlay', 'proximasClases'
         ));
     }
 

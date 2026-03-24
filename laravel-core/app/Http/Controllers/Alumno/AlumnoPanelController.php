@@ -22,7 +22,7 @@ class AlumnoPanelController extends Controller
                     ->cursos()
                     ->where('activo', true)
                     ->with([
-                        'clases'     => fn ($q) => $q->orderByDesc('fecha')->limit(3),
+                        'clases'     => fn ($q) => $q->where('fecha', '>', now())->orderBy('fecha'),
                         'materiales' => fn ($q) => $q->where('visible', true)->orderByDesc('fecha_publicacion')->limit(5),
                     ])
                     ->orderBy('nivel')

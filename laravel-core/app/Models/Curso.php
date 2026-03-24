@@ -11,7 +11,7 @@ class Curso extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'descripcion', 'nivel', 'grado', 'tipo', 'activo'];
+    protected $fillable = ['nombre', 'descripcion', 'nivel', 'grado', 'tipo', 'imagen_url', 'activo'];
 
     protected $casts = [
         'activo' => 'boolean',
