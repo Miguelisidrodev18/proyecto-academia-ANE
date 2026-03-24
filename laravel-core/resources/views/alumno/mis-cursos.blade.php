@@ -162,6 +162,36 @@
                         </div>
                     @endif
 
+                    {{-- Materiales recientes --}}
+                    @if($curso->materiales->isNotEmpty())
+                        <div class="mb-4">
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Materiales</p>
+                            <div class="space-y-1.5">
+                                @foreach($curso->materiales->take(3) as $material)
+                                @php
+                                    $tipoConfig = match($material->tipo) {
+                                        'pdf'    => ['icon' => '📄', 'color' => 'text-red-600 bg-red-50'],
+                                        'video'  => ['icon' => '🎥', 'color' => 'text-violet-600 bg-violet-50'],
+                                        'enlace' => ['icon' => '🔗', 'color' => 'text-blue-600 bg-blue-50'],
+                                        'imagen' => ['icon' => '🖼️', 'color' => 'text-amber-600 bg-amber-50'],
+                                        default  => ['icon' => '📎', 'color' => 'text-gray-600 bg-gray-100'],
+                                    };
+                                @endphp
+                                <a href="{{ $material->url }}" target="_blank"
+                                   class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors group/mat">
+                                    <span class="text-sm flex-shrink-0">{{ $tipoConfig['icon'] }}</span>
+                                    <span class="text-xs font-medium text-gray-700 truncate group-hover/mat:text-primary-dark transition-colors">
+                                        {{ $material->titulo }}
+                                    </span>
+                                    <svg class="w-3 h-3 text-gray-300 group-hover/mat:text-accent flex-shrink-0 ml-auto transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Botón Entrar --}}
                     @if($matricula && $matricula->tieneAcceso())
                         @if($proximaClase && $proximaClase->zoom_link)

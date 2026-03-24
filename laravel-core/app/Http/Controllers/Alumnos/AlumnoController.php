@@ -158,6 +158,11 @@ class AlumnoController extends Controller
 
     public function destroy(Alumno $alumno): RedirectResponse
     {
+        if ($alumno->matriculas()->exists()) {
+            return redirect()->route('alumnos.show', $alumno)
+                ->with('error', 'No se puede eliminar a ' . $alumno->nombreCompleto() . ' porque tiene matrículas registradas. Para desactivarlo, usa el botón "Desactivar".');
+        }
+
         $alumno->delete();
 
         return redirect()->route('alumnos.index')

@@ -14,7 +14,8 @@
       "Bash(php -r \"echo php_uname\\(''s''\\) . '' - '' . get_current_user\\(\\) . '' / '' . getmyuid\\(\\);\")",
       "Bash(cmd /c \"del /Q \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\\\\*.tmp\"\" 2>&1 & del /Q \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\\\\*.php\"\" 2>&1 && echo Limpio\")",
       "Bash(cmd /c \"dir \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\"\"\")",
-      "Bash(cmd /c \"dir /a \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\"\"\")"
+      "Bash(cmd /c \"dir /a \"\"c:\\\\xampp\\\\htdocs\\\\proyecto-academia\\\\academia-nueva-era\\\\laravel-core\\\\storage\\\\framework\\\\views\"\"\")",
+      "Bash(grep -r \"report\\\\|export\\\\|reporte\" /c/xampp/htdocs/proyecto-academia/academia-nueva-era/laravel-core/app/Http/Controllers --include=*.php -l)"
     ]
   }
 }

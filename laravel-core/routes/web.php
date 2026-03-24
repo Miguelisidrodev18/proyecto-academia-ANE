@@ -8,6 +8,9 @@ use App\Http\Controllers\Matriculas\MatriculaController;
 use App\Http\Controllers\Pagos\PagoController;
 use App\Http\Controllers\Planes\PlanController;
 use App\Http\Controllers\Cursos\CursoController;
+use App\Http\Controllers\Clases\ClaseController;
+use App\Http\Controllers\Materiales\MaterialController;
+use App\Http\Controllers\Asistencias\AsistenciaController;
 use App\Http\Controllers\Alumno\AlumnoPanelController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,10 +52,21 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('planes', PlanController::class)->parameters(['planes' => 'plan']);
     });
 
-    // ── Módulo Cursos: Admin y Docente ──────────────────────────────────────
+    // ── Módulo Cursos + Aula Virtual: Admin y Docente ──────────────────────
     Route::middleware(['role:admin,docente'])->group(function () {
         Route::patch('/cursos/{curso}/toggle', [CursoController::class, 'toggle'])->name('cursos.toggle');
         Route::resource('cursos', CursoController::class);
+
+        // Clases
+        Route::resource('clases', ClaseController::class);
+
+        // Asistencias (anidadas en una clase)
+        Route::get('/clases/{clase}/asistencia',  [AsistenciaController::class, 'registrar'])->name('asistencias.registrar');
+        Route::post('/clases/{clase}/asistencia', [AsistenciaController::class, 'guardar'])->name('asistencias.guardar');
+
+        // Materiales
+        Route::patch('/materiales/{material}/toggle', [MaterialController::class, 'toggle'])->name('materiales.toggle');
+        Route::resource('materiales', MaterialController::class)->parameters(['materiales' => 'material']);
     });
 
     // ── Perfil (todos los roles) ────────────────────────────────────────────

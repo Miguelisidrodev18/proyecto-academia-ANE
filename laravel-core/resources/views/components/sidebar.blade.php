@@ -1,8 +1,12 @@
 @php
 $role = auth()->user()->role;
 
+// Rutas que pertenecen al grupo Aula Virtual (para detectar si el grupo está activo)
+$aulaVirtualPatterns = ['cursos.*', 'clases.*', 'materiales.*', 'asistencias.*', 'alumno.*'];
+$aulaVirtualActiva   = collect($aulaVirtualPatterns)->contains(fn ($p) => request()->routeIs($p));
+
 $nav = [
-    // ── Todos los roles ──────────────────────────────────────────────────
+    // ── Todos los roles ──────────────────────────────────────────────────────
     [
         'label'     => 'Inicio',
         'route'     => 'dashboard',
@@ -11,17 +15,7 @@ $nav = [
         'icon'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>',
     ],
 
-    // ── Alumno ───────────────────────────────────────────────────────────
-    [
-        'label'     => 'Mis Cursos',
-        'route'     => 'alumno.mis-cursos',
-        'pattern'   => 'alumno.*',
-        'roles'     => ['alumno'],
-        'available' => true,
-        'icon'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>',
-    ],
-
-    // ── Admin ─────────────────────────────────────────────────────────────
+    // ── Solo Admin ───────────────────────────────────────────────────────────
     [
         'label'     => 'Alumnos',
         'route'     => 'alumnos.index',
@@ -55,31 +49,7 @@ $nav = [
         'icon'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
     ],
 
-    // ── Admin + Docente ───────────────────────────────────────────────────
-    [
-        'label'     => 'Cursos',
-        'route'     => 'cursos.index',
-        'pattern'   => 'cursos.*',
-        'roles'     => ['admin', 'docente'],
-        'available' => true,
-        'icon'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>',
-    ],
-    [
-        'label'     => 'Asistencia',
-        'route'     => 'dashboard.asistencia',
-        'roles'     => ['admin', 'docente'],
-        'available' => false,
-        'icon'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>',
-    ],
-    [
-        'label'     => 'Aula Virtual',
-        'route'     => 'dashboard.aula-virtual',
-        'roles'     => ['admin', 'docente'],
-        'available' => false,
-        'icon'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>',
-    ],
-
-    // ── Solo Admin (gestión) ──────────────────────────────────────────────
+    // ── Gestión (Admin) ───────────────────────────────────────────────────────
     [
         'label'     => 'Bazar',
         'route'     => 'dashboard.bazar',
@@ -110,8 +80,52 @@ $nav = [
     ],
 ];
 
-// Filtrar por rol del usuario
+// Sub-items del grupo Aula Virtual por rol
+$aulaVirtualItems = [
+    // Admin + Docente
+    [
+        'label'     => 'Cursos',
+        'route'     => 'cursos.index',
+        'pattern'   => 'cursos.*',
+        'roles'     => ['admin', 'docente'],
+        'available' => true,
+        'icon'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>',
+    ],
+    [
+        'label'     => 'Clases',
+        'route'     => 'clases.index',
+        'pattern'   => 'clases.*',
+        'roles'     => ['admin', 'docente'],
+        'available' => true,
+        'icon'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>',
+    ],
+    [
+        'label'     => 'Materiales',
+        'route'     => 'materiales.index',
+        'pattern'   => 'materiales.*',
+        'roles'     => ['admin', 'docente'],
+        'available' => true,
+        'icon'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
+    ],
+    // Solo Alumno
+    [
+        'label'     => 'Mis Cursos',
+        'route'     => 'alumno.mis-cursos',
+        'pattern'   => 'alumno.*',
+        'roles'     => ['alumno'],
+        'available' => true,
+        'icon'      => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>',
+    ],
+];
+
+// Filtrar items del grupo por rol
+$aulaVirtualItemsFiltrados = array_filter($aulaVirtualItems, fn ($i) => in_array($role, $i['roles']));
+
+// Filtrar nav principal por rol
 $navFiltrado = array_filter($nav, fn ($item) => in_array($role, $item['roles']));
+
+// Roles que tienen acceso al grupo Aula Virtual
+$verGrupoAula = in_array($role, ['admin', 'docente', 'alumno']);
 @endphp
 
 <aside class="fixed inset-y-0 left-0 z-30 w-64 bg-primary-dark flex flex-col
@@ -149,26 +163,31 @@ $navFiltrado = array_filter($nav, fn ($item) => in_array($role, $item['roles']))
     </div>
 
     {{-- Navegación --}}
-    <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
+    <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5 scrollbar-thin">
+
+        {{-- Inicio --}}
         @foreach($navFiltrado as $item)
             @php
                 $isActive = request()->routeIs($item['route'])
                     || (isset($item['pattern']) && request()->routeIs($item['pattern']));
             @endphp
+
+            {{-- Insertar grupo Aula Virtual antes de Bazar --}}
+            @if($item['route'] === 'dashboard.bazar' && $verGrupoAula)
+                @include('components.sidebar-aula-group')
+            @endif
+
             <a href="{{ route($item['route']) }}"
                @class([
                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group relative',
-                   'bg-[#0BC4D9]/15 text-[#0BC4D9] border-l-2 border-[#0BC4D9]' => $isActive,
+                   'bg-[#0BC4D9]/15 text-[#0BC4D9] border-l-2 border-[#0BC4D9]'           => $isActive,
                    'text-white/70 hover:bg-white/5 hover:text-white border-l-2 border-transparent' => !$isActive,
                ])>
-
-                <svg class="w-5 h-5 flex-shrink-0 @if($isActive) text-[#0BC4D9] @else text-white/50 group-hover:text-white/80 @endif"
+                <svg class="w-5 h-5 flex-shrink-0 {{ $isActive ? 'text-[#0BC4D9]' : 'text-white/50 group-hover:text-white/80' }}"
                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {!! $item['icon'] !!}
                 </svg>
-
                 <span class="flex-1 truncate">{{ $item['label'] }}</span>
-
                 @if(!$item['available'])
                     <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full
                                  bg-white/10 text-white/40 uppercase tracking-wide flex-shrink-0">
@@ -177,6 +196,12 @@ $navFiltrado = array_filter($nav, fn ($item) => in_array($role, $item['roles']))
                 @endif
             </a>
         @endforeach
+
+        {{-- Si no hay ítems tras el grupo (ej: alumno/representante), renderizar el grupo al final --}}
+        @if($verGrupoAula && !collect($navFiltrado)->contains('route', 'dashboard.bazar'))
+            @include('components.sidebar-aula-group')
+        @endif
+
     </nav>
 
     {{-- Logout --}}
