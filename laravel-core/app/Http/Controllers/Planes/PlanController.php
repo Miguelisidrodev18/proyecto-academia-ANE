@@ -66,7 +66,7 @@ class PlanController extends Controller
             ->where('estado', 'activa')
             ->where('fecha_fin', '>=', now())
             ->latest()
-            ->get();
+            ->paginate(10, ['*'], 'matriculas');
 
         return view('planes.show', compact('plan', 'matriculasActivas'));
     }

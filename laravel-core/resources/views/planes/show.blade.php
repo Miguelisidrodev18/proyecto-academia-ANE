@@ -202,7 +202,7 @@
                             {{ $plan->activo ? 'Desactivar plan' : 'Activar plan' }}
                         </button>
                     </form>
-                    @if($matriculasActivas->isEmpty())
+                    @if($matriculasActivas->total() === 0)
                         <form method="POST" action="{{ route('planes.destroy', $plan) }}"
                               onsubmit="return confirm('¿Eliminar el plan {{ $plan->nombre }}? Esta acción no se puede deshacer.')">
                             @csrf @method('DELETE')
@@ -287,11 +287,11 @@
                         <h3 class="text-sm font-bold text-gray-700">Alumnos inscritos actualmente</h3>
                     </div>
                     <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-primary-dark/10 text-primary-dark">
-                        {{ $matriculasActivas->count() }}
+                        {{ $matriculasActivas->total() }}
                     </span>
                 </div>
 
-                @if($matriculasActivas->isEmpty())
+                @if($matriculasActivas->total() === 0)
                     <div class="py-16 text-center">
                         <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
                             <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -338,6 +338,25 @@
                             </div>
                         @endforeach
                     </div>
+                    @if($matriculasActivas->hasPages())
+                        <div class="px-5 py-3 border-t border-gray-50 flex items-center justify-between">
+                            <div class="flex items-center gap-1">
+                                @if($matriculasActivas->onFirstPage())
+                                    <span class="px-2.5 py-1.5 rounded-lg text-xs text-gray-300 border border-gray-100">←</span>
+                                @else
+                                    <a href="{{ $matriculasActivas->previousPageUrl() }}"
+                                       class="px-2.5 py-1.5 rounded-lg text-xs text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors">←</a>
+                                @endif
+                                @if($matriculasActivas->hasMorePages())
+                                    <a href="{{ $matriculasActivas->nextPageUrl() }}"
+                                       class="px-2.5 py-1.5 rounded-lg text-xs text-gray-500 border border-gray-200 hover:bg-gray-50 transition-colors">→</a>
+                                @else
+                                    <span class="px-2.5 py-1.5 rounded-lg text-xs text-gray-300 border border-gray-100">→</span>
+                                @endif
+                            </div>
+                            <span class="text-[10px] text-gray-400">Pág. {{ $matriculasActivas->currentPage() }} / {{ $matriculasActivas->lastPage() }}</span>
+                        </div>
+                    @endif
                 @endif
             </div>
         </div>
