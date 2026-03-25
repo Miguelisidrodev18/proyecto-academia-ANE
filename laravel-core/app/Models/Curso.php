@@ -11,11 +11,15 @@ class Curso extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre', 'descripcion', 'nivel', 'grado', 'tipo', 'imagen_url', 'activo'];
+    protected $fillable = [
+        'nombre', 'descripcion', 'nivel', 'grado', 'tipo',
+        'imagen_url', 'zoom_link', 'dias_semana', 'hora_inicio', 'activo',
+    ];
 
     protected $casts = [
-        'activo' => 'boolean',
-        'grado'  => 'integer',
+        'activo'      => 'boolean',
+        'grado'       => 'integer',
+        'dias_semana' => 'array',
     ];
 
     public function clases(): HasMany     { return $this->hasMany(Clase::class); }
@@ -49,6 +53,40 @@ class Curso extends Model
                   });
               });
         });
+    }
+
+    /** True si hoy es uno de los días configurados del curso. */
+    public function estaActivoHoy(): bool
+    {
+        if (empty($this->dias_semana)) return false;
+
+        $mapa = [0 => 'domingo', 1 => 'lunes', 2 => 'martes', 3 => 'miercoles',
+                 4 => 'jueves',  5 => 'viernes', 6 => 'sabado'];
+
+        $hoy = $mapa[now()->dayOfWeek];
+        return in_array($hoy, $this->dias_semana);
+    }
+
+    /** Devuelve los días como etiquetas cortas: ["Lu","Mi","Vi"] */
+    public function diasLabels(): array
+    {
+        if (empty($this->dias_semana)) return [];
+
+        $etiquetas = [
+            'lunes'     => 'Lu', 'martes'   => 'Ma', 'miercoles' => 'Mi',
+            'jueves'    => 'Ju', 'viernes'  => 'Vi', 'sabado'    => 'Sá',
+            'domingo'   => 'Do',
+        ];
+
+        return array_values(array_filter(
+            array_map(fn ($d) => $etiquetas[$d] ?? null, $this->dias_semana)
+        ));
+    }
+
+    /** Orden canónico de días de la semana. */
+    public static function ordenDias(): array
+    {
+        return ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
     }
 
     public function proximaClase(): ?Clase

@@ -63,7 +63,6 @@ class ClaseController extends Controller
             'curso_id'      => 'required|exists:cursos,id',
             'titulo'        => 'required|string|max:200',
             'fecha'         => 'required|date',
-            'zoom_link'     => 'nullable|url|max:500',
             'descripcion'   => 'nullable|string|max:1000',
             'grabacion_url' => 'nullable|url|max:500',
         ]);
@@ -81,8 +80,7 @@ class ClaseController extends Controller
         $clase->load(['curso', 'asistencias.alumno.user']);
 
         $alumnosInscritos = $clase->curso
-            ->alumnos()
-            ->where('curso_alumno.activo', true)
+            ->alumnosViaPlanes()
             ->with('user')
             ->get();
 
@@ -102,7 +100,6 @@ class ClaseController extends Controller
             'curso_id'      => 'required|exists:cursos,id',
             'titulo'        => 'required|string|max:200',
             'fecha'         => 'required|date',
-            'zoom_link'     => 'nullable|url|max:500',
             'descripcion'   => 'nullable|string|max:1000',
             'grabacion_url' => 'nullable|url|max:500',
         ]);
@@ -121,10 +118,39 @@ class ClaseController extends Controller
             return back()->with('error', 'No se puede eliminar esta clase porque tiene registros de asistencia guardados.');
         }
 
-        $titulo = $clase->titulo;
+        $titulo  = $clase->titulo;
+        $cursoId = $clase->curso_id;
         $clase->delete();
 
-        return redirect()->route('clases.index')
+        return redirect()->route('cursos.show', $cursoId)
             ->with('success', 'Clase "' . $titulo . '" eliminada.');
+    }
+
+    public function storeFromCurso(Request $request, Curso $curso): RedirectResponse
+    {
+        $data = $request->validate([
+            'titulo'      => 'required|string|max:200',
+            'fecha'       => 'required|date',
+            'descripcion' => 'nullable|string|max:1000',
+        ]);
+
+        $data['curso_id'] = $curso->id;
+        $data['grabada']  = false;
+
+        Clase::create($data);
+
+        return redirect()->route('cursos.show', $curso)
+            ->with('success', 'Clase registrada correctamente.');
+    }
+
+    public function grabacion(Request $request, Clase $clase): RedirectResponse
+    {
+        $data = $request->validate([
+            'grabacion_url' => 'required|url|max:500',
+        ]);
+
+        $clase->update(['grabacion_url' => $data['grabacion_url'], 'grabada' => true]);
+
+        return back()->with('success', 'Grabación guardada.');
     }
 }

@@ -112,4 +112,23 @@ class MaterialController extends Controller
 
         return back()->with('success', $msg);
     }
+
+    public function storeFromCurso(Request $request, Curso $curso): RedirectResponse
+    {
+        $data = $request->validate([
+            'titulo'      => 'required|string|max:200',
+            'tipo'        => 'required|in:pdf,video,enlace,imagen,otro',
+            'url'         => 'required|url|max:1000',
+            'descripcion' => 'nullable|string|max:1000',
+        ]);
+
+        $data['curso_id']          = $curso->id;
+        $data['fecha_publicacion'] = now()->toDateString();
+        $data['visible']           = true;
+
+        Material::create($data);
+
+        return redirect()->route('cursos.show', $curso)
+            ->with('success', 'Material "' . $data['titulo'] . '" agregado.');
+    }
 }

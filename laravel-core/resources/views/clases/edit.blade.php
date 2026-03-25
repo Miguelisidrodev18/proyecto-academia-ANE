@@ -4,15 +4,8 @@
 @section('content')
 
 <div class="max-w-5xl mx-auto" x-data="{
-    zoomLink: '{{ old('zoom_link', $clase->zoom_link) }}',
     fecha: '{{ old('fecha', $clase->fecha->format('Y-m-d\TH:i')) }}',
     titulo: '{{ old('titulo', addslashes($clase->titulo)) }}',
-    get zoomValido() {
-        try {
-            const url = new URL(this.zoomLink);
-            return url.protocol === 'http:' || url.protocol === 'https:';
-        } catch { return false; }
-    },
     get diaSemana() {
         if (!this.fecha) return '';
         const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -24,7 +17,7 @@
 
     {{-- Breadcrumb --}}
     <div class="flex items-center gap-3 mb-8">
-        <a href="{{ route('clases.show', $clase) }}"
+        <a href="{{ route('cursos.show', $clase->curso) }}"
            class="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-primary-dark hover:border-primary-dark/30 hover:bg-primary-dark/5 transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
@@ -32,11 +25,11 @@
         </a>
         <div>
             <nav class="text-xs text-gray-400 mb-0.5">
-                <a href="{{ route('clases.index') }}" class="hover:text-accent transition-colors">Clases</a>
+                <a href="{{ route('cursos.index') }}" class="hover:text-accent transition-colors">Cursos</a>
                 <span class="mx-1">/</span>
-                <a href="{{ route('clases.show', $clase) }}" class="hover:text-accent transition-colors truncate max-w-[160px] inline-block">{{ $clase->titulo }}</a>
+                <a href="{{ route('cursos.show', $clase->curso) }}" class="hover:text-accent transition-colors">{{ $clase->curso->nombre }}</a>
                 <span class="mx-1">/</span>
-                <span class="text-gray-600">Editar</span>
+                <span class="text-gray-600">Editar clase</span>
             </nav>
             <h1 class="text-xl font-black text-primary-dark leading-none">Editar Clase</h1>
         </div>
@@ -97,33 +90,6 @@
                                       {{ $errors->has('fecha') ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20' }}">
                         @error('fecha') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         <p x-show="fecha" class="text-xs text-accent font-semibold mt-1.5" x-text="'📅 ' + diaSemana"></p>
-                    </div>
-                </div>
-
-                {{-- Card: Zoom --}}
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Enlace de clase</h3>
-
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Link de Zoom</label>
-                        <div class="relative">
-                            <input type="url" name="zoom_link" x-model="zoomLink"
-                                   value="{{ old('zoom_link', $clase->zoom_link) }}"
-                                   placeholder="https://zoom.us/j/123456789"
-                                   class="w-full pl-4 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all
-                                          {{ $errors->has('zoom_link') ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20' }}">
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2">
-                                <svg x-show="zoomLink && zoomValido" class="w-4 h-4 text-emerald-500"
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                <svg x-show="zoomLink && !zoomValido" class="w-4 h-4 text-red-400"
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </div>
-                        </div>
-                        @error('zoom_link') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
@@ -199,11 +165,11 @@
                             @endif
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-xs text-gray-500">Zoom</span>
-                            @if($clase->zoom_link)
+                            <span class="text-xs text-gray-500">Zoom del curso</span>
+                            @if($clase->curso->zoom_link)
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">Configurado ✓</span>
                             @else
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">Pendiente</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600">Sin configurar</span>
                             @endif
                         </div>
                         <div class="flex items-center justify-between">
@@ -222,15 +188,15 @@
                         </div>
                     </div>
 
-                    @if($clase->zoom_link)
-                        <a href="{{ $clase->zoom_link }}" target="_blank"
+                    @if($clase->curso->zoom_link)
+                        <a href="{{ $clase->curso->zoom_link }}" target="_blank"
                            class="mt-4 w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold text-white
                                   bg-gradient-to-r from-primary-dark to-primary-light hover:from-accent hover:to-secondary transition-all">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
-                            Abrir Zoom
+                            Abrir Zoom del curso
                         </a>
                     @endif
                 </div>
@@ -247,7 +213,7 @@
 
         {{-- Botones --}}
         <div class="flex items-center justify-between mt-6">
-            <a href="{{ route('clases.show', $clase) }}"
+            <a href="{{ route('cursos.show', $clase->curso) }}"
                class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-colors">
                 Cancelar
             </a>

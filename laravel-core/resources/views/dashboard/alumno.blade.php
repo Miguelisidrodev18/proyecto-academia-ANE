@@ -85,8 +85,8 @@
                             <p class="text-white font-bold text-sm truncate">{{ $proximaClaseGlobal->titulo }}</p>
                             <p class="text-white/60 text-xs">{{ $proximaClaseGlobal->fecha->format('d/m/Y') }} · {{ $proximaClaseGlobal->curso->nombre }}</p>
                         </div>
-                        @if($proximaClaseGlobal->zoom_link && $matricula->tieneAcceso())
-                            <a href="{{ $proximaClaseGlobal->zoom_link }}" target="_blank"
+                        @if($proximaClaseGlobal->curso->zoom_link && $matricula->tieneAcceso())
+                            <a href="{{ $proximaClaseGlobal->curso->zoom_link }}" target="_blank"
                                class="flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold
                                       bg-accent text-white hover:bg-secondary transition-colors shadow-lg shadow-accent/30">
                                 Entrar
@@ -162,7 +162,7 @@
                 <div class="h-36 relative overflow-hidden
                             bg-gradient-to-br {{ $grad }}">
                     @if($curso->imagen_url)
-                        <img src="{{ $curso->imagen_url }}" alt="{{ $curso->nombre }}"
+                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($curso->imagen_url) }}" alt="{{ $curso->nombre }}"
                              class="absolute inset-0 w-full h-full object-cover opacity-60
                                     group-hover:opacity-80 group-hover:scale-110 transition-all duration-500">
                     @else
@@ -271,8 +271,8 @@
                             <p class="text-xs text-gray-400 mt-1 line-clamp-2">{{ $clase->descripcion }}</p>
                         @endif
                     </div>
-                    @if($clase->zoom_link && $matricula->tieneAcceso())
-                        <a href="{{ $clase->zoom_link }}" target="_blank"
+                    @if($clase->curso->zoom_link && $matricula->tieneAcceso())
+                        <a href="{{ $clase->curso->zoom_link }}" target="_blank"
                            class="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold text-white
                                   {{ $estaHoy ? 'bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-lg shadow-emerald-300/40' : 'bg-gradient-to-r from-primary-dark to-primary-light' }}
                                   hover:opacity-90 transition-opacity">

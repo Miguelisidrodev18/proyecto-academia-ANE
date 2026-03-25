@@ -52,10 +52,15 @@ class CursoController extends Controller
             'nivel'       => ['required', 'in:pollito,intermedio,ambos'],
             'grado'       => ['nullable', 'integer', 'min:1', 'max:5'],
             'tipo'        => ['required', 'in:reforzamiento,preuniversitario'],
-            'activo'      => ['nullable', 'boolean'],
+            'zoom_link'    => ['nullable', 'url', 'max:500'],
+            'dias_semana'  => ['nullable', 'array'],
+            'dias_semana.*'=> ['in:lunes,martes,miercoles,jueves,viernes,sabado,domingo'],
+            'hora_inicio'  => ['nullable', 'date_format:H:i'],
+            'imagen'       => ['nullable', 'image', 'max:2048'],
+            'activo'       => ['nullable', 'boolean'],
         ]);
 
-        $curso = $this->cursoService->crear($data);
+        $curso = $this->cursoService->crear($data, $request->file('imagen'));
 
         return redirect()->route('cursos.show', $curso)
             ->with('success', 'Curso "' . $curso->nombre . '" creado correctamente.');
@@ -64,11 +69,12 @@ class CursoController extends Controller
     public function show(Curso $curso): View
     {
         $curso->load([
-            'clases' => fn ($q) => $q->orderBy('fecha', 'desc'),
+            'clases'    => fn ($q) => $q->orderBy('fecha', 'desc'),
+            'materiales'=> fn ($q) => $q->orderByDesc('fecha_publicacion'),
             'planes',
         ]);
 
-        $alumnos = $curso->alumnosViaPlanes()->with('user')->orderBy('id')->get();
+        $alumnos = $curso->alumnosViaPlanes()->with('user')->orderBy('id')->paginate(8, ['*'], 'alumnos');
 
         return view('cursos.show', compact('curso', 'alumnos'));
     }
@@ -86,10 +92,15 @@ class CursoController extends Controller
             'nivel'       => ['required', 'in:pollito,intermedio,ambos'],
             'grado'       => ['nullable', 'integer', 'min:1', 'max:5'],
             'tipo'        => ['required', 'in:reforzamiento,preuniversitario'],
-            'activo'      => ['nullable', 'boolean'],
+            'zoom_link'    => ['nullable', 'url', 'max:500'],
+            'dias_semana'  => ['nullable', 'array'],
+            'dias_semana.*'=> ['in:lunes,martes,miercoles,jueves,viernes,sabado,domingo'],
+            'hora_inicio'  => ['nullable', 'date_format:H:i'],
+            'imagen'       => ['nullable', 'image', 'max:2048'],
+            'activo'       => ['nullable', 'boolean'],
         ]);
 
-        $this->cursoService->actualizar($curso, $data);
+        $this->cursoService->actualizar($curso, $data, $request->file('imagen'));
 
         return redirect()->route('cursos.show', $curso)
             ->with('success', 'Curso actualizado correctamente.');

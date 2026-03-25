@@ -25,7 +25,7 @@
 
     @include('cursos._flash')
 
-    <form method="POST" action="{{ route('cursos.update', $curso) }}">
+    <form method="POST" action="{{ route('cursos.update', $curso) }}" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         @include('cursos._form')

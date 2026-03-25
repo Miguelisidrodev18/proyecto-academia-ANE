@@ -6,7 +6,7 @@
 
     {{-- Breadcrumb + acciones --}}
     <div class="flex items-center gap-3 mb-6 flex-wrap">
-        <a href="{{ route('clases.index') }}"
+        <a href="{{ route('cursos.show', $clase->curso) }}"
            class="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-primary-dark hover:border-primary-dark/30 hover:bg-primary-dark/5 transition-all">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
@@ -14,9 +14,11 @@
         </a>
         <div class="flex-1">
             <nav class="text-xs text-gray-400 mb-0.5">
-                <a href="{{ route('clases.index') }}" class="hover:text-accent transition-colors">Clases</a>
+                <a href="{{ route('cursos.index') }}" class="hover:text-accent transition-colors">Cursos</a>
                 <span class="mx-1">/</span>
-                <span class="text-gray-600">Detalle</span>
+                <a href="{{ route('cursos.show', $clase->curso) }}" class="hover:text-accent transition-colors">{{ $clase->curso->nombre }}</a>
+                <span class="mx-1">/</span>
+                <span class="text-gray-600">{{ $clase->titulo }}</span>
             </nav>
             <h1 class="text-xl font-black text-primary-dark leading-none">{{ $clase->titulo }}</h1>
         </div>
@@ -81,8 +83,8 @@
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Accesos</h3>
             <div class="space-y-3">
-                @if($clase->zoom_link)
-                <a href="{{ $clase->zoom_link }}" target="_blank"
+                @if($clase->curso->zoom_link)
+                <a href="{{ $clase->curso->zoom_link }}" target="_blank"
                    class="flex items-center gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors group">
                     <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
                         <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,8 +92,8 @@
                         </svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs font-bold text-blue-700">Enlace de Zoom</p>
-                        <p class="text-xs text-blue-500 truncate">{{ $clase->zoom_link }}</p>
+                        <p class="text-xs font-bold text-blue-700">Enlace de Zoom (del curso)</p>
+                        <p class="text-xs text-blue-500 truncate">{{ $clase->curso->zoom_link }}</p>
                     </div>
                     <svg class="w-3.5 h-3.5 text-blue-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -104,7 +106,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    <p class="text-xs text-gray-400">Sin link de Zoom</p>
+                    <p class="text-xs text-gray-400">Sin link de Zoom configurado en el curso</p>
                 </div>
                 @endif
 

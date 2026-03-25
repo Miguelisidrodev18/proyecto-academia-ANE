@@ -245,39 +245,6 @@
                         </div>
                     </div>
 
-                    {{-- Card: Zoom --}}
-                    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Enlace de clase</h3>
-
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Link de Zoom</label>
-                            <div class="relative">
-                                <input type="url" name="zoom_link" value="{{ old('zoom_link') }}"
-                                       x-model="zoomLink"
-                                       placeholder="https://zoom.us/j/123456789"
-                                       class="w-full pl-4 pr-10 py-2.5 rounded-xl border text-sm outline-none transition-all
-                                              {{ $errors->has('zoom_link') ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-gray-50 focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20' }}">
-                                {{-- Indicador de validez --}}
-                                <div class="absolute right-3 top-1/2 -translate-y-1/2 transition-all">
-                                    <svg x-show="zoomLink && zoomValido" class="w-4 h-4 text-emerald-500"
-                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    <svg x-show="zoomLink && !zoomValido" class="w-4 h-4 text-red-400"
-                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </div>
-                            </div>
-                            <p x-show="zoomLink && !zoomValido" class="text-red-500 text-xs mt-1">
-                                El enlace no parece válido (debe comenzar con http:// o https://)
-                            </p>
-                            @error('zoom_link')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-
                     {{-- Card: Extras colapsables --}}
                     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
                          x-data="{ abierto: {{ $errors->has('descripcion') || $errors->has('grabacion_url') || old('descripcion') || old('grabacion_url') ? 'true' : 'false' }} }">
@@ -363,12 +330,6 @@
                                         <div class="min-w-0">
                                             <p class="text-xs font-bold text-gray-700 leading-tight truncate">{{ $clase->titulo }}</p>
                                             <p class="text-[10px] text-gray-400 mt-0.5">{{ $clase->fecha->format('d/m/Y · H:i') }}</p>
-                                            @if($clase->zoom_link)
-                                                <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-semibold text-emerald-600">
-                                                    <span class="w-1 h-1 rounded-full bg-emerald-500"></span>
-                                                    Zoom configurado
-                                                </span>
-                                            @endif
                                         </div>
                                     </div>
                                     @empty
@@ -392,7 +353,7 @@
                     <div class="bg-accent/5 border border-accent/15 rounded-2xl p-4">
                         <p class="text-xs font-bold text-accent mb-1">💡 Tip</p>
                         <p class="text-xs text-gray-500 leading-relaxed">
-                            El link de Zoom puede agregarse luego editando la clase. La grabación también se puede añadir después de que se realice la clase.
+                            El link de Zoom se configura a nivel del curso. La grabación se puede añadir después de que se realice la clase.
                         </p>
                     </div>
                 </div>
@@ -440,7 +401,6 @@ function claseWizard(cursos, cursoSeleccionadoId) {
         busqueda: '',
         titulo: '{{ old('titulo') }}',
         fecha: '{{ old('fecha') }}',
-        zoomLink: '{{ old('zoom_link') }}',
 
         get cursoActual() {
             return this.cursos.find(c => c.id == this.cursoId) || null;
@@ -454,15 +414,6 @@ function claseWizard(cursos, cursoSeleccionadoId) {
                 c.nivelLabel.toLowerCase().includes(q) ||
                 c.planes.some(p => p.nombre.toLowerCase().includes(q))
             );
-        },
-
-        get zoomValido() {
-            try {
-                const url = new URL(this.zoomLink);
-                return url.protocol === 'http:' || url.protocol === 'https:';
-            } catch {
-                return false;
-            }
         },
 
         get diaSemana() {

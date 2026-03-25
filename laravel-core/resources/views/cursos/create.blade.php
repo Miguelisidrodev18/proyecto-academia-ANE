@@ -23,7 +23,7 @@
 
     @include('cursos._flash')
 
-    <form method="POST" action="{{ route('cursos.store') }}">
+    <form method="POST" action="{{ route('cursos.store') }}" enctype="multipart/form-data">
         @csrf
         @include('cursos._form')
 

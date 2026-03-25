@@ -60,6 +60,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Clases
         Route::resource('clases', ClaseController::class);
+        Route::post('/cursos/{curso}/clases',      [ClaseController::class,  'storeFromCurso'])->name('cursos.clases.store');
+        Route::patch('/clases/{clase}/grabacion',  [ClaseController::class,  'grabacion'])->name('clases.grabacion');
 
         // Asistencias (anidadas en una clase)
         Route::get('/clases/{clase}/asistencia',  [AsistenciaController::class, 'registrar'])->name('asistencias.registrar');
@@ -68,6 +70,7 @@ Route::middleware(['auth'])->group(function () {
         // Materiales
         Route::patch('/materiales/{material}/toggle', [MaterialController::class, 'toggle'])->name('materiales.toggle');
         Route::resource('materiales', MaterialController::class)->parameters(['materiales' => 'material']);
+        Route::post('/cursos/{curso}/materiales', [MaterialController::class, 'storeFromCurso'])->name('cursos.materiales.store');
     });
 
     // ── Perfil (todos los roles) ────────────────────────────────────────────

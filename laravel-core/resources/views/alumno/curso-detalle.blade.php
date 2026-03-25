@@ -9,11 +9,17 @@
         'intermedio' => 'from-[#082B59] via-[#1a5ba0] to-[#30A9D9]',
         'ambos'      => 'from-violet-800 via-violet-600 to-violet-400',
     ];
-    $grad = $gradients[$curso->nivel] ?? $gradients['intermedio'];
+    $grad        = $gradients[$curso->nivel] ?? $gradients['intermedio'];
     $tieneAcceso = $matricula && $matricula->tieneAcceso();
+    $claseHoy    = $curso->estaActivoHoy();
+    $diasCortos  = $curso->diasLabels();
 
-    $clasesProximas  = $curso->clases->where('fecha', '>', now())->sortBy('fecha');
-    $clasesPasadas   = $curso->clases->where('fecha', '<=', now())->sortByDesc('fecha');
+    $etiquetasDias = [
+        'lunes'=>'Lunes','martes'=>'Martes','miercoles'=>'Miércoles',
+        'jueves'=>'Jueves','viernes'=>'Viernes','sabado'=>'Sábado','domingo'=>'Domingo',
+    ];
+
+    $clasesPasadas = $curso->clases->where('fecha', '<=', now())->sortByDesc('fecha');
 @endphp
 
 {{-- ── Header / breadcrumb ── --}}
@@ -75,58 +81,91 @@
     {{-- ── Columna principal: clases ── --}}
     <div class="lg:col-span-2 space-y-5">
 
-        {{-- Próximas clases --}}
+        {{-- Horario semanal + botón de acceso --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
-                <h3 class="text-sm font-bold text-gray-700 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-accent"></span>
-                    Próximas clases
-                </h3>
-                <span class="text-xs text-gray-400">{{ $clasesProximas->count() }} programadas</span>
+            <div class="px-5 py-3.5 border-b border-gray-100 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-accent"></span>
+                <h3 class="text-sm font-bold text-gray-700">Horario de clases</h3>
             </div>
-            @if($clasesProximas->isEmpty())
-                <div class="py-10 text-center">
-                    <p class="text-gray-400 text-sm">No hay clases próximas programadas.</p>
-                </div>
-            @else
-                <div class="divide-y divide-gray-50">
-                    @foreach($clasesProximas as $clase)
-                    <div class="px-5 py-4 flex items-center justify-between gap-4">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-gray-700 truncate">{{ $clase->titulo }}</p>
-                                <p class="text-xs text-gray-400 mt-0.5">
-                                    {{ \Carbon\Carbon::parse($clase->fecha)->format('d/m/Y') }}
-                                    · {{ \Carbon\Carbon::parse($clase->fecha)->format('H:i') }}
-                                </p>
-                            </div>
+            <div class="p-5 space-y-4">
+
+                {{-- Días de la semana visual --}}
+                @if(!empty($diasCortos))
+                    <div>
+                        <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-2">Días activos</p>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach(\App\Models\Curso::ordenDias() as $dia)
+                                @php $esActivo = in_array($dia, $curso->dias_semana ?? []); @endphp
+                                <span @class([
+                                    'inline-flex items-center justify-center w-10 h-10 rounded-xl text-xs font-black border-2 transition-all',
+                                    'bg-accent text-white border-accent shadow-md shadow-accent/30' => $esActivo,
+                                    'bg-gray-50 text-gray-300 border-gray-100' => !$esActivo,
+                                ])>
+                                    {{ ['lunes'=>'Lu','martes'=>'Ma','miercoles'=>'Mi','jueves'=>'Ju','viernes'=>'Vi','sabado'=>'Sá','domingo'=>'Do'][$dia] }}
+                                </span>
+                            @endforeach
                         </div>
-                        @if($tieneAcceso && $clase->zoom_link)
-                            <a href="{{ $clase->zoom_link }}" target="_blank"
-                               class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl
-                                      bg-gradient-to-r from-primary-dark to-primary-light text-white text-xs font-bold
-                                      hover:from-accent hover:to-secondary transition-all shadow-sm hover:shadow-md">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                </svg>
-                                Entrar
-                            </a>
-                        @elseif(!$tieneAcceso)
-                            <span class="flex-shrink-0 text-xs text-red-400 font-semibold">Acceso suspendido</span>
-                        @else
-                            <span class="flex-shrink-0 text-xs text-gray-300 font-medium">Sin enlace</span>
-                        @endif
                     </div>
-                    @endforeach
-                </div>
-            @endif
+                @endif
+
+                {{-- Hora de inicio --}}
+                @if($curso->hora_inicio)
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-primary-dark/8 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400">Hora de inicio</p>
+                            <p class="text-sm font-bold text-gray-700">
+                                {{ \Carbon\Carbon::parse($curso->hora_inicio)->format('H:i') }}
+                            </p>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Botón de acceso dinámico --}}
+                @if(!$tieneAcceso)
+                    <button disabled
+                            class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm
+                                   bg-red-50 text-red-400 cursor-not-allowed border border-red-100">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        Acceso suspendido
+                    </button>
+                @elseif(!$curso->zoom_link)
+                    <div class="text-center py-3 text-xs text-gray-400">
+                        Link de Zoom no configurado aún.
+                    </div>
+                @elseif($claseHoy)
+                    <a href="{{ $curso->zoom_link }}" target="_blank"
+                       class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm text-white
+                              bg-gradient-to-r from-emerald-500 to-teal-400
+                              hover:from-emerald-600 hover:to-teal-500
+                              transition-all shadow-lg hover:-translate-y-0.5 relative overflow-hidden">
+                        <span class="absolute inset-0 bg-white/10 animate-pulse rounded-2xl pointer-events-none"></span>
+                        <svg class="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="relative z-10">¡Entrar a la clase ahora!</span>
+                    </a>
+                @else
+                    <button disabled
+                            class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm
+                                   bg-gray-50 text-gray-400 cursor-not-allowed border border-gray-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Hoy no hay clase · Próx: {{ implode(', ', $diasCortos) }}
+                    </button>
+                @endif
+            </div>
         </div>
 
         {{-- Clases pasadas / grabadas --}}
