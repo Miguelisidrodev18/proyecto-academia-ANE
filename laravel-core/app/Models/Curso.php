@@ -33,6 +33,24 @@ class Curso extends Model
         return $this->belongsToMany(Plan::class, 'plan_curso');
     }
 
+    /**
+     * Alumnos que acceden a este curso a través de su plan activo.
+     * Usar en lugar de alumnos() ya que curso_alumno no se puebla directamente.
+     */
+    public function alumnosViaPlanes(): \Illuminate\Database\Eloquent\Builder
+    {
+        $cursoId = $this->id;
+
+        return Alumno::whereHas('matriculas', function ($q) use ($cursoId) {
+            $q->where('estado', 'activa')
+              ->whereHas('plan', function ($p) use ($cursoId) {
+                  $p->whereHas('cursos', function ($c) use ($cursoId) {
+                      $c->where('cursos.id', $cursoId);
+                  });
+              });
+        });
+    }
+
     public function proximaClase(): ?Clase
     {
         return $this->clases()->where('fecha', '>', now())->orderBy('fecha')->first();

@@ -88,6 +88,46 @@
         </div>
     </div>
 
+    {{-- Alumnos inscritos vía plan activo --}}
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-5">
+        <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-gray-700">Alumnos inscritos</h3>
+            <span class="text-xs text-gray-400">{{ $alumnos->count() }} {{ $alumnos->count() === 1 ? 'alumno' : 'alumnos' }}</span>
+        </div>
+        @if($alumnos->isEmpty())
+            <div class="py-10 text-center">
+                <p class="text-gray-400 text-sm">No hay alumnos inscritos en este curso.</p>
+            </div>
+        @else
+            <div class="divide-y divide-gray-50">
+                @foreach($alumnos as $alumno)
+                <div class="px-5 py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-dark to-primary-light
+                                    flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
+                            {{ strtoupper(substr($alumno->user->name ?? 'A', 0, 1)) }}
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-700">{{ $alumno->user->name ?? '—' }}</p>
+                            <p class="text-xs text-gray-400">{{ $alumno->user->email ?? '' }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold
+                                     bg-emerald-50 text-emerald-600 border border-emerald-100">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Plan activo
+                        </span>
+                        @if(auth()->user()->isAdmin())
+                            <a href="{{ route('alumnos.show', $alumno) }}"
+                               class="text-xs text-accent hover:underline font-medium">Ver perfil</a>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+
     {{-- Clases --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">

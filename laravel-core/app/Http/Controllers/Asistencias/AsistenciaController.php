@@ -17,8 +17,7 @@ class AsistenciaController extends Controller
         $clase->load(['curso', 'asistencias']);
 
         $alumnosInscritos = $clase->curso
-            ->alumnos()
-            ->where('curso_alumno.activo', true)
+            ->alumnosViaPlanes()
             ->with('user')
             ->get();
 

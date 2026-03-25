@@ -257,43 +257,57 @@
                 {{-- Spacer para empujar el botón abajo --}}
                 <div class="flex-1"></div>
 
-                {{-- ── Botón de acción ── --}}
-                @if($tieneAcceso)
-                    @if($proximaClase && $proximaClase->zoom_link)
-                        <a href="{{ $proximaClase->zoom_link }}" target="_blank"
-                           class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm text-white
-                                  bg-gradient-to-r from-primary-dark to-primary-light
-                                  hover:from-accent hover:to-secondary
-                                  transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5
-                                  group-hover:scale-[1.02]">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                            </svg>
-                            Entrar a la clase
-                        </a>
+                {{-- ── Botones de acción ── --}}
+                <div class="flex flex-col gap-2">
+                    {{-- Botón principal: entrar a clase o estado --}}
+                    @if($tieneAcceso)
+                        @if($proximaClase && $proximaClase->zoom_link)
+                            <a href="{{ $proximaClase->zoom_link }}" target="_blank"
+                               class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm text-white
+                                      bg-gradient-to-r from-primary-dark to-primary-light
+                                      hover:from-accent hover:to-secondary
+                                      transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                                Entrar a la clase
+                            </a>
+                        @else
+                            <button disabled
+                                    class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm
+                                           bg-gray-100 text-gray-400 cursor-not-allowed">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                                Sin clase programada
+                            </button>
+                        @endif
                     @else
                         <button disabled
-                                class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm
-                                       bg-gray-100 text-gray-400 cursor-not-allowed">
+                                class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm
+                                       bg-red-50 text-red-400 cursor-not-allowed border border-red-100">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                             </svg>
-                            Sin clase programada
+                            Acceso suspendido
                         </button>
                     @endif
-                @else
-                    <button disabled
-                            class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm
-                                   bg-red-50 text-red-400 cursor-not-allowed border border-red-100">
+
+                    {{-- Botón secundario: ver detalle del curso --}}
+                    <a href="{{ route('alumno.curso-detalle', $curso) }}"
+                       class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm
+                              text-primary-dark bg-primary-dark/5 border border-primary-dark/10
+                              hover:bg-primary-dark/10 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                  d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
                         </svg>
-                        Acceso suspendido
-                    </button>
-                @endif
+                        Ver clases y materiales
+                    </a>
+                </div>
             </div>
         </div>
         @endforeach

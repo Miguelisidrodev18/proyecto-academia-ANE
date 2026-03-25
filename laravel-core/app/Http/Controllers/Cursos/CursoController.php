@@ -7,6 +7,7 @@ use App\Models\Curso;
 use App\Services\CursoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class CursoController extends Controller
@@ -15,7 +16,14 @@ class CursoController extends Controller
 
     public function index(): View
     {
-        $cursos = Curso::withCount(['alumnos', 'clases'])
+        $cursos = Curso::withCount(['clases'])
+            ->addSelect(DB::raw('(
+                SELECT COUNT(DISTINCT alumnos.id)
+                FROM alumnos
+                INNER JOIN matriculas ON matriculas.alumno_id = alumnos.id AND matriculas.estado = "activa"
+                INNER JOIN plan_curso ON plan_curso.plan_id = matriculas.plan_id AND plan_curso.curso_id = cursos.id
+                WHERE alumnos.deleted_at IS NULL
+            ) as alumnos_count'))
             ->orderBy('nivel')
             ->orderBy('grado')
             ->orderBy('nombre')
@@ -55,9 +63,14 @@ class CursoController extends Controller
 
     public function show(Curso $curso): View
     {
-        $curso->load(['clases' => fn ($q) => $q->orderBy('fecha', 'desc'), 'planes']);
+        $curso->load([
+            'clases' => fn ($q) => $q->orderBy('fecha', 'desc'),
+            'planes',
+        ]);
 
-        return view('cursos.show', compact('curso'));
+        $alumnos = $curso->alumnosViaPlanes()->with('user')->orderBy('id')->get();
+
+        return view('cursos.show', compact('curso', 'alumnos'));
     }
 
     public function edit(Curso $curso): View

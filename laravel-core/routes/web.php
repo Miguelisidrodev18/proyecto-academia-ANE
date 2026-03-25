@@ -32,7 +32,8 @@ Route::middleware(['auth'])->group(function () {
 
     // ── Panel del Alumno ────────────────────────────────────────────────────
     Route::middleware(['role:alumno'])->group(function () {
-        Route::get('/mis-cursos', [AlumnoPanelController::class, 'misCursos'])->name('alumno.mis-cursos');
+        Route::get('/mis-cursos',          [AlumnoPanelController::class, 'misCursos'])->name('alumno.mis-cursos');
+        Route::get('/mis-cursos/{curso}',  [AlumnoPanelController::class, 'cursoDetalle'])->name('alumno.curso-detalle');
     });
 
     // ── Módulos: solo Admin ─────────────────────────────────────────────────
