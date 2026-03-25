@@ -37,11 +37,15 @@ class CursoService
             $imagenUrl = $curso->imagen_url;
 
             if ($imagen) {
-                // Borrar imagen anterior si existe
                 if ($imagenUrl) {
                     Storage::disk('public')->delete($imagenUrl);
                 }
                 $imagenUrl = $imagen->store('cursos', 'public');
+            } elseif (!empty($data['remove_imagen'])) {
+                if ($imagenUrl) {
+                    Storage::disk('public')->delete($imagenUrl);
+                }
+                $imagenUrl = null;
             }
 
             $curso->update([

@@ -96,8 +96,9 @@ class CursoController extends Controller
             'dias_semana'  => ['nullable', 'array'],
             'dias_semana.*'=> ['in:lunes,martes,miercoles,jueves,viernes,sabado,domingo'],
             'hora_inicio'  => ['nullable', 'date_format:H:i'],
-            'imagen'       => ['nullable', 'image', 'max:2048'],
-            'activo'       => ['nullable', 'boolean'],
+            'imagen'        => ['nullable', 'image', 'max:2048'],
+            'remove_imagen' => ['nullable', 'boolean'],
+            'activo'        => ['nullable', 'boolean'],
         ]);
 
         $this->cursoService->actualizar($curso, $data, $request->file('imagen'));

@@ -214,14 +214,21 @@
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4"
      x-data="{
          preview: '{{ $imagenActual ?? '' }}',
+         removeImagen: false,
          handleFile(e) {
              const file = e.target.files[0];
              if (!file) return;
              const reader = new FileReader();
-             reader.onload = ev => this.preview = ev.target.result;
+             reader.onload = ev => { this.preview = ev.target.result; this.removeImagen = false; };
              reader.readAsDataURL(file);
+         },
+         quitarImagen() {
+             this.preview = '';
+             this.removeImagen = true;
+             this.$refs.fileInput.value = '';
          }
      }">
+    <input type="hidden" name="remove_imagen" :value="removeImagen ? '1' : '0'">
     <div class="px-5 py-3.5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex items-center gap-2.5">
         <div class="w-7 h-7 rounded-lg bg-primary-dark/10 flex items-center justify-center">
             <svg class="w-4 h-4 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,7 +243,7 @@
 
             {{-- Preview --}}
             <div class="flex-shrink-0">
-                <div class="w-40 h-28 rounded-xl border-2 border-dashed border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
+                <div class="w-40 h-28 rounded-xl border-2 border-dashed border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center relative group/prev">
                     <template x-if="preview">
                         <img :src="preview" alt="Preview" class="w-full h-full object-cover">
                     </template>
@@ -249,14 +256,26 @@
                             <p class="text-xs text-gray-400">Sin imagen</p>
                         </div>
                     </template>
+                    {{-- Botón eliminar sobre la preview --}}
+                    <template x-if="preview">
+                        <button type="button" @click="quitarImagen()"
+                                title="Eliminar imagen"
+                                class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center
+                                       opacity-0 group-hover/prev:opacity-100 transition-opacity shadow-md hover:bg-red-600">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </template>
                 </div>
+                {{-- Texto de estado debajo del preview --}}
+                <p x-show="removeImagen" class="text-[10px] text-red-500 font-semibold text-center mt-1">Se eliminará al guardar</p>
             </div>
 
             {{-- Uploader --}}
             <div class="flex-1 min-w-0">
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                    Subir imagen
-                </label>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2"
+                       x-text="preview ? 'Cambiar imagen' : 'Subir imagen'"></label>
                 <label class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-gray-200
                               hover:border-accent hover:bg-accent/5 transition-all cursor-pointer group">
                     <div class="w-9 h-9 rounded-xl bg-gray-100 group-hover:bg-accent/10 flex items-center justify-center flex-shrink-0 transition-colors">
@@ -266,12 +285,11 @@
                         </svg>
                     </div>
                     <div class="min-w-0">
-                        <p class="text-sm font-semibold text-gray-600 group-hover:text-primary-dark transition-colors">
-                            Seleccionar imagen
-                        </p>
+                        <p class="text-sm font-semibold text-gray-600 group-hover:text-primary-dark transition-colors"
+                           x-text="preview ? 'Seleccionar otra imagen' : 'Seleccionar imagen'"></p>
                         <p class="text-xs text-gray-400">JPG, PNG, WebP · máx. 2 MB</p>
                     </div>
-                    <input type="file" name="imagen" accept="image/*" class="hidden" @change="handleFile($event)">
+                    <input type="file" name="imagen" accept="image/*" class="hidden" x-ref="fileInput" @change="handleFile($event)">
                 </label>
                 @error('imagen')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
