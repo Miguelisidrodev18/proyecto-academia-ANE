@@ -119,6 +119,78 @@
     </div>
 </div>
 
+{{-- ═══════════════════════════════════════════════════════════ --}}
+{{-- ALERTA DE VENCIMIENTO                                       --}}
+{{-- ═══════════════════════════════════════════════════════════ --}}
+@if($matricula && !$matricula->plan->acceso_ilimitado)
+@php
+    $dias      = $matricula->diasRestantes();
+    $saldo     = $matricula->saldoPendiente();
+    $esCritico = $dias <= 3;
+    $esAviso   = $dias > 3 && $dias <= 7;
+@endphp
+@if($esCritico || $esAviso)
+<div class="mb-6 rounded-2xl overflow-hidden shadow-md
+            {{ $esCritico
+                ? 'bg-gradient-to-r from-red-600 to-orange-500'
+                : 'bg-gradient-to-r from-amber-500 to-yellow-400' }}">
+    <div class="px-5 py-4 flex items-start gap-4">
+
+        {{-- Icono --}}
+        <div class="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center
+                    {{ $esCritico ? 'bg-white/20' : 'bg-white/25' }}">
+            @if($esCritico)
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+            @else
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            @endif
+        </div>
+
+        {{-- Texto --}}
+        <div class="flex-1 min-w-0">
+            <p class="text-white font-black text-sm leading-tight">
+                @if($esCritico)
+                    ⚠️ ¡Tu acceso vence {{ $dias === 0 ? 'hoy' : 'en ' . $dias . ' ' . ($dias === 1 ? 'día' : 'días') }}!
+                @else
+                    Tu matrícula vence en {{ $dias }} días
+                @endif
+            </p>
+            <p class="text-white/85 text-xs mt-1 leading-snug">
+                @if($saldo > 0)
+                    Tienes un saldo pendiente de
+                    <span class="font-black text-white">S/. {{ number_format($saldo, 2) }}</span>.
+                    Si no regularizas tu pago, tu acceso al aula virtual
+                    <span class="font-bold {{ $esCritico ? 'underline' : '' }}">será bloqueado automáticamente</span>.
+                @else
+                    Tu plan <strong class="text-white">{{ $matricula->plan->nombre }}</strong> está próximo a vencer.
+                    Renueva a tiempo para no perder el acceso a tus clases y contenido.
+                @endif
+            </p>
+        </div>
+
+        {{-- Badge días --}}
+        <div class="flex-shrink-0 text-center bg-white/20 backdrop-blur-sm rounded-xl px-3 py-2 min-w-[52px]">
+            <p class="text-white font-black text-lg leading-none">{{ $dias }}</p>
+            <p class="text-white/70 text-[10px] font-semibold mt-0.5">{{ $dias === 1 ? 'día' : 'días' }}</p>
+        </div>
+    </div>
+
+    {{-- Barra de urgencia --}}
+    @if($esCritico)
+    <div class="h-1 bg-white/20">
+        <div class="h-full bg-white/60 animate-pulse" style="width: {{ max(5, ($dias / 3) * 100) }}%"></div>
+    </div>
+    @endif
+</div>
+@endif
+@endif
+
 @if($cursos->isNotEmpty())
 
 {{-- ═══════════════════════════════════════════════════════════ --}}
