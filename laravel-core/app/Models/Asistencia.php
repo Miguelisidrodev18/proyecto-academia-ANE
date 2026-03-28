@@ -10,7 +10,9 @@ class Asistencia extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['clase_id', 'alumno_id', 'estado', 'observacion'];
+    protected $fillable = ['clase_id', 'alumno_id', 'estado', 'observacion', 'hora_ingreso'];
+
+    protected $casts = ['hora_ingreso' => 'datetime'];
 
     public function clase(): BelongsTo  { return $this->belongsTo(Clase::class); }
     public function alumno(): BelongsTo { return $this->belongsTo(Alumno::class); }

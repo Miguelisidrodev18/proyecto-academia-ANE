@@ -52,7 +52,7 @@
                           hover:shadow-secondary/40 hover:-translate-y-0.5">
                     Ver planes de estudio
                 </a>
-                <a href="{{ route('register') }}"
+                <a href="#contacto"
                    class="px-8 py-4 rounded-xl border-2 border-white/30 text-white font-bold text-base
                           hover:border-accent hover:text-accent transition-all duration-200">
                     Quiero ingresar →
@@ -283,6 +283,209 @@
                         </div>
                     </div>
                 @endforeach
+            </div>
+        </div>
+    </section>
+
+    {{-- ============================================================
+         FORMULARIO DE INTERÉS / CONTACTO
+    ============================================================ --}}
+    <section id="contacto" class="bg-primary-dark py-20 lg:py-28 relative overflow-hidden">
+        {{-- Decoraciones --}}
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-accent/10 blur-3xl"></div>
+            <div class="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-primary-light/10 blur-3xl"></div>
+        </div>
+
+        <div class="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+                {{-- Texto izquierdo --}}
+                <div>
+                    <span class="inline-block px-4 py-1.5 rounded-full bg-accent/20 text-accent
+                                 text-xs font-semibold uppercase tracking-widest mb-4 border border-accent/30">
+                        ¡Es gratis empezar!
+                    </span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-white leading-tight mb-4">
+                        ¿Te interesa prepararte?<br>
+                        <span class="text-accent">Déjanos tus datos</span>
+                    </h2>
+                    <p class="text-white/60 text-base leading-relaxed mb-8">
+                        Uno de nuestros asesores te contactará para contarte todo sobre nuestros planes,
+                        horarios y cómo prepararte para ingresar a tu universidad.
+                    </p>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <p class="text-white/70 text-sm">Te respondemos en menos de 24 horas</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <p class="text-white/70 text-sm">Sin compromisos ni costos ocultos</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <p class="text-white/70 text-sm">Te orientamos según tu universidad objetivo</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Formulario derecho --}}
+                <div class="bg-white rounded-3xl p-7 shadow-2xl">
+
+                    @if(session('lead_success'))
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-black text-primary-dark mb-2">¡Gracias por tu interés!</h3>
+                        <p class="text-gray-500 text-sm">Uno de nuestros asesores te contactará muy pronto. ¡Prepárate para ingresar!</p>
+                    </div>
+                    @else
+
+                    <h3 class="text-lg font-black text-primary-dark mb-1">Solicita información</h3>
+                    <p class="text-gray-400 text-xs mb-5">Completa el formulario y nos ponemos en contacto contigo.</p>
+
+                    @if($errors->any())
+                    <div class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+                        <ul class="text-xs text-red-700 space-y-0.5">
+                            @foreach($errors->all() as $error)
+                                <li>• {{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('leads.store-public') }}" class="space-y-3">
+                        @csrf
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                    Nombres <span class="text-red-400">*</span>
+                                </label>
+                                <input type="text" name="nombre" value="{{ old('nombre') }}"
+                                       placeholder="Juan Carlos"
+                                       class="w-full px-3 py-2.5 rounded-xl border text-sm outline-none transition-all
+                                              focus:border-accent focus:ring-2 focus:ring-accent/20 bg-gray-50 focus:bg-white
+                                              {{ $errors->has('nombre') ? 'border-red-400' : 'border-gray-200' }}">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                    Apellidos <span class="text-red-400">*</span>
+                                </label>
+                                <input type="text" name="apellidos" value="{{ old('apellidos') }}"
+                                       placeholder="García López"
+                                       class="w-full px-3 py-2.5 rounded-xl border text-sm outline-none transition-all
+                                              focus:border-accent focus:ring-2 focus:ring-accent/20 bg-gray-50 focus:bg-white
+                                              {{ $errors->has('apellidos') ? 'border-red-400' : 'border-gray-200' }}">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                Correo electrónico <span class="text-red-400">*</span>
+                            </label>
+                            <div class="relative">
+                                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                <input type="email" name="email" value="{{ old('email') }}"
+                                       placeholder="correo@ejemplo.com"
+                                       class="w-full pl-9 pr-3 py-2.5 rounded-xl border text-sm outline-none transition-all
+                                              focus:border-accent focus:ring-2 focus:ring-accent/20 bg-gray-50 focus:bg-white
+                                              {{ $errors->has('email') ? 'border-red-400' : 'border-gray-200' }}">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                Teléfono / WhatsApp
+                            </label>
+                            <div class="relative">
+                                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                </svg>
+                                <input type="text" name="telefono" value="{{ old('telefono') }}"
+                                       placeholder="987 654 321"
+                                       class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none transition-all
+                                              focus:border-accent focus:ring-2 focus:ring-accent/20 bg-gray-50 focus:bg-white">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                    Nivel de interés
+                                </label>
+                                <select name="nivel"
+                                        class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none transition-all
+                                               focus:border-accent focus:ring-2 focus:ring-accent/20 bg-gray-50 focus:bg-white">
+                                    <option value="no_sabe" {{ old('nivel') === 'no_sabe' ? 'selected' : '' }}>No sé aún</option>
+                                    <option value="pollito" {{ old('nivel') === 'pollito' ? 'selected' : '' }}>🐣 Pollito (Escolar)</option>
+                                    <option value="intermedio" {{ old('nivel') === 'intermedio' ? 'selected' : '' }}>⚡ Intermedio (Pre-U)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                    Plan de interés
+                                </label>
+                                <select name="plan_id"
+                                        class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none transition-all
+                                               focus:border-accent focus:ring-2 focus:ring-accent/20 bg-gray-50 focus:bg-white">
+                                    <option value="">Sin preferencia</option>
+                                    @foreach($planesContacto as $plan)
+                                        <option value="{{ $plan->id }}" {{ old('plan_id') == $plan->id ? 'selected' : '' }}>
+                                            {{ $plan->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                                Mensaje <span class="text-gray-300 font-normal normal-case">(opcional)</span>
+                            </label>
+                            <textarea name="mensaje" rows="2"
+                                      placeholder="¿Tienes alguna duda o pregunta específica?"
+                                      class="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm outline-none transition-all resize-none
+                                             focus:border-accent focus:ring-2 focus:ring-accent/20 bg-gray-50 focus:bg-white">{{ old('mensaje') }}</textarea>
+                        </div>
+
+                        <button type="submit"
+                                class="w-full py-3 rounded-xl font-black text-sm text-white
+                                       bg-gradient-to-r from-primary-dark to-accent
+                                       hover:from-accent hover:to-secondary
+                                       transition-all duration-300 shadow-lg shadow-accent/30 hover:-translate-y-0.5">
+                            Quiero que me contacten →
+                        </button>
+
+                        <p class="text-center text-xs text-gray-400">
+                            Sin spam. Tus datos están seguros con nosotros.
+                        </p>
+                    </form>
+                    @endif
+                </div>
             </div>
         </div>
     </section>

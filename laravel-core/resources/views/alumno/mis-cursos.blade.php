@@ -205,19 +205,28 @@
                     <p class="text-gray-300 text-sm italic mb-4">Contenido en preparación.</p>
                 @endif
 
-                {{-- Próxima clase --}}
-                @if($proximaClase)
-                    <div class="flex items-center gap-2.5 mb-4 p-3 rounded-2xl bg-accent/5 border border-accent/10">
-                        <div class="w-8 h-8 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                @php
+                    $claseHoy     = $curso->clases->first(fn($c) => $c->fecha->isToday());
+                    $proximaClase = $curso->clases->first(fn($c) => $c->fecha->isFuture());
+                    $mostrarClase = $claseHoy ?? $proximaClase;
+                @endphp
+
+                {{-- Próxima clase / clase de hoy --}}
+                @if($mostrarClase)
+                    <div class="flex items-center gap-2.5 mb-4 p-3 rounded-2xl
+                                {{ $claseHoy ? 'bg-emerald-50 border border-emerald-100' : 'bg-accent/5 border border-accent/10' }}">
+                        <div class="w-8 h-8 rounded-xl {{ $claseHoy ? 'bg-emerald-100' : 'bg-accent/15' }} flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 {{ $claseHoy ? 'text-emerald-600' : 'text-accent' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                         </div>
                         <div class="min-w-0">
-                            <p class="text-xs font-bold text-accent leading-none truncate">{{ $proximaClase->titulo }}</p>
+                            <p class="text-xs font-bold {{ $claseHoy ? 'text-emerald-700' : 'text-accent' }} leading-none truncate">
+                                {{ $claseHoy ? '¡Clase hoy!' : $mostrarClase->titulo }}
+                            </p>
                             <p class="text-[10px] text-gray-400 mt-0.5">
-                                {{ \Carbon\Carbon::parse($proximaClase->fecha)->format('d/m/Y H:i') }}
+                                {{ \Carbon\Carbon::parse($mostrarClase->fecha)->format('d/m/Y H:i') }}
                             </p>
                         </div>
                     </div>
@@ -259,11 +268,13 @@
 
                 {{-- ── Botones de acción ── --}}
                 @php
-                    $claseHoy   = $curso->estaActivoHoy();
-                    $diasCortos = $curso->diasLabels();
+                    $diasCortos      = $curso->diasLabels();
+                    $zoomHabilitado  = $claseHoy && now()->gte($claseHoy->fecha->copy()->subMinutes(5));
+                    $minutosRestantes = $claseHoy && !$zoomHabilitado
+                        ? (int) now()->diffInMinutes($claseHoy->fecha->copy()->subMinutes(5), false)
+                        : null;
                 @endphp
                 <div class="flex flex-col gap-2">
-                    {{-- Botón principal: Zoom con lógica de día activo --}}
                     @if(!$tieneAcceso)
                         <button disabled
                                 class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm
@@ -280,9 +291,9 @@
                                        bg-gray-100 text-gray-400 cursor-not-allowed">
                             Sin link de Zoom configurado
                         </button>
-                    @elseif($claseHoy)
-                        {{-- HOY ES DÍA DE CLASE → botón activo pulsante --}}
-                        <a href="{{ $curso->zoom_link }}" target="_blank"
+                    @elseif($zoomHabilitado)
+                        {{-- Clase habilitada (5 min antes o durante) → botón activo --}}
+                        <a href="{{ route('alumno.zoom', $curso) }}" target="_blank"
                            class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm text-white
                                   bg-gradient-to-r from-emerald-500 to-teal-400
                                   hover:from-emerald-600 hover:to-teal-500
@@ -294,8 +305,22 @@
                             </svg>
                             <span class="relative z-10">¡Entrar a la clase ahora!</span>
                         </a>
+                    @elseif($claseHoy)
+                        {{-- Clase hoy pero aún no es la hora --}}
+                        <button disabled
+                                class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm
+                                       bg-emerald-50 text-emerald-500 cursor-not-allowed border border-emerald-100">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Clase a las {{ $claseHoy->fecha->format('H:i') }}
+                            @if($minutosRestantes !== null && $minutosRestantes <= 60)
+                                (en {{ $minutosRestantes }} min)
+                            @endif
+                        </button>
                     @else
-                        {{-- No es día de clase → botón deshabilitado con días --}}
+                        {{-- Sin clase programada hoy --}}
                         <button disabled
                                 class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm
                                        bg-gray-50 text-gray-400 cursor-not-allowed border border-gray-100">
@@ -303,7 +328,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
-                            Clases: {{ implode(' · ', $diasCortos) ?: 'Sin horario' }}
+                            {{ $proximaClase ? 'Próx. ' . $proximaClase->fecha->format('d/m H:i') : (implode(' · ', $diasCortos) ?: 'Sin clase programada') }}
                         </button>
                     @endif
 

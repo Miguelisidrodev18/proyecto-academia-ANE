@@ -12,9 +12,11 @@ use App\Http\Controllers\Clases\ClaseController;
 use App\Http\Controllers\Materiales\MaterialController;
 use App\Http\Controllers\Asistencias\AsistenciaController;
 use App\Http\Controllers\Alumno\AlumnoPanelController;
+use App\Http\Controllers\Leads\LeadController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::post('/contacto', [LeadController::class, 'store'])->name('leads.store-public');
 
 Route::middleware(['auth'])->group(function () {
 
@@ -32,8 +34,10 @@ Route::middleware(['auth'])->group(function () {
 
     // ── Panel del Alumno ────────────────────────────────────────────────────
     Route::middleware(['role:alumno'])->group(function () {
-        Route::get('/mis-cursos',          [AlumnoPanelController::class, 'misCursos'])->name('alumno.mis-cursos');
-        Route::get('/mis-cursos/{curso}',  [AlumnoPanelController::class, 'cursoDetalle'])->name('alumno.curso-detalle');
+        Route::get('/mis-cursos',                [AlumnoPanelController::class, 'misCursos'])->name('alumno.mis-cursos');
+        Route::get('/mis-cursos/{curso}/zoom',   [AlumnoPanelController::class, 'zoom'])->name('alumno.zoom');
+        Route::get('/mis-cursos/{curso}',        [AlumnoPanelController::class, 'cursoDetalle'])->name('alumno.curso-detalle');
+        Route::get('/mis-asistencias',           [AlumnoPanelController::class, 'asistencias'])->name('alumno.asistencias');
     });
 
     // ── Módulos: solo Admin ─────────────────────────────────────────────────
@@ -41,7 +45,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/alumnos/dni/{numero}',                [AlumnoController::class, 'buscarDni'])->name('alumnos.dni');
         Route::get('/alumnos/buscar',                      [AlumnoController::class, 'buscar'])->name('alumnos.buscar');
         Route::get('/alumnos/{alumno}/matriculas-activas', [AlumnoController::class, 'matriculasActivas'])->name('alumnos.matriculas-activas');
-        Route::get('/alumnos/{alumno}/credenciales',       [AlumnoController::class, 'credenciales'])->name('alumnos.credenciales');
+        Route::get('/alumnos/{alumno}/credenciales',        [AlumnoController::class, 'credenciales'])->name('alumnos.credenciales');
+        Route::post('/alumnos/{alumno}/reset-representante',  [AlumnoController::class, 'resetRepresentante'])->name('alumnos.reset-representante');
+        Route::post('/alumnos/{alumno}/representante',         [AlumnoController::class, 'storeRepresentante'])->name('alumnos.store-representante');
         Route::patch('/alumnos/{alumno}/estado',           [AlumnoController::class, 'cambiarEstado'])->name('alumnos.cambiarEstado');
         Route::resource('alumnos', AlumnoController::class);
 
@@ -49,7 +55,10 @@ Route::middleware(['auth'])->group(function () {
 
         Route::resource('pagos', PagoController::class);
 
-        Route::patch('/planes/{plan}/toggle', [PlanController::class, 'toggle'])->name('planes.toggle');
+        Route::resource('leads', LeadController::class)->except(['create', 'store']);
+
+        Route::patch('/planes/{plan}/toggle',         [PlanController::class, 'toggle'])->name('planes.toggle');
+        Route::patch('/planes/{plan}/toggle-landing', [PlanController::class, 'toggleLanding'])->name('planes.toggle-landing');
         Route::resource('planes', PlanController::class)->parameters(['planes' => 'plan']);
     });
 

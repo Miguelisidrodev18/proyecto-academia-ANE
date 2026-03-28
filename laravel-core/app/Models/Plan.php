@@ -21,12 +21,14 @@ class Plan extends Model
         'acceso_ilimitado',
         'descripcion',
         'activo',
+        'mostrar_en_landing',
     ];
 
     protected $casts = [
-        'acceso_ilimitado' => 'boolean',
-        'activo'           => 'boolean',
-        'precio'           => 'decimal:2',
+        'acceso_ilimitado'    => 'boolean',
+        'activo'              => 'boolean',
+        'mostrar_en_landing'  => 'boolean',
+        'precio'              => 'decimal:2',
     ];
 
     // ── Relaciones ────────────────────────────────────────────────────────────

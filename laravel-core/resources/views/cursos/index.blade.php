@@ -53,12 +53,10 @@
 </div>
 
 {{-- Header --}}
-<div class="flex items-center justify-between mb-5 gap-4 flex-wrap">
+<div class="flex items-center justify-between mb-6 gap-4 flex-wrap">
     <div>
         <h1 class="text-2xl font-black text-primary-dark">Cursos</h1>
-        <p class="text-gray-400 text-sm mt-0.5">
-            {{ $cursos->count() }} {{ $cursos->count() === 1 ? 'curso registrado' : 'cursos registrados' }}
-        </p>
+        <p class="text-gray-400 text-sm mt-0.5">{{ $cursos->count() }} {{ $cursos->count() === 1 ? 'curso registrado' : 'cursos registrados' }}, organizados por plan</p>
     </div>
     @if(auth()->user()->isAdmin())
     <a href="{{ route('cursos.create') }}"
@@ -91,109 +89,50 @@
         @endif
     </div>
 @else
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-        @foreach($cursos as $curso)
-            <div class="group bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden
-                        hover:shadow-lg hover:-translate-y-1 transition-all duration-300
-                        {{ !$curso->activo ? 'opacity-60' : '' }}">
 
-                {{-- Header de la card --}}
-                <div class="bg-gradient-to-r
-                    {{ $curso->nivel === 'pollito' ? 'from-blue-600 to-blue-400' : ($curso->nivel === 'intermedio' ? 'from-primary-dark to-primary-light' : 'from-violet-700 to-violet-500') }}
-                    px-5 py-5 relative">
+    {{-- ── Secciones por plan ───────────────────────────────────────────── --}}
+    @foreach($planes as $plan)
+        @php $listaCursos = $cursosPorPlan[$plan->id] ?? collect(); @endphp
+        @if($listaCursos->isEmpty()) @continue @endif
 
-                    {{-- Badges --}}
-                    <div class="absolute top-3 right-3 flex flex-col gap-1 items-end">
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
-                                     bg-white/15 text-white text-[10px] font-bold uppercase tracking-wide">
-                            {{ $curso->tipoLabel() }}
-                        </span>
-                        @if($curso->grado)
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
-                                         bg-amber-400/20 text-amber-200 text-[10px] font-bold border border-amber-400/30">
-                                {{ $curso->gradoLabel() }}
-                            </span>
-                        @endif
-                    </div>
-
-                    <p class="text-white/60 text-xs font-semibold uppercase tracking-widest mb-1">
-                        {{ $curso->nivelLabel() }}
-                    </p>
-                    <h2 class="text-xl font-black text-white leading-tight pr-16">{{ $curso->nombre }}</h2>
-
-                    {{-- Métricas --}}
-                    <div class="flex items-center gap-4 mt-3">
-                        <span class="text-white/70 text-xs flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                            {{ $curso->alumnos_count }} alumnos
-                        </span>
-                        <span class="text-white/70 text-xs flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                            </svg>
-                            {{ $curso->clases_count }} clases
-                        </span>
-                    </div>
+        <div class="mb-10">
+            {{-- Encabezado de sección --}}
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex items-center gap-2.5 px-4 py-2 rounded-xl
+                            bg-gradient-to-r from-primary-dark/90 to-primary-light/80 shadow-sm">
+                    <span class="text-base leading-none">{{ $plan->tipoIcono() }}</span>
+                    <span class="text-white font-black text-sm">{{ $plan->nombre }}</span>
+                    <span class="text-white/60 text-xs font-medium">· {{ $listaCursos->count() }} {{ $listaCursos->count() === 1 ? 'curso' : 'cursos' }}</span>
                 </div>
-
-                {{-- Cuerpo --}}
-                <div class="px-5 py-4">
-                    @if($curso->descripcion)
-                        <p class="text-gray-500 text-sm leading-relaxed line-clamp-2">{{ $curso->descripcion }}</p>
-                    @else
-                        <p class="text-gray-300 text-sm italic">Sin descripción.</p>
-                    @endif
-
-                    <div class="mt-3 flex items-center justify-between">
-                        <span @class([
-                            'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold',
-                            'bg-emerald-50 text-emerald-700 border border-emerald-200' => $curso->activo,
-                            'bg-gray-100 text-gray-500 border border-gray-200'         => !$curso->activo,
-                        ])>
-                            <span class="w-1.5 h-1.5 rounded-full {{ $curso->activo ? 'bg-emerald-500' : 'bg-gray-400' }}"></span>
-                            {{ $curso->activo ? 'Activo' : 'Inactivo' }}
-                        </span>
-                    </div>
-                </div>
-
-                {{-- Footer --}}
-                <div class="px-5 pb-4 pt-0 flex items-center gap-2">
-                    <a href="{{ route('cursos.show', $curso) }}"
-                       class="flex-1 text-center py-2 rounded-xl text-xs font-bold bg-primary-dark/5 text-primary-dark
-                              hover:bg-primary-dark hover:text-white transition-all duration-200">
-                        Ver detalle
-                    </a>
-                    @if(auth()->user()->isAdmin())
-                    <a href="{{ route('cursos.edit', $curso) }}"
-                       class="flex-1 text-center py-2 rounded-xl text-xs font-bold bg-gray-100 text-gray-600
-                              hover:bg-gray-200 transition-all duration-200">
-                        Editar
-                    </a>
-                    <form method="POST" action="{{ route('cursos.toggle', $curso) }}">
-                        @csrf @method('PATCH')
-                        <button type="submit" title="{{ $curso->activo ? 'Desactivar' : 'Activar' }}"
-                                class="p-2 rounded-xl transition-all duration-200
-                                       {{ $curso->activo ? 'bg-amber-50 text-amber-600 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' }}">
-                            @if($curso->activo)
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-                                </svg>
-                            @else
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            @endif
-                        </button>
-                    </form>
-                    @endif
-                </div>
+                <div class="flex-1 h-px bg-gray-100"></div>
             </div>
-        @endforeach
-    </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                @foreach($listaCursos as $curso)
+                    @include('cursos._card', ['curso' => $curso])
+                @endforeach
+            </div>
+        </div>
+    @endforeach
+
+    {{-- Cursos sin plan asignado --}}
+    @if($sinPlan->isNotEmpty())
+        <div class="mb-10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-gray-200 shadow-sm">
+                    <span class="text-gray-500 font-black text-sm">Sin plan asignado</span>
+                    <span class="text-gray-400 text-xs font-medium">· {{ $sinPlan->count() }} {{ $sinPlan->count() === 1 ? 'curso' : 'cursos' }}</span>
+                </div>
+                <div class="flex-1 h-px bg-gray-100"></div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                @foreach($sinPlan as $curso)
+                    @include('cursos._card', ['curso' => $curso])
+                @endforeach
+            </div>
+        </div>
+    @endif
+
 @endif
 
 @endsection

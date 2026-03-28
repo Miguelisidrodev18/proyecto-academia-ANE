@@ -1,13 +1,14 @@
 @php
-    $editing = isset($plan);
-    $nombre          = old('nombre',         $editing ? $plan->nombre         : '');
-    $tipoPlan        = old('tipo_plan',      $editing ? $plan->tipo_plan      : 'premium');
-    $precio          = old('precio',         $editing ? $plan->precio         : '');
-    $duracionMeses   = old('duracion_meses', $editing ? $plan->duracion_meses : '');
-    $descripcion     = old('descripcion',    $editing ? $plan->descripcion    : '');
-    $accesoIlimitado = old('acceso_ilimitado', $editing ? ($plan->acceso_ilimitado ? '1' : '0') : '0');
-    $activo          = old('activo',           $editing ? ($plan->activo ? '1' : '0') : '1');
-    $selectedCursos  = old('cursos', $editing ? $plan->cursos->pluck('id')->toArray() : []);
+    $editing          = isset($plan);
+    $nombre           = old('nombre',              $editing ? $plan->nombre              : '');
+    $tipoPlan         = old('tipo_plan',           $editing ? $plan->tipo_plan           : 'premium');
+    $precio           = old('precio',              $editing ? $plan->precio              : '');
+    $duracionMeses    = old('duracion_meses',      $editing ? $plan->duracion_meses      : '');
+    $descripcion      = old('descripcion',         $editing ? $plan->descripcion         : '');
+    $accesoIlimitado  = old('acceso_ilimitado',    $editing ? ($plan->acceso_ilimitado   ? '1' : '0') : '0');
+    $activo           = old('activo',              $editing ? ($plan->activo             ? '1' : '0') : '1');
+    $enLanding        = old('mostrar_en_landing',  $editing ? ($plan->mostrar_en_landing ? '1' : '0') : '0');
+    $selectedCursos   = old('cursos', $editing ? $plan->cursos->pluck('id')->toArray() : []);
 @endphp
 
 {{-- Sección 1: Información del plan --}}
@@ -203,8 +204,9 @@
 {{-- Sección 2: Configuración --}}
 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4"
      x-data="{
-         ilimitado: {{ $accesoIlimitado === '1' ? 'true' : 'false' }},
-         activo: {{ $activo === '1' ? 'true' : 'false' }},
+         ilimitado:  {{ $accesoIlimitado === '1' ? 'true' : 'false' }},
+         activo:     {{ $activo          === '1' ? 'true' : 'false' }},
+         enLanding:  {{ $enLanding       === '1' ? 'true' : 'false' }},
      }">
     <div class="px-5 py-3.5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex items-center gap-2.5">
         <div class="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
@@ -219,8 +221,9 @@
     <div class="p-5 space-y-4">
 
         {{-- Hidden inputs --}}
-        <input type="hidden" name="acceso_ilimitado" :value="ilimitado ? '1' : '0'">
-        <input type="hidden" name="activo" :value="activo ? '1' : '0'">
+        <input type="hidden" name="acceso_ilimitado"   :value="ilimitado  ? '1' : '0'">
+        <input type="hidden" name="activo"             :value="activo     ? '1' : '0'">
+        <input type="hidden" name="mostrar_en_landing" :value="enLanding  ? '1' : '0'">
 
         {{-- Toggle: Acceso Ilimitado --}}
         <div class="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-gray-50 transition-colors cursor-pointer"
@@ -263,7 +266,7 @@
                 </div>
                 <div>
                     <p class="text-sm font-semibold text-gray-700">Plan activo</p>
-                    <p class="text-xs text-gray-400">Los planes activos se muestran en la landing page y en el formulario de matrículas</p>
+                    <p class="text-xs text-gray-400">Los planes activos están disponibles para nuevas matrículas</p>
                 </div>
             </div>
             <div class="relative flex-shrink-0">
@@ -272,6 +275,34 @@
                 </div>
                 <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"
                      :class="activo ? 'translate-x-6' : 'translate-x-0'">
+                </div>
+            </div>
+        </div>
+
+        {{-- Toggle: Mostrar en landing page --}}
+        <div class="flex items-center justify-between p-4 rounded-xl border transition-colors cursor-pointer"
+             :class="enLanding ? 'border-accent/30 bg-accent/5 hover:bg-accent/10' : 'border-gray-100 bg-gray-50/50 hover:bg-gray-50'"
+             @click="enLanding = !enLanding">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
+                     :class="enLanding ? 'bg-accent/20' : 'bg-gray-100'">
+                    <svg class="w-4 h-4 transition-colors" :class="enLanding ? 'text-accent' : 'text-gray-400'"
+                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-700">Mostrar en landing page</p>
+                    <p class="text-xs text-gray-400">Este plan aparecerá en la sección de precios del sitio web público</p>
+                </div>
+            </div>
+            <div class="relative flex-shrink-0">
+                <div class="w-12 h-6 rounded-full transition-colors duration-200"
+                     :class="enLanding ? 'bg-accent' : 'bg-gray-200'">
+                </div>
+                <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200"
+                     :class="enLanding ? 'translate-x-6' : 'translate-x-0'">
                 </div>
             </div>
         </div>

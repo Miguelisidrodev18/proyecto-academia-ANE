@@ -36,7 +36,7 @@
                           hover:bg-accent hover:text-white transition-all duration-200 text-sm">
                     Ingresar
                 </a>
-                <a href="{{ route('register') }}"
+                <a href="#contacto"
                    class="px-5 py-2 rounded-lg bg-accent text-white font-semibold
                           hover:bg-secondary transition-all duration-200 text-sm shadow-md">
                     Registrarse
@@ -81,7 +81,7 @@
                       hover:bg-accent hover:text-white transition-all duration-200 text-sm">
                 Ingresar
             </a>
-            <a href="{{ route('register') }}"
+            <a href="#contacto"
                class="w-full text-center px-5 py-2 rounded-lg bg-accent text-white font-semibold
                       hover:bg-secondary transition-all duration-200 text-sm shadow-md">
                 Registrarse

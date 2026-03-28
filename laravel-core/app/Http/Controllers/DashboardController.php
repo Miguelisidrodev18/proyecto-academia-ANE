@@ -26,7 +26,7 @@ class DashboardController extends Controller
         }
 
         if ($user->isRepresentante()) {
-            return view('dashboard.representante');
+            return $this->representanteIndex($user);
         }
 
         // Admin
@@ -94,6 +94,39 @@ class DashboardController extends Controller
 
         return view('dashboard.alumno', compact(
             'alumno', 'matricula', 'cursos', 'rachaInfo', 'mostrarOverlay', 'proximasClases'
+        ));
+    }
+
+    private function representanteIndex($user)
+    {
+        $alumno    = \App\Models\Alumno::with(['user', 'matriculas.plan', 'matriculas.pagos', 'matriculas.cuotas'])
+                        ->where('representante_id', $user->id)
+                        ->first();
+
+        $matricula      = null;
+        $pagos          = collect();
+        $cuotas         = collect();
+        $proximasClases = collect();
+
+        if ($alumno) {
+            $matricula = $alumno->matriculaActiva();
+
+            if ($matricula) {
+                $pagos  = $matricula->pagos()->orderByDesc('fecha_pago')->get();
+                $cuotas = $matricula->cuotas()->orderBy('numero')->get();
+
+                $cursoIds = $matricula->plan->cursos()->pluck('cursos.id');
+                $proximasClases = \App\Models\Clase::whereIn('curso_id', $cursoIds)
+                    ->where('fecha', '>', now())
+                    ->orderBy('fecha')
+                    ->limit(4)
+                    ->with('curso')
+                    ->get();
+            }
+        }
+
+        return view('dashboard.representante', compact(
+            'alumno', 'matricula', 'pagos', 'cuotas', 'proximasClases'
         ));
     }
 

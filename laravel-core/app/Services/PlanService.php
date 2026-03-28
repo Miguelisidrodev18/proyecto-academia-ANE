@@ -11,13 +11,14 @@ class PlanService
     {
         return DB::transaction(function () use ($data) {
             $plan = Plan::create([
-                'nombre'           => $data['nombre'],
-                'tipo_plan'        => $data['tipo_plan'] ?? 'premium',
-                'precio'           => $data['precio'],
-                'duracion_meses'   => $data['duracion_meses'],
-                'acceso_ilimitado' => (bool) ($data['acceso_ilimitado'] ?? false),
-                'descripcion'      => $data['descripcion'] ?? null,
-                'activo'           => (bool) ($data['activo'] ?? true),
+                'nombre'              => $data['nombre'],
+                'tipo_plan'           => $data['tipo_plan'] ?? 'premium',
+                'precio'              => $data['precio'],
+                'duracion_meses'      => $data['duracion_meses'],
+                'acceso_ilimitado'    => (bool) ($data['acceso_ilimitado'] ?? false),
+                'descripcion'         => $data['descripcion'] ?? null,
+                'activo'              => (bool) ($data['activo'] ?? true),
+                'mostrar_en_landing'  => (bool) ($data['mostrar_en_landing'] ?? false),
             ]);
 
             if (! empty($data['cursos'])) {
@@ -32,13 +33,14 @@ class PlanService
     {
         DB::transaction(function () use ($plan, $data) {
             $plan->update([
-                'nombre'           => $data['nombre'],
-                'tipo_plan'        => $data['tipo_plan'] ?? 'premium',
-                'precio'           => $data['precio'],
-                'duracion_meses'   => $data['duracion_meses'],
-                'acceso_ilimitado' => (bool) ($data['acceso_ilimitado'] ?? false),
-                'descripcion'      => $data['descripcion'] ?? null,
-                'activo'           => (bool) ($data['activo'] ?? false),
+                'nombre'              => $data['nombre'],
+                'tipo_plan'           => $data['tipo_plan'] ?? 'premium',
+                'precio'              => $data['precio'],
+                'duracion_meses'      => $data['duracion_meses'],
+                'acceso_ilimitado'    => (bool) ($data['acceso_ilimitado'] ?? false),
+                'descripcion'         => $data['descripcion'] ?? null,
+                'activo'              => (bool) ($data['activo'] ?? false),
+                'mostrar_en_landing'  => (bool) ($data['mostrar_en_landing'] ?? false),
             ]);
 
             $plan->cursos()->sync($data['cursos'] ?? []);
@@ -56,5 +58,11 @@ class PlanService
     {
         $plan->update(['activo' => ! $plan->activo]);
         return $plan->activo;
+    }
+
+    public function toggleLanding(Plan $plan): bool
+    {
+        $plan->update(['mostrar_en_landing' => ! $plan->mostrar_en_landing]);
+        return $plan->mostrar_en_landing;
     }
 }

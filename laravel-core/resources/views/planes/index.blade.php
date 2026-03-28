@@ -123,6 +123,15 @@
                                 Ilimitado
                             </span>
                         @endif
+                        @if($plan->mostrar_en_landing)
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+                                         bg-accent/30 text-white text-[10px] font-bold border border-accent/40 uppercase tracking-wide">
+                                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                En landing
+                            </span>
+                        @endif
                     </div>
 
                     <p class="{{ $plan->esVip() ? 'text-amber-300/60' : 'text-white/60' }} text-xs font-semibold uppercase tracking-widest mb-1">Plan</p>
@@ -193,6 +202,22 @@
                               hover:bg-gray-200 transition-all duration-200">
                         Editar
                     </a>
+                    {{-- Toggle landing --}}
+                    <form method="POST" action="{{ route('planes.toggle-landing', $plan) }}">
+                        @csrf @method('PATCH')
+                        <button type="submit"
+                                title="{{ $plan->mostrar_en_landing ? 'Quitar de landing page' : 'Mostrar en landing page' }}"
+                                class="p-2 rounded-xl transition-all duration-200
+                                       {{ $plan->mostrar_en_landing
+                                            ? 'bg-accent/15 text-accent hover:bg-accent/25'
+                                            : 'bg-gray-100 text-gray-400 hover:bg-accent/10 hover:text-accent' }}">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </button>
+                    </form>
+                    {{-- Toggle activo --}}
                     <form method="POST" action="{{ route('planes.toggle', $plan) }}">
                         @csrf @method('PATCH')
                         <button type="submit"

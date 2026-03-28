@@ -46,9 +46,10 @@ class PlanController extends Controller
             'duracion_meses'   => ['required', 'integer', 'min:1', 'max:36'],
             'acceso_ilimitado' => ['nullable', 'boolean'],
             'descripcion'      => ['nullable', 'string', 'max:500'],
-            'activo'           => ['nullable', 'boolean'],
-            'cursos'           => ['nullable', 'array'],
-            'cursos.*'         => ['integer', 'exists:cursos,id'],
+            'activo'              => ['nullable', 'boolean'],
+            'mostrar_en_landing'  => ['nullable', 'boolean'],
+            'cursos'              => ['nullable', 'array'],
+            'cursos.*'            => ['integer', 'exists:cursos,id'],
         ]);
 
         $plan = $this->planService->crear($data);
@@ -87,9 +88,10 @@ class PlanController extends Controller
             'duracion_meses'   => ['required', 'integer', 'min:1', 'max:36'],
             'acceso_ilimitado' => ['nullable', 'boolean'],
             'descripcion'      => ['nullable', 'string', 'max:500'],
-            'activo'           => ['nullable', 'boolean'],
-            'cursos'           => ['nullable', 'array'],
-            'cursos.*'         => ['integer', 'exists:cursos,id'],
+            'activo'              => ['nullable', 'boolean'],
+            'mostrar_en_landing'  => ['nullable', 'boolean'],
+            'cursos'              => ['nullable', 'array'],
+            'cursos.*'            => ['integer', 'exists:cursos,id'],
         ]);
 
         $this->planService->actualizar($plan, $data);
@@ -117,5 +119,13 @@ class PlanController extends Controller
         $estado = $activo ? 'activado' : 'desactivado';
 
         return back()->with('success', 'Plan "' . $plan->nombre . '" ' . $estado . ' correctamente.');
+    }
+
+    public function toggleLanding(Plan $plan): RedirectResponse
+    {
+        $visible = $this->planService->toggleLanding($plan);
+        $estado  = $visible ? 'visible en la landing page' : 'ocultado de la landing page';
+
+        return back()->with('success', 'Plan "' . $plan->nombre . '" ' . $estado . '.');
     }
 }

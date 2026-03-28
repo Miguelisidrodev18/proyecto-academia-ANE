@@ -113,7 +113,19 @@ class AlumnoController extends Controller
         $credenciales = session('credenciales');
 
         if (!$credenciales) {
-            return redirect()->route('alumnos.show', $alumno);
+            // Reconstruir desde la BD: la contraseña inicial del alumno es siempre su DNI
+            $credenciales = [
+                'alumno' => [
+                    'nombre'   => $alumno->nombreCompleto(),
+                    'email'    => $alumno->user->email ?? '—',
+                    'password' => $alumno->dni,
+                ],
+                'representante' => $alumno->representante ? [
+                    'nombre'   => $alumno->representante->name,
+                    'email'    => $alumno->representante->email,
+                    'password' => null, // no recuperable
+                ] : null,
+            ];
         }
 
         return view('alumnos.credenciales', compact('alumno', 'credenciales'));
@@ -220,6 +232,75 @@ class AlumnoController extends Controller
             ]);
 
         return response()->json($alumnos);
+    }
+
+    public function storeRepresentante(Request $request, Alumno $alumno): RedirectResponse
+    {
+        $data = $request->validate([
+            'nombre_rep'    => ['required', 'string', 'max:100'],
+            'apellidos_rep' => ['required', 'string', 'max:100'],
+            'email_rep'     => ['required', 'email', 'max:150', 'unique:users,email'],
+        ], [
+            'nombre_rep.required'    => 'El nombre del representante es obligatorio.',
+            'apellidos_rep.required' => 'Los apellidos del representante son obligatorios.',
+            'email_rep.required'     => 'El correo del representante es obligatorio.',
+            'email_rep.email'        => 'El correo no tiene un formato válido.',
+            'email_rep.unique'       => 'Ya existe una cuenta con ese correo.',
+        ]);
+
+        $password = 'Rep' . $alumno->dni;
+
+        $userRep = User::create([
+            'name'     => trim($data['nombre_rep'] . ' ' . $data['apellidos_rep']),
+            'email'    => $data['email_rep'],
+            'password' => Hash::make($password),
+            'role'     => 'representante',
+        ]);
+
+        $alumno->update(['representante_id' => $userRep->id]);
+
+        session()->flash('credenciales', [
+            'alumno' => [
+                'nombre'   => $alumno->nombreCompleto(),
+                'email'    => $alumno->user->email ?? '—',
+                'password' => $alumno->dni,
+            ],
+            'representante' => [
+                'nombre'   => $userRep->name,
+                'email'    => $userRep->email,
+                'password' => $password,
+            ],
+        ]);
+
+        return redirect()->route('alumnos.credenciales', $alumno);
+    }
+
+    public function resetRepresentante(Alumno $alumno): RedirectResponse
+    {
+        $alumno->load('representante');
+
+        if (!$alumno->representante) {
+            return redirect()->route('alumnos.credenciales', $alumno)
+                ->with('error', 'Este alumno no tiene representante registrado.');
+        }
+
+        $nuevaPassword = 'Rep' . $alumno->dni;
+        $alumno->representante->update(['password' => Hash::make($nuevaPassword)]);
+
+        session()->flash('credenciales', [
+            'alumno' => [
+                'nombre'   => $alumno->nombreCompleto(),
+                'email'    => $alumno->user->email ?? '—',
+                'password' => $alumno->dni,
+            ],
+            'representante' => [
+                'nombre'   => $alumno->representante->name,
+                'email'    => $alumno->representante->email,
+                'password' => $nuevaPassword,
+            ],
+        ]);
+
+        return redirect()->route('alumnos.credenciales', $alumno);
     }
 
     public function buscarDni(string $numero)

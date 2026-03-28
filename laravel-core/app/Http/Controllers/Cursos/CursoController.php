@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cursos;
 
 use App\Http\Controllers\Controller;
 use App\Models\Curso;
+use App\Models\Plan;
 use App\Services\CursoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,7 +17,8 @@ class CursoController extends Controller
 
     public function index(): View
     {
-        $cursos = Curso::withCount(['clases'])
+        $cursos = Curso::withCount(['clases', 'materiales'])
+            ->with(['planes:id,nombre,tipo_plan'])
             ->addSelect(DB::raw('(
                 SELECT COUNT(DISTINCT alumnos.id)
                 FROM alumnos
@@ -29,6 +31,15 @@ class CursoController extends Controller
             ->orderBy('nombre')
             ->get();
 
+        // Agrupar cursos por plan para la vista en secciones
+        $planes = Plan::orderBy('precio')->get();
+
+        $cursosPorPlan = $planes->mapWithKeys(fn ($plan) => [
+            $plan->id => $cursos->filter(fn ($c) => $c->planes->contains('id', $plan->id))->values(),
+        ])->filter(fn ($lista) => $lista->isNotEmpty());
+
+        $sinPlan = $cursos->filter(fn ($c) => $c->planes->isEmpty())->values();
+
         $stats = [
             'total'      => $cursos->count(),
             'activos'    => $cursos->where('activo', true)->count(),
@@ -36,7 +47,7 @@ class CursoController extends Controller
             'intermedio' => $cursos->whereIn('nivel', ['intermedio', 'ambos'])->count(),
         ];
 
-        return view('cursos.index', compact('cursos', 'stats'));
+        return view('cursos.index', compact('cursos', 'cursosPorPlan', 'planes', 'sinPlan', 'stats'));
     }
 
     public function create(): View
