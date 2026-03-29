@@ -77,9 +77,10 @@
                 <div class="divide-y divide-gray-50">
                     @foreach($alumnosInscritos as $alumno)
                     @php
-                        $asistencia = $asistenciasExistentes->get($alumno->id);
+                        $asistencia   = $asistenciasExistentes->get($alumno->id);
                         $estadoActual = $asistencia?->estado ?? 'presente';
                         $obsActual    = $asistencia?->observacion ?? '';
+                        $viaZoom      = $asistencia?->hora_ingreso;
                     @endphp
                     <div x-data="{ estado: '{{ $estadoActual }}' }"
                          class="p-4 transition-colors"
@@ -95,7 +96,19 @@
                                 {{ $alumno->inicial() }}
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="font-semibold text-gray-800 text-sm">{{ $alumno->nombreCompleto() }}</p>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <p class="font-semibold text-gray-800 text-sm">{{ $alumno->nombreCompleto() }}</p>
+                                    @if($viaZoom)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold
+                                                     bg-emerald-100 text-emerald-700 border border-emerald-200">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                            </svg>
+                                            Zoom {{ $viaZoom->format('H:i') }}
+                                        </span>
+                                    @endif
+                                </div>
                                 <p class="text-xs text-gray-400">{{ $alumno->dni }}</p>
                             </div>
                             <div class="flex items-center gap-2 flex-wrap">
