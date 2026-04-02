@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -16,8 +18,70 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+
+        $completion = 0;
+        if ($user->avatar) $completion += 45;
+        if ($user->name)   $completion += 30;
+        if ($user->role)   $completion += 25;
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user'              => $user,
+            'profileCompletion' => $completion,
+        ]);
+    }
+
+    /**
+     * Upload or replace the user's avatar.
+     */
+    public function updateAvatar(Request $request): JsonResponse
+    {
+        $request->validate([
+            'avatar' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+        ]);
+
+        $user = $request->user();
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        $path = $request->file('avatar')->store("avatars/{$user->id}", 'public');
+
+        $metadata = [
+            'uploaded_at'   => now()->toIso8601String(),
+            'original_name' => $request->file('avatar')->getClientOriginalName(),
+            'size_bytes'    => $request->file('avatar')->getSize(),
+            'face_detected' => null,   // Future: reconocimiento facial
+            'face_encoding' => null,   // Future: embedding del rostro
+        ];
+
+        $user->update([
+            'avatar'          => $path,
+            'avatar_metadata' => $metadata,
+        ]);
+
+        return response()->json([
+            'success'    => true,
+            'avatar_url' => Storage::disk('public')->url($path),
+        ]);
+    }
+
+    /**
+     * Delete the user's avatar.
+     */
+    public function destroyAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
+            $user->update(['avatar' => null, 'avatar_metadata' => null]);
+        }
+
+        return response()->json([
+            'success'    => true,
+            'avatar_url' => $user->avatarUrl(),
         ]);
     }
 

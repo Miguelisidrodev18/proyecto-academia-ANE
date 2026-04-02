@@ -146,23 +146,53 @@ $verGrupoAula = in_array($role, ['admin', 'docente', 'alumno']);
     </div>
 
     {{-- Perfil del usuario --}}
-    <div class="px-5 py-4 border-b border-white/10 flex-shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#0BC4D9] to-[#30A9D9]
-                        flex items-center justify-center flex-shrink-0 shadow-lg">
-                <span class="text-white font-black text-sm uppercase">
-                    {{ substr(auth()->user()->name, 0, 1) }}
-                </span>
-            </div>
-            <div class="min-w-0">
-                <p class="text-white font-semibold text-sm truncate">{{ auth()->user()->name }}</p>
-                <span class="inline-block text-xs px-2 py-0.5 rounded-full font-medium capitalize
-                             bg-white/10 text-[#0BC4D9]">
-                    {{ auth()->user()->role }}
-                </span>
+    <a href="{{ route('profile.edit') }}"
+       class="px-5 py-4 border-b border-white/10 flex-shrink-0 flex items-center gap-3 group
+              hover:bg-white/5 transition-colors duration-150 cursor-pointer">
+
+        {{-- Avatar: foto real o inicial --}}
+        <div class="relative flex-shrink-0">
+            @if(auth()->user()->avatar)
+                <img src="{{ auth()->user()->avatarUrl() }}"
+                     alt="Foto de perfil"
+                     class="js-user-avatar w-10 h-10 rounded-full object-cover ring-2 ring-[#0BC4D9]/60
+                            group-hover:ring-[#0BC4D9] transition-all duration-200 shadow-lg">
+            @else
+                <div class="js-user-avatar-placeholder w-10 h-10 rounded-full bg-gradient-to-br
+                            from-[#0BC4D9] to-[#30A9D9] flex items-center justify-center
+                            ring-2 ring-white/20 group-hover:ring-[#0BC4D9]/60
+                            transition-all duration-200 shadow-lg">
+                    <span class="text-white font-black text-sm uppercase">
+                        {{ substr(auth()->user()->name, 0, 1) }}
+                    </span>
+                </div>
+            @endif
+
+            {{-- Indicador de edición al hover --}}
+            <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full
+                        bg-[#0BC4D9] border-2 border-primary-dark flex items-center justify-center
+                        opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
             </div>
         </div>
-    </div>
+
+        <div class="min-w-0 flex-1">
+            <p class="text-white font-semibold text-sm truncate group-hover:text-[#0BC4D9] transition-colors">
+                {{ auth()->user()->name }}
+            </p>
+            <span class="inline-block text-xs px-2 py-0.5 rounded-full font-medium capitalize
+                         bg-white/10 text-[#0BC4D9]">
+                {{ auth()->user()->role }}
+            </span>
+        </div>
+
+        {{-- Chevron --}}
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white/30 group-hover:text-white/60 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+    </a>
 
     {{-- Navegación --}}
     <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5 scrollbar-thin">
