@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alumno;
+use App\Models\Curso;
 use App\Models\Matricula;
 use App\Models\Pago;
 use App\Services\AccesoService;
@@ -200,11 +201,14 @@ class DashboardController extends Controller
 
     public function reportes()
     {
-        return view('dashboard.reportes', [
-            'modulo'      => 'Reportes',
-            'descripcion' => 'Genera estadísticas, informes académicos y reportes de rendimiento.',
-            'color'       => 'teal',
-        ]);
+        $cursos = Curso::withCount('clases')
+            ->with(['clases' => fn ($q) => $q->withCount('asistencias')->orderBy('fecha')])
+            ->orderBy('nombre')
+            ->get();
+
+        $alumnos = Alumno::with('user')->activos()->orderBy('id')->get();
+
+        return view('dashboard.reportes', compact('cursos', 'alumnos'));
     }
 
     public function configuracion()

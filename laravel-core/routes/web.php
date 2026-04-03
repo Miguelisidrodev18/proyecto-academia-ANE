@@ -13,6 +13,7 @@ use App\Http\Controllers\Materiales\MaterialController;
 use App\Http\Controllers\Asistencias\AsistenciaController;
 use App\Http\Controllers\Alumno\AlumnoPanelController;
 use App\Http\Controllers\Leads\LeadController;
+use App\Http\Controllers\Reportes\ReporteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -30,6 +31,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/bazar',           [DashboardController::class, 'bazar'])->name('dashboard.bazar');
     Route::get('/dashboard/reconocimientos', [DashboardController::class, 'reconocimientos'])->name('dashboard.reconocimientos');
     Route::get('/dashboard/reportes',        [DashboardController::class, 'reportes'])->name('dashboard.reportes');
+    Route::get('/reportes/exportar',                    [ReporteController::class, 'exportar'])->name('reportes.exportar');
+    Route::get('/reportes/alumno/{alumno}/cursos',      [ReporteController::class, 'cursosDeAlumno'])->name('reportes.alumno.cursos');
     Route::get('/dashboard/configuracion',   [DashboardController::class, 'configuracion'])->name('dashboard.configuracion');
 
     // ── Panel del Alumno ────────────────────────────────────────────────────

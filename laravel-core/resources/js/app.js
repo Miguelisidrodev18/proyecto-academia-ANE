@@ -267,4 +267,113 @@ Alpine.data('avatarManager', (config) => ({
     },
 }));
 
+/* ── Componente: reportes académicos ── */
+Alpine.data('reportes', (config) => ({
+    tab:             'alumno',
+    exportarUrl:     config.exportarUrl     || '',
+    cursosAlumnoBase: config.cursosAlumnoBase || '',
+    allCursos:       config.allCursos       || [],
+    allAlumnos:      config.allAlumnos      || [],
+
+    // Tab 1 – Por Alumno
+    alumnoQ:           '',
+    alumnoOpen:        false,
+    alumnoSel:         null,
+    cursosAlumno:      [],
+    cursosAlumnoLoading: false,
+    cursoAlumnoSel:    null,
+
+    // Tab 2 – Por Clase
+    cursoClasQ:    '',
+    cursoClasOpen: false,
+    cursoClasSel:  null,
+    claseSel:      null,
+
+    // Tab 3 – Resumen del Curso
+    cursoResumenQ:    '',
+    cursoResumenOpen: false,
+    cursoResumenSel:  null,
+
+    get alumnosFiltrados() {
+        const q = this.alumnoQ.toLowerCase().trim();
+        if (!q) return this.allAlumnos;
+        return this.allAlumnos.filter(a =>
+            a.nombre.toLowerCase().includes(q) || (a.dni && a.dni.includes(q))
+        );
+    },
+
+    get cursosFiltradosClase() {
+        const q = this.cursoClasQ.toLowerCase().trim();
+        if (!q) return this.allCursos;
+        return this.allCursos.filter(c => c.nombre.toLowerCase().includes(q));
+    },
+
+    get cursosFiltradosResumen() {
+        const q = this.cursoResumenQ.toLowerCase().trim();
+        if (!q) return this.allCursos;
+        return this.allCursos.filter(c => c.nombre.toLowerCase().includes(q));
+    },
+
+    setTab(t) {
+        this.tab = t;
+    },
+
+    selectAlumno(a) {
+        this.alumnoSel  = a;
+        this.alumnoOpen = false;
+        this.alumnoQ    = '';
+        this.cursoAlumnoSel  = null;
+        this.cursosAlumno    = [];
+        this.fetchCursosAlumno(a.id);
+    },
+
+    clearAlumno() {
+        this.alumnoSel       = null;
+        this.alumnoQ         = '';
+        this.alumnoOpen      = false;
+        this.cursosAlumno    = [];
+        this.cursoAlumnoSel  = null;
+    },
+
+    fetchCursosAlumno(id) {
+        this.cursosAlumnoLoading = true;
+        fetch(this.cursosAlumnoBase + '/' + id + '/cursos', {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        })
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(data => { this.cursosAlumno = Array.isArray(data) ? data : []; })
+        .catch(() => { this.cursosAlumno = []; })
+        .finally(() => { this.cursosAlumnoLoading = false; });
+    },
+
+    selectCursoClase(c) {
+        this.cursoClasSel  = c;
+        this.cursoClasOpen = false;
+        this.claseSel      = null;
+    },
+
+    clearCursoClase() {
+        this.cursoClasSel  = null;
+        this.cursoClasQ    = '';
+        this.cursoClasOpen = false;
+        this.claseSel      = null;
+    },
+
+    buildUrl(tipo, formato) {
+        const params = new URLSearchParams({ tipo: tipo === 'resumen' ? 'curso' : tipo, formato });
+
+        if (tipo === 'alumno' && this.alumnoSel && this.cursoAlumnoSel) {
+            params.set('alumno_id', this.alumnoSel.id);
+            params.set('curso_id', this.cursoAlumnoSel.id);
+        } else if (tipo === 'clase' && this.claseSel) {
+            params.set('clase_id', this.claseSel.id);
+        } else if (tipo === 'resumen' && this.cursoResumenSel) {
+            params.set('curso_id', this.cursoResumenSel.id);
+        }
+
+        return this.exportarUrl + '?' + params.toString();
+    },
+}));
+
 Alpine.start();
