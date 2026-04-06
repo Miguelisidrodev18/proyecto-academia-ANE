@@ -41,10 +41,8 @@ class PagoService
             'comprobante_url' => $comprobanteUrl,
         ]);
 
-        // Si el pago ya viene confirmado y tiene cuota, marcarla pagada
-        if ($pago->estado === 'confirmado' && $pago->cuota_id) {
-            $cuota = Cuota::find($pago->cuota_id);
-            $cuota?->update(['estado' => 'pagada', 'fecha_pago' => Carbon::parse($pago->fecha_pago)]);
+        if ($pago->estado === 'confirmado') {
+            $this->reconciliarCuotas(Matricula::find($pago->matricula_id), Carbon::parse($pago->fecha_pago));
         }
 
         return $pago;
@@ -59,28 +57,64 @@ class PagoService
             $data['comprobante_url'] = $comprobante->store('comprobantes', 'public');
         }
 
+        $estadoAnterior = $pago->estado;
         $pago->update($data);
+
+        if ($pago->fresh()->estado === 'confirmado') {
+            $this->reconciliarCuotas($pago->matricula, Carbon::parse($pago->fecha_pago));
+        } elseif ($estadoAnterior === 'confirmado' && $pago->fresh()->estado !== 'confirmado') {
+            $this->reconciliarCuotas($pago->matricula);
+        }
     }
 
     public function confirmarPago(Pago $pago): void
     {
         $pago->update(['estado' => 'confirmado']);
-
-        if ($pago->cuota_id) {
-            Cuota::where('id', $pago->cuota_id)
-                ->update(['estado' => 'pagada', 'fecha_pago' => $pago->fecha_pago]);
-        }
+        $this->reconciliarCuotas($pago->matricula, Carbon::parse($pago->fecha_pago));
     }
 
     public function anularPago(Pago $pago): void
     {
         $pago->update(['estado' => 'anulado']);
+        $this->reconciliarCuotas($pago->matricula);
+    }
 
-        // Revertir cuota a pendiente si aplica
-        if ($pago->cuota_id) {
-            Cuota::where('id', $pago->cuota_id)
-                ->where('estado', 'pagada')
-                ->update(['estado' => 'pendiente', 'fecha_pago' => null]);
+    /**
+     * Reconcilia el estado de las cuotas según el total pagado confirmado.
+     * Recorre las cuotas en orden y las marca como 'pagada' mientras
+     * el acumulado de pagos confirmados cubra su monto.
+     * Las cuotas no cubiertas se revierten a 'pendiente' o 'vencida'.
+     */
+    public function reconciliarCuotas(Matricula $matricula, ?Carbon $fechaPago = null): void
+    {
+        $totalPagado = (float) $matricula->pagos()
+            ->where('estado', 'confirmado')
+            ->sum('monto');
+
+        $cuotas = $matricula->cuotas()->orderBy('numero')->get();
+        $acumulado = 0.0;
+
+        foreach ($cuotas as $cuota) {
+            $acumulado += (float) $cuota->monto;
+
+            if ($totalPagado >= $acumulado - 0.01) {
+                // El pago cubre esta cuota → marcar pagada
+                if ($cuota->estado !== 'pagada') {
+                    $cuota->update([
+                        'estado'     => 'pagada',
+                        'fecha_pago' => $fechaPago ?? now(),
+                    ]);
+                }
+            } else {
+                // No cubierta → revertir a pendiente o vencida según fecha
+                if ($cuota->estado === 'pagada') {
+                    $estaVencida = $cuota->fecha_vencimiento->lt(now()->startOfDay());
+                    $cuota->update([
+                        'estado'     => $estaVencida ? 'vencida' : 'pendiente',
+                        'fecha_pago' => null,
+                    ]);
+                }
+            }
         }
     }
 }

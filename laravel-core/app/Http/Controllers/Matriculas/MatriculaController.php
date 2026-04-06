@@ -57,29 +57,26 @@ class MatriculaController extends Controller
             SUM(estado = "suspendida") as suspendidas
         ')->first();
 
-        // Recordatorios: matriculas activas con cuotas vencidas o próximas a vencer (≤7 días)
+        // Recordatorios: solo matrículas con saldo real pendiente (cuotas vencidas sin pagar)
         $recordatorios = Matricula::with(['alumno.user', 'cuotas'])
             ->where('estado', 'activa')
             ->whereHas('cuotas', fn ($q) =>
-                $q->whereIn('estado', ['vencida', 'pendiente'])
-                  ->where('fecha_vencimiento', '<=', now()->addDays(7))
+                $q->where('estado', 'vencida')
             )
             ->get()
             ->map(function ($m) {
-                $cuotasPendientes = $m->cuotas->filter(fn ($c) =>
-                    in_array($c->estado, ['vencida', 'pendiente']) &&
-                    $c->fecha_vencimiento <= now()->addDays(7)
-                );
+                $cuotasVencidas = $m->cuotas->where('estado', 'vencida');
+                $saldo = $m->saldoPendiente();
                 return [
-                    'matricula'  => $m,
-                    'nombre'     => $m->alumno?->nombreCompleto() ?? '—',
-                    'whatsapp'   => $m->alumno?->whatsapp ?? $m->alumno?->telefono ?? '',
-                    'saldo'      => $m->saldoPendiente(),
-                    'cuotas'     => $cuotasPendientes->count(),
-                    'vencidas'   => $cuotasPendientes->where('estado', 'vencida')->count(),
+                    'matricula' => $m,
+                    'nombre'    => $m->alumno?->nombreCompleto() ?? '—',
+                    'whatsapp'  => $m->alumno?->whatsapp ?? $m->alumno?->telefono ?? '',
+                    'saldo'     => $saldo,
+                    'cuotas'    => $cuotasVencidas->count(),
+                    'vencidas'  => $cuotasVencidas->count(),
                 ];
             })
-            ->filter(fn ($r) => $r['cuotas'] > 0);
+            ->filter(fn ($r) => $r['vencidas'] > 0 && $r['saldo'] > 0);
 
         return view('matriculas.index', compact('matriculas', 'planes', 'stats', 'recordatorios'));
     }

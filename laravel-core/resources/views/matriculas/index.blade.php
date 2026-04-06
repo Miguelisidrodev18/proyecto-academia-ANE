@@ -94,7 +94,7 @@
                         Recordatorios de pago
                         <span class="ml-1.5 px-2 py-0.5 bg-amber-400 text-white text-xs font-bold rounded-full">{{ $recordatorios->count() }}</span>
                     </p>
-                    <p class="text-xs text-amber-600">Alumnos con cuotas vencidas o que vencen en los próximos 7 días</p>
+                    <p class="text-xs text-amber-600">Alumnos con cuotas vencidas y saldo pendiente por cobrar</p>
                 </div>
             </div>
             <svg class="w-4 h-4 text-amber-500 transition-transform duration-200" :class="abierto ? 'rotate-180' : ''"
