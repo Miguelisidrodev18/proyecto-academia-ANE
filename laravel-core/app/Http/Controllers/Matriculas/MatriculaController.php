@@ -57,7 +57,31 @@ class MatriculaController extends Controller
             SUM(estado = "suspendida") as suspendidas
         ')->first();
 
-        return view('matriculas.index', compact('matriculas', 'planes', 'stats'));
+        // Recordatorios: matriculas activas con cuotas vencidas o próximas a vencer (≤7 días)
+        $recordatorios = Matricula::with(['alumno.user', 'cuotas'])
+            ->where('estado', 'activa')
+            ->whereHas('cuotas', fn ($q) =>
+                $q->whereIn('estado', ['vencida', 'pendiente'])
+                  ->where('fecha_vencimiento', '<=', now()->addDays(7))
+            )
+            ->get()
+            ->map(function ($m) {
+                $cuotasPendientes = $m->cuotas->filter(fn ($c) =>
+                    in_array($c->estado, ['vencida', 'pendiente']) &&
+                    $c->fecha_vencimiento <= now()->addDays(7)
+                );
+                return [
+                    'matricula'  => $m,
+                    'nombre'     => $m->alumno?->nombreCompleto() ?? '—',
+                    'whatsapp'   => $m->alumno?->whatsapp ?? $m->alumno?->telefono ?? '',
+                    'saldo'      => $m->saldoPendiente(),
+                    'cuotas'     => $cuotasPendientes->count(),
+                    'vencidas'   => $cuotasPendientes->where('estado', 'vencida')->count(),
+                ];
+            })
+            ->filter(fn ($r) => $r['cuotas'] > 0);
+
+        return view('matriculas.index', compact('matriculas', 'planes', 'stats', 'recordatorios'));
     }
 
     public function create(Request $request): View

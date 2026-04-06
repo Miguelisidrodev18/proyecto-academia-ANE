@@ -34,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reportes/exportar',                    [ReporteController::class, 'exportar'])->name('reportes.exportar');
     Route::get('/reportes/alumno/{alumno}/cursos',      [ReporteController::class, 'cursosDeAlumno'])->name('reportes.alumno.cursos');
     Route::get('/dashboard/configuracion',   [DashboardController::class, 'configuracion'])->name('dashboard.configuracion');
+    Route::post('/dashboard/configuracion',  [DashboardController::class, 'configuracionGuardar'])->name('dashboard.configuracion.guardar');
 
     // ── Panel del Alumno ────────────────────────────────────────────────────
     Route::middleware(['role:alumno'])->group(function () {

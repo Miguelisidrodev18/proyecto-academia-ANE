@@ -19,6 +19,7 @@ class StoreAlumnoRequest extends FormRequest
             'email'      => ['required', 'email', 'max:255', 'unique:users,email'],
             'dni'        => ['required', 'digits:8', 'unique:alumnos,dni'],
             'telefono'   => ['nullable', 'string', 'max:20'],
+            'whatsapp'   => ['nullable', 'string', 'max:15'],
             'tipo'       => ['required', 'in:pollito,intermedio'],
             'estado'     => ['required', 'in:activo,inactivo'],
             'origen_registro' => ['nullable', 'string', 'max:100'],

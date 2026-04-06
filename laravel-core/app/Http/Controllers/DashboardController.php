@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alumno;
+use App\Models\Configuracion;
 use App\Models\Curso;
 use App\Models\Matricula;
 use App\Models\Pago;
@@ -213,10 +214,47 @@ class DashboardController extends Controller
 
     public function configuracion()
     {
-        return view('dashboard.configuracion', [
-            'modulo'      => 'Configuración',
-            'descripcion' => 'Ajusta los parámetros del sistema, roles, permisos y preferencias generales.',
-            'color'       => 'slate',
+        $defaults = [
+            'whatsapp_number'    => config('app.whatsapp_number', ''),
+            'wa_msg_recordatorio'=> 'Hola {nombre}, te recordamos que tienes un pago pendiente en Academia Nueva Era por S/. {saldo}. Por favor regulariza tu pago para no perder el acceso a tus clases.',
+            'wa_msg_renovacion'  => 'Hola {nombre}, tu membresía en Academia Nueva Era ha vencido. ¡Renueva tu plan y sigue disfrutando de todas tus clases! Contáctanos para coordinar.',
+            'wa_msg_vencimiento' => 'Hola {nombre}, te informamos que solo te quedan {dias} días de acceso en Academia Nueva Era. ¡Renueva a tiempo para no perder el acceso!',
+            'wa_alumno_caducada' => 'Hola, mi membresía de Academia Nueva Era ha caducado. Quisiera renovar mi pago para seguir gozando de todos los beneficios.',
+            'wa_alumno_suspendida'=> 'Hola, mi acceso en Academia Nueva Era está suspendido. Quisiera regularizar mi pago para recuperar el acceso a mis clases.',
+        ];
+
+        $config = [];
+        foreach ($defaults as $clave => $default) {
+            $config[$clave] = Configuracion::get($clave, $default);
+        }
+
+        return view('dashboard.configuracion', compact('config'));
+    }
+
+    public function configuracionGuardar(Request $request)
+    {
+        $request->validate([
+            'whatsapp_number'     => ['nullable', 'string', 'max:20'],
+            'wa_msg_recordatorio' => ['nullable', 'string', 'max:1000'],
+            'wa_msg_renovacion'   => ['nullable', 'string', 'max:1000'],
+            'wa_msg_vencimiento'  => ['nullable', 'string', 'max:1000'],
+            'wa_alumno_caducada'  => ['nullable', 'string', 'max:1000'],
+            'wa_alumno_suspendida'=> ['nullable', 'string', 'max:1000'],
         ]);
+
+        // Normalizar número: guardar solo los 9 dígitos
+        $numero = preg_replace('/\D/', '', $request->whatsapp_number ?? '');
+        if (str_starts_with($numero, '51') && strlen($numero) === 11) {
+            $numero = substr($numero, 2);
+        }
+        Configuracion::set('whatsapp_number',     $numero ?: null);
+        Configuracion::set('wa_msg_recordatorio', $request->wa_msg_recordatorio);
+        Configuracion::set('wa_msg_renovacion',   $request->wa_msg_renovacion);
+        Configuracion::set('wa_msg_vencimiento',  $request->wa_msg_vencimiento);
+        Configuracion::set('wa_alumno_caducada',  $request->wa_alumno_caducada);
+        Configuracion::set('wa_alumno_suspendida',$request->wa_alumno_suspendida);
+
+        return redirect()->route('dashboard.configuracion')
+            ->with('success', 'Configuración de WhatsApp guardada correctamente.');
     }
 }

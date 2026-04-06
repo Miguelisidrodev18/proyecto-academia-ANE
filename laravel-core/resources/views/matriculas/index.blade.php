@@ -2,6 +2,7 @@
 @section('title', 'Matrículas')
 
 @section('content')
+<div x-data="waModal()">
 
 {{-- Stats Cards --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -71,6 +72,95 @@
 </div>
 
 @include('matriculas._flash')
+
+{{-- ═══════════════════════════════════════════════════════════ --}}
+{{-- RECORDATORIOS DE PAGO                                       --}}
+{{-- ═══════════════════════════════════════════════════════════ --}}
+@if($recordatorios->isNotEmpty())
+<div class="mb-5" x-data="{ abierto: true }">
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden shadow-sm">
+
+        {{-- Header colapsable --}}
+        <button type="button" @click="abierto = !abierto"
+                class="w-full px-5 py-3.5 flex items-center justify-between gap-3 hover:bg-amber-100/60 transition-colors">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-xl bg-amber-400/30 flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-amber-600">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/>
+                    </svg>
+                </div>
+                <div class="text-left">
+                    <p class="text-sm font-black text-amber-800">
+                        Recordatorios de pago
+                        <span class="ml-1.5 px-2 py-0.5 bg-amber-400 text-white text-xs font-bold rounded-full">{{ $recordatorios->count() }}</span>
+                    </p>
+                    <p class="text-xs text-amber-600">Alumnos con cuotas vencidas o que vencen en los próximos 7 días</p>
+                </div>
+            </div>
+            <svg class="w-4 h-4 text-amber-500 transition-transform duration-200" :class="abierto ? 'rotate-180' : ''"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+        </button>
+
+        {{-- Lista de recordatorios --}}
+        <div x-show="abierto" x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="border-t border-amber-200 divide-y divide-amber-100">
+            @foreach($recordatorios as $rec)
+            @php
+                $tel = preg_replace('/\D/', '', $rec['whatsapp']);
+                $tieneWa = strlen($tel) >= 9;
+            @endphp
+            <div class="px-5 py-3 flex items-center justify-between gap-4 hover:bg-amber-100/40 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center flex-shrink-0 text-xs font-black text-amber-700">
+                        {{ substr($rec['nombre'], 0, 1) }}
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-gray-800 truncate">{{ $rec['nombre'] }}</p>
+                        <p class="text-xs text-amber-600">
+                            @if($rec['vencidas'] > 0)
+                                <span class="font-bold text-red-600">{{ $rec['vencidas'] }} cuota(s) vencida(s)</span>
+                                @if($rec['cuotas'] > $rec['vencidas']) · @endif
+                            @endif
+                            @if($rec['cuotas'] > $rec['vencidas'])
+                                {{ $rec['cuotas'] - $rec['vencidas'] }} próxima(s)
+                            @endif
+                            · Saldo: <span class="font-bold">S/. {{ number_format($rec['saldo'], 2) }}</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    @if($tieneWa)
+                        <button type="button"
+                                @click="abrir(
+                                    '{{ addslashes($rec['nombre']) }}',
+                                    '{{ $tel }}',
+                                    '{{ number_format($rec['saldo'], 2) }}',
+                                    '{{ $rec['matricula']->diasRestantes() }}'
+                                )"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold
+                                       bg-[#25D366] hover:bg-[#1ebe5d] text-white shadow-sm transition-all hover:-translate-y-0.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/>
+                            </svg>
+                            Enviar recordatorio
+                        </button>
+                    @else
+                        <span class="text-xs text-gray-400 italic">Sin WhatsApp registrado</span>
+                        <a href="{{ route('matriculas.show', $rec['matricula']) }}"
+                           class="text-xs text-accent hover:underline">Ver matrícula</a>
+                    @endif
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+@endif
 
 {{-- Filtros --}}
 <form method="GET" action="{{ route('matriculas.index') }}"
@@ -224,7 +314,28 @@
                             @include('matriculas._badge', ['estado' => $matricula->estado])
                         </td>
                         <td class="px-5 py-4">
+                            @php
+                                $waAlumno = $matricula->alumno?->whatsapp ?? $matricula->alumno?->telefono ?? '';
+                                $waTel = preg_replace('/\D/', '', $waAlumno);
+                                $tieneWaAccion = strlen($waTel) >= 9;
+                            @endphp
                             <div class="flex items-center justify-end gap-1">
+                                {{-- WhatsApp --}}
+                                @if($tieneWaAccion)
+                                <button type="button"
+                                        @click="abrir(
+                                            '{{ addslashes($matricula->alumno?->nombreCompleto() ?? '') }}',
+                                            '{{ $waTel }}',
+                                            '{{ number_format($matricula->saldoPendiente(), 2) }}',
+                                            '{{ $matricula->diasRestantes() }}'
+                                        )"
+                                        class="p-2 rounded-lg text-gray-400 hover:text-[#25D366] hover:bg-[#25D366]/10 transition-all"
+                                        title="Enviar WhatsApp">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/>
+                                    </svg>
+                                </button>
+                                @endif
                                 <a href="{{ route('matriculas.show', $matricula) }}"
                                    class="p-2 rounded-lg text-gray-400 hover:text-accent hover:bg-accent/10 transition-all" title="Ver">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,6 +388,24 @@
                     <span class="font-black {{ $dias <= 7 ? 'text-red-500' : 'text-gray-600' }}">{{ max(0, $dias) }}d</span>
                 </div>
                 <div class="flex gap-2">
+                    @php
+                        $waMobile = preg_replace('/\D/', '', $matricula->alumno?->whatsapp ?? $matricula->alumno?->telefono ?? '');
+                    @endphp
+                    @if(strlen($waMobile) >= 9)
+                    <button type="button"
+                            @click="abrir(
+                                '{{ addslashes($matricula->alumno?->nombreCompleto() ?? '') }}',
+                                '{{ $waMobile }}',
+                                '{{ number_format($matricula->saldoPendiente(), 2) }}',
+                                '{{ $matricula->diasRestantes() }}'
+                            )"
+                            class="py-2 px-3 rounded-xl text-xs font-bold bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/>
+                        </svg>
+                        WA
+                    </button>
+                    @endif
                     <a href="{{ route('matriculas.show', $matricula) }}"
                        class="flex-1 text-center py-2 rounded-xl text-xs font-bold bg-accent/10 text-accent hover:bg-accent hover:text-white transition-all">Ver</a>
                     <a href="{{ route('matriculas.edit', $matricula) }}"
@@ -293,5 +422,163 @@
         @endif
     @endif
 </div>
+
+{{-- ═══════════════════════════════════════════════════════════════════ --}}
+{{-- MODAL WHATSAPP                                                       --}}
+{{-- ═══════════════════════════════════════════════════════════════════ --}}
+<div x-show="show" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+
+    {{-- Overlay --}}
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="show = false"></div>
+
+    {{-- Panel --}}
+    <div class="relative z-10 w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+
+        {{-- Header --}}
+        <div class="px-6 py-5 bg-gradient-to-r from-[#075E54] to-[#128C7E] flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-white font-black text-sm">Enviar mensaje por WhatsApp</p>
+                    <p class="text-white/70 text-xs" x-text="nombre"></p>
+                </div>
+            </div>
+            <button @click="show = false" class="w-8 h-8 rounded-xl bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        {{-- Cuerpo --}}
+        <div class="p-6">
+
+            {{-- Info alumno --}}
+            <div class="flex items-center gap-3 mb-5 p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-dark to-primary-light flex items-center justify-center text-white font-black text-sm flex-shrink-0"
+                     x-text="nombre.charAt(0)"></div>
+                <div>
+                    <p class="font-bold text-gray-800 text-sm" x-text="nombre"></p>
+                    <p class="text-xs text-gray-500">
+                        WhatsApp: <span class="font-mono font-semibold" x-text="'+51 ' + numero"></span>
+                        <span x-show="saldo > 0" class="ml-2 text-red-500 font-semibold">· Saldo: S/. <span x-text="saldo"></span></span>
+                    </p>
+                </div>
+            </div>
+
+            {{-- Mensaje editable --}}
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                Mensaje
+                <span class="normal-case font-normal text-gray-400 ml-1">— puedes editarlo antes de enviar</span>
+            </label>
+            <textarea x-model="mensaje" rows="6"
+                      class="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm outline-none resize-none
+                             focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 bg-gray-50 focus:bg-white
+                             transition-all leading-relaxed"></textarea>
+
+            {{-- Plantilla rápida --}}
+            <div class="mt-3">
+                <p class="text-xs text-gray-400 mb-2 font-semibold">Plantillas rápidas:</p>
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" @click="usarPlantilla('recordatorio')"
+                            class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                        📋 Recordatorio pago
+                    </button>
+                    <button type="button" @click="usarPlantilla('renovacion')"
+                            class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                        🔄 Renovación
+                    </button>
+                    <button type="button" @click="usarPlantilla('vencimiento')"
+                            class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                        ⏰ Próximo vencimiento
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- Footer --}}
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-3">
+            <button @click="show = false"
+                    class="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-200 transition-colors">
+                Cancelar
+            </button>
+            <button @click="enviar()"
+                    :disabled="!mensaje.trim() || !numero"
+                    class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white
+                           bg-[#25D366] hover:bg-[#1ebe5d] disabled:opacity-50 disabled:cursor-not-allowed
+                           shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/>
+                </svg>
+                Abrir WhatsApp
+            </button>
+        </div>
+    </div>
+</div>
+
+</div>{{-- /x-data waModal --}}
+
+@push('scripts')
+<script>
+const WA_PLANTILLAS = {
+    recordatorio: {!! json_encode(wa_plantilla_recordatorio('{nombre}', '{saldo}', '{dias}'), JSON_UNESCAPED_UNICODE) !!},
+    renovacion:   {!! json_encode(wa_plantilla_renovacion('{nombre}', '{saldo}', '{dias}'), JSON_UNESCAPED_UNICODE) !!},
+    vencimiento:  {!! json_encode(wa_plantilla_vencimiento('{nombre}', '{saldo}', '{dias}'), JSON_UNESCAPED_UNICODE) !!},
+};
+
+function waReemplazar(tpl, vars) {
+    return tpl
+        .replace(/\{nombre\}/g, vars.nombre ?? '')
+        .replace(/\{saldo\}/g,  vars.saldo  ?? '')
+        .replace(/\{dias\}/g,   vars.dias   ?? '');
+}
+
+function waModal() {
+    return {
+        show: false,
+        nombre: '',
+        numero: '',
+        saldo: '0.00',
+        dias: 0,
+        mensaje: '',
+        abrir(nombre, numero, saldo, dias) {
+            this.nombre = nombre;
+            this.numero = numero;
+            this.saldo  = saldo;
+            this.dias   = dias;
+            this.mensaje = waReemplazar(WA_PLANTILLAS.recordatorio, { nombre, saldo, dias });
+            this.show = true;
+        },
+        usarPlantilla(tipo) {
+            this.mensaje = waReemplazar(WA_PLANTILLAS[tipo] ?? WA_PLANTILLAS.recordatorio, {
+                nombre: this.nombre,
+                saldo:  this.saldo,
+                dias:   this.dias,
+            });
+        },
+        enviar() {
+            let tel = this.numero.replace(/\D/g, '');
+            if (tel.length === 9) tel = '51' + tel;
+            window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(this.mensaje), '_blank');
+            this.show = false;
+        }
+    }
+}
+</script>
+@endpush
 
 @endsection

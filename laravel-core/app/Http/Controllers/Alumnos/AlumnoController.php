@@ -83,6 +83,7 @@ class AlumnoController extends Controller
                 'representante_id' => $representanteId,
                 'dni'              => $data['dni'],
                 'telefono'         => $data['telefono'] ?? null,
+                'whatsapp'         => $data['whatsapp'] ?? null,
                 'tipo'             => $data['tipo'],
                 'estado'           => $data['estado'] === 'activo',
                 'origen_registro'  => $data['origen_registro'] ?? 'manual',
@@ -158,6 +159,7 @@ class AlumnoController extends Controller
             $alumno->update([
                 'dni'             => $data['dni'],
                 'telefono'        => $data['telefono'] ?? null,
+                'whatsapp'        => $data['whatsapp'] ?? null,
                 'tipo'            => $data['tipo'],
                 'estado'          => $data['estado'] === 'activo',
                 'origen_registro' => $data['origen_registro'] ?? $alumno->origen_registro,

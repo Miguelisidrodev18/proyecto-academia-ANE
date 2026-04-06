@@ -18,6 +18,7 @@ class Alumno extends Model
         'representante_id',
         'dni',
         'telefono',
+        'whatsapp',
         'origen_registro',
         'tipo',
         'estado',

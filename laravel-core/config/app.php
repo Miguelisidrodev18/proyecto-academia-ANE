@@ -17,6 +17,8 @@ return [
 
     'master_key' => env('MASTER_KEY', ''),
 
+    'whatsapp_number' => env('WHATSAPP_NUMBER', ''),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
