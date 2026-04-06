@@ -33,16 +33,28 @@
     <div class="md:pl-64">
 
         {{-- Topbar móvil --}}
-        <header class="md:hidden flex items-center h-14 px-4 bg-white border-b border-gray-200 shadow-sm gap-3 sticky top-0 z-10">
+        <header class="md:hidden flex items-center h-14 px-3 gap-3 sticky top-0 z-10
+                       bg-primary-dark shadow-lg">
             <button @click="sidebarOpen = !sidebarOpen"
-                    class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors">
+                    class="p-2 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all duration-150">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
             </button>
             <img src="{{ asset('images/logo-academia.png') }}" alt="Logo" class="h-7 w-auto object-contain">
-            <span class="text-sm font-bold text-primary-dark truncate">{{ config('app.name') }}</span>
+            <span class="text-sm font-bold text-white truncate flex-1">Academia Nueva Era</span>
+            {{-- Perfil rápido --}}
+            <a href="{{ route('profile.edit') }}"
+               class="flex-shrink-0 w-8 h-8 rounded-lg overflow-hidden ring-2 ring-white/20 hover:ring-accent transition-all">
+                @if(auth()->user()->avatar)
+                    <img src="{{ auth()->user()->avatarUrl() }}" alt="Perfil" class="w-full h-full object-cover">
+                @else
+                    <div class="w-full h-full bg-gradient-to-br from-accent to-primary-light flex items-center justify-center">
+                        <span class="text-white font-black text-xs uppercase">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                    </div>
+                @endif
+            </a>
         </header>
 
         {{-- Contenido de página --}}
