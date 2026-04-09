@@ -254,7 +254,9 @@
                     <div class="divide-y divide-gray-50">
                         @foreach($curso->clases as $clase)
                         @php $esPasada = $clase->fecha->isPast(); @endphp
-                        <div class="px-5 py-3" x-data="{ showGrab: false }">
+                        <div class="px-5 py-3" x-data="{ showGrab: false, showMats: {{ $clase->materiales->isNotEmpty() ? 'true' : 'false' }}, showAddMat: false }">
+
+                            {{-- Fila principal de la clase --}}
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex items-start gap-3 flex-1 min-w-0">
                                     <div @class([
@@ -273,24 +275,44 @@
                                     <div class="min-w-0">
                                         <p class="text-sm font-semibold text-gray-700 truncate">{{ $clase->titulo }}</p>
                                         <p class="text-xs text-gray-400 mt-0.5">{{ $clase->fecha->format('d/m/Y H:i') }}</p>
-                                        @if($clase->grabacion_url)
-                                            <a href="{{ $clase->grabacion_url }}" target="_blank"
-                                               class="inline-flex items-center gap-1 text-[10px] font-bold text-violet-600 hover:underline mt-1">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                </svg>
-                                                Ver grabación
-                                            </a>
-                                        @endif
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            @if($clase->grabacion_url)
+                                                <a href="{{ $clase->grabacion_url }}" target="_blank"
+                                                   class="inline-flex items-center gap-1 text-[10px] font-bold text-violet-600 hover:underline">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                    Ver grabación
+                                                </a>
+                                            @endif
+                                            {{-- Badge materiales de clase --}}
+                                            @if($clase->materiales->isNotEmpty())
+                                                <button @click="showMats = !showMats" type="button"
+                                                        class="inline-flex items-center gap-1 text-[10px] font-bold text-accent hover:text-primary-dark transition-colors">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                                    </svg>
+                                                    {{ $clase->materiales->count() }} material(es)
+                                                    <svg class="w-2.5 h-2.5 transition-transform" :class="showMats ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                                    </svg>
+                                                </button>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-1 flex-shrink-0">
+                                <div class="flex items-center gap-1 flex-shrink-0 flex-wrap justify-end">
                                     <a href="{{ route('clases.show', $clase) }}"
                                        class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-primary-dark/5 text-primary-dark border border-primary-dark/10 hover:bg-primary-dark/10 transition-colors">
                                         Ver
                                     </a>
+                                    {{-- Botón agregar material de clase --}}
+                                    <button @click="showAddMat = !showAddMat; showGrab = false" type="button"
+                                            class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors">
+                                        + Material
+                                    </button>
                                     @if($esPasada && !$clase->grabacion_url)
-                                        <button @click="showGrab = !showGrab"
+                                        <button @click="showGrab = !showGrab; showAddMat = false" type="button"
                                                 class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-violet-50 text-violet-600 border border-violet-100 hover:bg-violet-100 transition-colors">
                                             + Grabación
                                         </button>
@@ -313,8 +335,61 @@
                                     </form>
                                 </div>
                             </div>
-                            {{-- Panel para agregar grabación rápida --}}
-                            <div x-show="showGrab" x-transition class="mt-3 ml-11">
+
+                            {{-- Panel: agregar material de clase (link Drive) --}}
+                            <div x-show="showAddMat" x-transition x-cloak class="mt-3 ml-11 p-3 bg-accent/5 border border-accent/15 rounded-xl">
+                                <p class="text-[10px] font-bold text-accent uppercase tracking-wide mb-2">Agregar material a esta clase</p>
+                                <form action="{{ route('clases.materiales.store', $clase) }}" method="POST" class="space-y-2">
+                                    @csrf
+                                    <input type="text" name="titulo" placeholder="Título del material *" required
+                                           class="w-full text-sm px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent">
+                                    <input type="url" name="url" placeholder="Link de Google Drive / YouTube / etc. *" required
+                                           class="w-full text-sm px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent">
+                                    <input type="text" name="descripcion" placeholder="Descripción (opcional)"
+                                           class="w-full text-sm px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent">
+                                    <div class="flex items-center gap-2">
+                                        <button type="submit"
+                                                class="px-4 py-1.5 rounded-xl bg-accent text-white text-xs font-bold hover:bg-primary-dark transition-colors shadow-sm">
+                                            Guardar material
+                                        </button>
+                                        <button type="button" @click="showAddMat = false"
+                                                class="px-4 py-1.5 rounded-xl border border-gray-200 text-gray-500 text-xs font-medium hover:bg-gray-100 transition-colors">
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            {{-- Panel: materiales de esta clase --}}
+                            <div x-show="showMats" x-transition x-cloak class="mt-2 ml-11 space-y-1">
+                                @foreach($clase->materiales as $mat)
+                                <div class="flex items-center justify-between gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-gray-100">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <svg class="w-3.5 h-3.5 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                        </svg>
+                                        <a href="{{ $mat->url }}" target="_blank"
+                                           class="text-xs font-semibold text-gray-700 hover:text-accent transition-colors truncate">
+                                            {{ $mat->titulo }}
+                                        </a>
+                                        @if($mat->descripcion)
+                                            <span class="text-[10px] text-gray-400 truncate hidden sm:inline">— {{ $mat->descripcion }}</span>
+                                        @endif
+                                    </div>
+                                    <form action="{{ route('materiales.destroy', $mat) }}" method="POST"
+                                          onsubmit="return confirm('¿Eliminar este material?')" class="flex-shrink-0">
+                                        @csrf @method('DELETE')
+                                        <button type="submit"
+                                                class="text-[10px] text-red-400 hover:text-red-600 font-bold px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors">
+                                            ✕
+                                        </button>
+                                    </form>
+                                </div>
+                                @endforeach
+                            </div>
+
+                            {{-- Panel: agregar grabación rápida --}}
+                            <div x-show="showGrab" x-transition x-cloak class="mt-3 ml-11">
                                 <form action="{{ route('clases.grabacion', $clase) }}" method="POST" class="flex items-center gap-2">
                                     @csrf @method('PATCH')
                                     <input type="url" name="grabacion_url" placeholder="URL de la grabación *" required
@@ -329,6 +404,7 @@
                                     </button>
                                 </form>
                             </div>
+
                         </div>
                         @endforeach
                     </div>

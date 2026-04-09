@@ -121,8 +121,9 @@ class AlumnoPanelController extends Controller
         abort_unless($tieneAcceso, 403, 'No tienes acceso a este curso.');
 
         $curso->load([
-            'clases'     => fn ($q) => $q->orderBy('fecha', 'desc'),
-            'materiales' => fn ($q) => $q->where('visible', true)->orderByDesc('fecha_publicacion'),
+            'clases'             => fn ($q) => $q->orderBy('fecha', 'desc'),
+            'clases.materiales'  => fn ($q) => $q->where('visible', true)->orderBy('created_at'),
+            'materiales'         => fn ($q) => $q->where('visible', true)->whereNull('clase_id')->orderByDesc('fecha_publicacion'),
         ]);
 
         return view('alumno.curso-detalle', compact('curso', 'matricula'));

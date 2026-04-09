@@ -184,36 +184,80 @@
             @else
                 <div class="divide-y divide-gray-50">
                     @foreach($clasesPasadas as $clase)
-                    <div class="px-5 py-4 flex items-center justify-between gap-4">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                </svg>
+                    @php $matClase = $clase->materiales->where('visible', true); @endphp
+                    <div class="px-5 py-4" x-data="{ showMats: false }">
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-gray-600 truncate">{{ $clase->titulo }}</p>
+                                    <p class="text-xs text-gray-400 mt-0.5">
+                                        {{ \Carbon\Carbon::parse($clase->fecha)->format('d/m/Y H:i') }}
+                                    </p>
+                                    @if($matClase->isNotEmpty())
+                                        <button @click="showMats = !showMats" type="button"
+                                                class="inline-flex items-center gap-1 text-[10px] font-bold text-accent hover:text-primary-dark transition-colors mt-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                            </svg>
+                                            {{ $matClase->count() }} material(es)
+                                            <svg class="w-2.5 h-2.5 transition-transform" :class="showMats ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="min-w-0">
-                                <p class="text-sm font-semibold text-gray-600 truncate">{{ $clase->titulo }}</p>
-                                <p class="text-xs text-gray-400 mt-0.5">
-                                    {{ \Carbon\Carbon::parse($clase->fecha)->format('d/m/Y H:i') }}
-                                </p>
-                            </div>
+                            @if($clase->grabada && $clase->grabacion_url)
+                                <a href="{{ $clase->grabacion_url }}" target="_blank"
+                                   class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl
+                                          bg-violet-50 text-violet-600 border border-violet-100 text-xs font-bold
+                                          hover:bg-violet-100 transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Ver grabación
+                                </a>
+                            @else
+                                <span class="flex-shrink-0 text-xs text-gray-300 font-medium">Sin grabación</span>
+                            @endif
                         </div>
-                        @if($clase->grabada && $clase->grabacion_url)
-                            <a href="{{ $clase->grabacion_url }}" target="_blank"
-                               class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl
-                                      bg-violet-50 text-violet-600 border border-violet-100 text-xs font-bold
-                                      hover:bg-violet-100 transition-colors">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                        {{-- Materiales de la clase (alumno) --}}
+                        @if($matClase->isNotEmpty())
+                        <div x-show="showMats" x-transition x-cloak class="mt-3 ml-13 space-y-1.5">
+                            @foreach($matClase as $mat)
+                            <a href="{{ $mat->url }}" target="_blank"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-accent/5 border border-accent/15
+                                      hover:bg-accent/10 transition-colors group">
+                                <svg class="w-4 h-4 text-accent flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                          d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                                 </svg>
-                                Ver grabación
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold text-gray-700 truncate group-hover:text-accent transition-colors">
+                                        {{ $mat->titulo }}
+                                    </p>
+                                    @if($mat->descripcion)
+                                        <p class="text-[10px] text-gray-400 truncate">{{ $mat->descripcion }}</p>
+                                    @endif
+                                </div>
+                                <svg class="w-3 h-3 text-gray-300 group-hover:text-accent flex-shrink-0 transition-colors"
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
                             </a>
-                        @else
-                            <span class="flex-shrink-0 text-xs text-gray-300 font-medium">Sin grabación</span>
+                            @endforeach
+                        </div>
                         @endif
                     </div>
                     @endforeach
