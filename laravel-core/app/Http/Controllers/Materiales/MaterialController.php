@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Materiales;
 
 use App\Http\Controllers\Controller;
+use App\Models\Clase;
 use App\Models\Curso;
 use App\Models\Material;
 use Illuminate\Http\RedirectResponse;
@@ -111,6 +112,26 @@ class MaterialController extends Controller
         $msg = $material->visible ? 'Material visible para los alumnos.' : 'Material ocultado.';
 
         return back()->with('success', $msg);
+    }
+
+    public function storeFromClase(Request $request, Clase $clase): RedirectResponse
+    {
+        $data = $request->validate([
+            'titulo'      => 'required|string|max:200',
+            'url'         => 'required|url|max:1000',
+            'descripcion' => 'nullable|string|max:1000',
+        ]);
+
+        $data['curso_id']          = $clase->curso_id;
+        $data['clase_id']          = $clase->id;
+        $data['tipo']              = 'enlace';
+        $data['fecha_publicacion'] = now()->toDateString();
+        $data['visible']           = true;
+
+        Material::create($data);
+
+        return redirect()->route('cursos.show', $clase->curso_id)
+            ->with('success', 'Material "' . $data['titulo'] . '" agregado a la clase.');
     }
 
     public function storeFromCurso(Request $request, Curso $curso): RedirectResponse

@@ -13,13 +13,14 @@ class Material extends Model
     protected $table = 'materiales';
 
     protected $fillable = [
-        'curso_id', 'titulo', 'tipo', 'url',
+        'curso_id', 'clase_id', 'titulo', 'tipo', 'url',
         'fecha_publicacion', 'descripcion', 'visible',
     ];
 
     protected $casts = ['fecha_publicacion' => 'date', 'visible' => 'boolean'];
 
     public function curso(): BelongsTo { return $this->belongsTo(Curso::class); }
+    public function clase(): BelongsTo { return $this->belongsTo(Clase::class); }
 
     public function icono(): string
     {

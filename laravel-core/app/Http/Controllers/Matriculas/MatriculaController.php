@@ -19,7 +19,22 @@ class MatriculaController extends Controller
 
     public function index(Request $request): View
     {
-        $query = Matricula::with(['alumno.user', 'plan'])->latest();
+        $ordenar = $request->get('ordenar', 'reciente');
+
+        $query = Matricula::with(['alumno.user', 'plan']);
+
+        match($ordenar) {
+            'dias_asc'  => $query->orderByRaw('CASE WHEN fecha_fin IS NULL THEN 9999999 ELSE DATEDIFF(fecha_fin, CURDATE()) END ASC'),
+            'dias_desc' => $query->orderByRaw('CASE WHEN fecha_fin IS NULL THEN -1 ELSE DATEDIFF(fecha_fin, CURDATE()) END DESC'),
+            'nombre'    => $query->orderBy(
+                \App\Models\User::select('name')
+                    ->join('alumnos', 'alumnos.user_id', '=', 'users.id')
+                    ->whereColumn('alumnos.id', 'matriculas.alumno_id')
+                    ->whereNull('alumnos.deleted_at')
+                    ->limit(1)
+            ),
+            default     => $query->latest(),
+        };
 
         if ($request->filled('buscar')) {
             $texto = $request->buscar;

@@ -196,25 +196,35 @@
             @endforeach
         </select>
 
-        <div class="flex gap-2">
-            <select name="estado"
-                    class="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm
+        <select name="estado"
+                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm
+                       focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none bg-gray-50 focus:bg-white">
+            <option value="">Todos los estados</option>
+            <option value="activa"     {{ request('estado') === 'activa'     ? 'selected' : '' }}>✅ Activa</option>
+            <option value="vencida"    {{ request('estado') === 'vencida'    ? 'selected' : '' }}>🔴 Vencida</option>
+            <option value="suspendida" {{ request('estado') === 'suspendida' ? 'selected' : '' }}>⏸️ Suspendida</option>
+            <option value="pendiente"  {{ request('estado') === 'pendiente'  ? 'selected' : '' }}>🟡 Pendiente</option>
+        </select>
+
+        {{-- Fila 2: Ordenar + botones --}}
+        <div class="sm:col-span-4 flex gap-2 flex-wrap sm:flex-nowrap">
+            <select name="ordenar"
+                    class="flex-1 min-w-0 px-4 py-2.5 rounded-xl border border-gray-200 text-sm
                            focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none bg-gray-50 focus:bg-white">
-                <option value="">Todos los estados</option>
-                <option value="activa"     {{ request('estado') === 'activa'     ? 'selected' : '' }}>✅ Activa</option>
-                <option value="vencida"    {{ request('estado') === 'vencida'    ? 'selected' : '' }}>🔴 Vencida</option>
-                <option value="suspendida" {{ request('estado') === 'suspendida' ? 'selected' : '' }}>⏸️ Suspendida</option>
-                <option value="pendiente"  {{ request('estado') === 'pendiente'  ? 'selected' : '' }}>🟡 Pendiente</option>
+                <option value="reciente"  {{ request('ordenar', 'reciente') === 'reciente'  ? 'selected' : '' }}>🕐 Más reciente primero</option>
+                <option value="dias_asc"  {{ request('ordenar') === 'dias_asc'  ? 'selected' : '' }}>⬆️ Días rest. menor → mayor</option>
+                <option value="dias_desc" {{ request('ordenar') === 'dias_desc' ? 'selected' : '' }}>⬇️ Días rest. mayor → menor</option>
+                <option value="nombre"    {{ request('ordenar') === 'nombre'    ? 'selected' : '' }}>🔤 Nombre A → Z</option>
             </select>
             <button type="submit"
-                    class="px-4 py-2.5 rounded-xl bg-primary-dark text-white text-sm font-semibold
+                    class="px-5 py-2.5 rounded-xl bg-primary-dark text-white text-sm font-semibold
                            hover:bg-accent transition-colors flex-shrink-0">
                 Filtrar
             </button>
-            @if(request()->hasAny(['buscar','plan_id','estado']))
+            @if(request()->hasAny(['buscar','plan_id','estado']) || (request('ordenar') && request('ordenar') !== 'reciente'))
                 <a href="{{ route('matriculas.index') }}"
                    class="px-3 py-2.5 rounded-xl border border-gray-200 text-gray-400 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0"
-                   title="Limpiar">
+                   title="Limpiar filtros">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
@@ -256,7 +266,16 @@
                         <th class="px-5 py-3.5 font-semibold text-gray-400 text-xs uppercase tracking-wider">Precio</th>
                         <th class="px-5 py-3.5 font-semibold text-gray-400 text-xs uppercase tracking-wider">T. Pago</th>
                         <th class="px-5 py-3.5 font-semibold text-gray-400 text-xs uppercase tracking-wider">Vigencia</th>
-                        <th class="px-5 py-3.5 font-semibold text-gray-400 text-xs uppercase tracking-wider">Días rest.</th>
+                        <th class="px-5 py-3.5 font-semibold text-gray-400 text-xs uppercase tracking-wider">
+                            @php
+                                $nextOrden = request('ordenar') === 'dias_asc' ? 'dias_desc' : 'dias_asc';
+                                $iconoDias = request('ordenar') === 'dias_asc' ? '↑' : (request('ordenar') === 'dias_desc' ? '↓' : '↕');
+                            @endphp
+                            <a href="{{ route('matriculas.index', array_merge(request()->query(), ['ordenar' => $nextOrden])) }}"
+                               class="inline-flex items-center gap-1 hover:text-accent transition-colors {{ in_array(request('ordenar'), ['dias_asc','dias_desc']) ? 'text-accent' : '' }}">
+                                Días rest. <span>{{ $iconoDias }}</span>
+                            </a>
+                        </th>
                         <th class="px-5 py-3.5 font-semibold text-gray-400 text-xs uppercase tracking-wider">Estado</th>
                         <th class="px-5 py-3.5 font-semibold text-gray-400 text-xs uppercase tracking-wider text-right">Acciones</th>
                     </tr>

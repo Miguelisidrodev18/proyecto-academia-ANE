@@ -20,6 +20,7 @@ class Clase extends Model
 
     public function curso(): BelongsTo      { return $this->belongsTo(Curso::class); }
     public function asistencias(): HasMany  { return $this->hasMany(Asistencia::class); }
+    public function materiales(): HasMany   { return $this->hasMany(Material::class)->orderBy('created_at'); }
 
     public function totalPresentes(): int { return $this->asistencias()->where('estado', 'presente')->count(); }
 

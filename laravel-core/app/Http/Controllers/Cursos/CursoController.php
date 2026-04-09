@@ -80,8 +80,9 @@ class CursoController extends Controller
     public function show(Curso $curso): View
     {
         $curso->load([
-            'clases'    => fn ($q) => $q->orderBy('fecha', 'desc'),
-            'materiales'=> fn ($q) => $q->orderByDesc('fecha_publicacion'),
+            'clases'             => fn ($q) => $q->orderBy('fecha', 'desc'),
+            'clases.materiales',
+            'materiales'         => fn ($q) => $q->whereNull('clase_id')->orderByDesc('fecha_publicacion'),
             'planes',
         ]);
 

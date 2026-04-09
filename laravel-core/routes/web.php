@@ -83,7 +83,8 @@ Route::middleware(['auth'])->group(function () {
         // Materiales
         Route::patch('/materiales/{material}/toggle', [MaterialController::class, 'toggle'])->name('materiales.toggle');
         Route::resource('materiales', MaterialController::class)->parameters(['materiales' => 'material']);
-        Route::post('/cursos/{curso}/materiales', [MaterialController::class, 'storeFromCurso'])->name('cursos.materiales.store');
+        Route::post('/cursos/{curso}/materiales',  [MaterialController::class, 'storeFromCurso'])->name('cursos.materiales.store');
+        Route::post('/clases/{clase}/materiales',  [MaterialController::class, 'storeFromClase'])->name('clases.materiales.store');
     });
 
     // ── Perfil (todos los roles) ────────────────────────────────────────────
