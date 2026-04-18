@@ -326,22 +326,4 @@ class AlumnoController extends Controller
         ]);
     }
 
-    private function actualizarRacha(Alumno $alumno): void
-    {
-        $hoy  = Carbon::today();
-        $ayer = Carbon::yesterday();
-
-        if ($alumno->ultimo_acceso === null) {
-            $alumno->racha_actual = 1;
-        } elseif ($alumno->ultimo_acceso->equalTo($ayer)) {
-            $alumno->racha_actual += 1;
-        } elseif ($alumno->ultimo_acceso->equalTo($hoy)) {
-            return;
-        } else {
-            $alumno->racha_actual = 1;
-        }
-
-        $alumno->ultimo_acceso = $hoy;
-        $alumno->save();
-    }
 }

@@ -24,7 +24,8 @@ class AccesoService
     public function registrarAcceso(int $alumnoId): array
     {
         $alumno        = Alumno::findOrFail($alumnoId);
-        $hoy           = Carbon::today();
+        $hoyStr        = Carbon::today()->toDateString();
+        $ayerStr       = Carbon::yesterday()->toDateString();
         $rachaAnterior = (int) ($alumno->racha_actual ?? 0);
         $subioRacha    = false;
         $perdioRacha   = false;
@@ -33,9 +34,9 @@ class AccesoService
         if ($alumno->ultimo_acceso === null) {
             $alumno->racha_actual = 1;
             $subioRacha           = true;
-        } elseif ($alumno->ultimo_acceso->equalTo($hoy)) {
+        } elseif ($alumno->ultimo_acceso->toDateString() === $hoyStr) {
             $mismoDia = true;
-        } elseif ($alumno->ultimo_acceso->equalTo($hoy->copy()->subDay())) {
+        } elseif ($alumno->ultimo_acceso->toDateString() === $ayerStr) {
             $alumno->racha_actual += 1;
             $subioRacha            = true;
         } else {

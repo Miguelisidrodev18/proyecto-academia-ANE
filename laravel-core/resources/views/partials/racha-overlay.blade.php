@@ -51,12 +51,12 @@
         $dimText    = 'rgba(254,243,199,0.7)';
     }
 
-    $emoji        = $perdio ? '💔' : ($racha >= 75 ? '💎🔥' : '🔥');
+    $emoji        = $perdio ? ($anterior > 0 ? '💔' : '🔥') : ($racha >= 75 ? '💎🔥' : '🔥');
     $titulo       = $perdio
-        ? 'Perdiste tu racha'
+        ? ($anterior > 0 ? 'Perdiste tu racha' : '¡Comenzaste tu racha!')
         : ($racha === 1 && $anterior === 0 ? '¡Comenzaste tu racha!' : "Día {$racha} de racha");
     $subtitulo    = $perdio
-        ? ($anterior > 0 ? "Tenías una racha de {$anterior} días. ¡Empieza de nuevo!" : '¡Empieza de nuevo!')
+        ? ($anterior > 0 ? "Tenías una racha de {$anterior} días. ¡Empieza de nuevo!" : '¡Bienvenido! Regresa mañana para continuar.')
         : ($racha === 1 && $anterior === 0 ? '¡Bienvenido! Regresa mañana para continuar.' : '¡Sigue así, vas muy bien!');
 
     if ($racha >= 30) {
