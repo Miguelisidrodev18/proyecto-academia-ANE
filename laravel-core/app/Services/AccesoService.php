@@ -45,7 +45,7 @@ class AccesoService
         }
 
         if (! $mismoDia) {
-            $alumno->ultimo_acceso = $hoy;
+            $alumno->ultimo_acceso = $hoyStr;
             $alumno->acceso_activo = true;
             $alumno->save();
         }
