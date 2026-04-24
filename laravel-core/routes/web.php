@@ -73,6 +73,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Clases
         Route::resource('clases', ClaseController::class);
+        Route::get('/cursos/{curso}/clases',       fn($curso) => redirect()->route('cursos.show', $curso));
         Route::post('/cursos/{curso}/clases',      [ClaseController::class,  'storeFromCurso'])->name('cursos.clases.store');
         Route::patch('/clases/{clase}/grabacion',  [ClaseController::class,  'grabacion'])->name('clases.grabacion');
 
