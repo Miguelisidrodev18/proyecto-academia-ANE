@@ -1,6 +1,7 @@
 @php
-    $anuncio  ??= null;
-    $editing   = $anuncio !== null;
+    $anuncio        ??= null;
+    $siguienteOrden ??= 0;
+    $editing         = $anuncio !== null;
     $destinos  = ['alumno' => 'Alumnos', 'representante' => 'Representantes'];
     $selDest   = old('destinatarios', $editing ? ($anuncio->destinatarios ?? []) : ['alumno', 'representante']);
 @endphp
@@ -135,7 +136,7 @@
     <div>
         <label class="block text-xs font-bold text-gray-600 mb-1.5">Orden de aparición</label>
         <input type="number" name="orden" min="0" max="999"
-               value="{{ old('orden', $anuncio?->orden ?? 0) }}"
+               value="{{ old('orden', $anuncio?->orden ?? $siguienteOrden) }}"
                class="w-24 px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-accent/30 focus:border-accent outline-none transition text-center">
         <p class="text-[10px] text-gray-400 mt-1">Menor número = aparece primero</p>
         @error('orden')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror

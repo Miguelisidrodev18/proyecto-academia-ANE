@@ -59,6 +59,17 @@ $waIconPath = 'M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.5
             </svg>
             Mensajes de alumnos
         </button>
+        <button type="button" @click="tab = 'bienvenida'"
+                :class="tab === 'bienvenida'
+                    ? 'bg-white text-primary-dark shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/>
+            </svg>
+            Bienvenida
+        </button>
     </div>
 
     <form method="POST" action="{{ route('dashboard.configuracion.guardar') }}">
@@ -309,6 +320,78 @@ $waIconPath = 'M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.5
                     </div>
                 </div>
                 @endforeach
+            </div>
+        </div>
+
+        {{-- ══════════════════════════════════════════════════════════ --}}
+        {{-- TAB 4: MENSAJE DE BIENVENIDA                               --}}
+        {{-- ══════════════════════════════════════════════════════════ --}}
+        <div x-show="tab === 'bienvenida'" x-cloak>
+
+            {{-- Info --}}
+            <div class="mb-4 px-4 py-3 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-start gap-2.5">
+                <svg class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div class="text-xs text-emerald-800">
+                    <p>Mensaje que se carga al pulsar <strong>🎓 Bienvenida</strong> en el modal de WhatsApp de matrículas. Variables disponibles:</p>
+                    <div class="flex flex-wrap gap-1.5 mt-1.5">
+                        @foreach(['{nombre}' => 'Nombre del alumno', '{email}' => 'Correo de acceso', '{password}' => 'Contraseña temporal (DNI)', '{url}' => 'URL de la plataforma'] as $var => $desc)
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-100 border border-emerald-200">
+                                <code class="font-mono font-bold text-emerald-700">{{ $var }}</code>
+                                <span class="text-emerald-600">— {{ $desc }}</span>
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- Aviso contraseña temporal --}}
+            <div class="mb-4 px-4 py-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5">
+                <svg class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+                <p class="text-xs text-amber-800">
+                    La contraseña inicial del alumno es su <strong>número de DNI</strong>. Se recomienda incluir
+                    <code class="bg-amber-100 px-1 rounded font-mono">{password}</code> en el mensaje
+                    y recordarle que la cambie por seguridad.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="px-5 py-3.5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex items-center gap-3">
+                    <span class="text-xl">🎓</span>
+                    <div>
+                        <h4 class="text-sm font-black text-gray-800">Mensaje de bienvenida</h4>
+                        <p class="text-xs text-gray-400">Se envía al alumno recién matriculado con sus credenciales de acceso</p>
+                    </div>
+                    <span class="ml-auto flex-shrink-0 px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded-lg border border-emerald-100">
+                        Matrículas · Plantilla Bienvenida
+                    </span>
+                </div>
+                <div class="p-4">
+                    <textarea name="wa_msg_bienvenida" rows="7"
+                              class="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm outline-none resize-none
+                                     focus:border-[#25D366] focus:ring-2 focus:ring-[#25D366]/20 bg-gray-50 focus:bg-white
+                                     transition-all leading-relaxed
+                                     {{ $errors->has('wa_msg_bienvenida') ? 'border-red-400 bg-red-50' : '' }}"
+                              >{{ old('wa_msg_bienvenida', $config['wa_msg_bienvenida']) }}</textarea>
+                    @error('wa_msg_bienvenida')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+
+                    @if($config['whatsapp_number'])
+                    <a href="{{ wa_url(wa_plantilla_bienvenida('Alumno Ejemplo', 'alumno@ejemplo.com', '12345678')) }}"
+                       target="_blank" rel="noopener"
+                       class="mt-2 inline-flex items-center gap-1.5 text-xs text-[#25D366] hover:underline font-semibold">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+                            <path d="{{ $waIconPath }}"/>
+                        </svg>
+                        Previsualizar mensaje →
+                    </a>
+                    @endif
+                </div>
             </div>
         </div>
 

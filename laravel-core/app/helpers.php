@@ -119,12 +119,12 @@ function wa_mensaje_renovacion(string $nombre = '', string $saldo = ''): string
 /**
  * Plantilla "Bienvenida" — envía credenciales de acceso al alumno recién matriculado.
  */
-function wa_plantilla_bienvenida(string $nombre = '', string $email = ''): string
+function wa_plantilla_bienvenida(string $nombre = '', string $email = '', string $password = ''): string
 {
     $url = rtrim(config('app.url'), '/');
     $tpl = Configuracion::get(
         'wa_msg_bienvenida',
-        "¡Hola {nombre}! 👋 Te saluda Jean Pierre Briceño, representante de la Academia Nueva Era Estudiantil.\n\nEstos son tus accesos a nuestra plataforma:\n📧 Usuario: {email}\n🔑 Contraseña: La que registraste al crear tu cuenta\n🌐 Plataforma: {url}\n\n¡Bienvenido(a)! Estamos muy felices de tenerte con nosotros. Ante cualquier duda, no dudes en escribirnos. 🎓"
+        "¡Hola {nombre}! 👋 Bienvenido(a) a Academia Nueva Era Estudiantil.\n\nEstos son tus accesos a la plataforma:\n📧 Usuario: {email}\n🔑 Contraseña temporal: {password}\n🌐 Ingresa en: {url}\n\n⚠️ Por seguridad, te recomendamos cambiar tu contraseña la primera vez que ingreses.\n\nCualquier duda, escríbenos. 🎓"
     );
-    return wa_reemplazar($tpl, ['nombre' => $nombre, 'email' => $email, 'url' => $url]);
+    return wa_reemplazar($tpl, ['nombre' => $nombre, 'email' => $email, 'password' => $password, 'url' => $url]);
 }

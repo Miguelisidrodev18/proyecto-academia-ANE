@@ -141,7 +141,8 @@
                                     '{{ $tel }}',
                                     '{{ number_format($rec['saldo'], 2) }}',
                                     '{{ $rec['matricula']->diasRestantes() }}',
-                                    '{{ addslashes($rec['matricula']->alumno?->user?->email ?? '') }}'
+                                    '{{ addslashes($rec['matricula']->alumno?->user?->email ?? '') }}',
+                                    '{{ $rec['matricula']->alumno?->dni ?? '' }}'
                                 )"
                                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold
                                        bg-[#25D366] hover:bg-[#1ebe5d] text-white shadow-sm transition-all hover:-translate-y-0.5">
@@ -348,7 +349,8 @@
                                             '{{ $waTel }}',
                                             '{{ number_format($matricula->saldoPendiente(), 2) }}',
                                             '{{ $matricula->diasRestantes() }}',
-                                            '{{ addslashes($matricula->alumno?->user?->email ?? '') }}'
+                                            '{{ addslashes($matricula->alumno?->user?->email ?? '') }}',
+                                            '{{ $matricula->alumno?->dni ?? '' }}'
                                         )"
                                         class="p-2 rounded-lg text-gray-400 hover:text-[#25D366] hover:bg-[#25D366]/10 transition-all"
                                         title="Enviar WhatsApp">
@@ -419,7 +421,8 @@
                                 '{{ $waMobile }}',
                                 '{{ number_format($matricula->saldoPendiente(), 2) }}',
                                 '{{ $matricula->diasRestantes() }}',
-                                '{{ addslashes($matricula->alumno?->user?->email ?? '') }}'
+                                '{{ addslashes($matricula->alumno?->user?->email ?? '') }}',
+                                '{{ $matricula->alumno?->dni ?? '' }}'
                             )"
                             class="py-2 px-3 rounded-xl text-xs font-bold bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
@@ -564,15 +567,16 @@ const WA_PLANTILLAS = {
     recordatorio: {!! json_encode(wa_plantilla_recordatorio('{nombre}', '{saldo}', '{dias}'), JSON_UNESCAPED_UNICODE) !!},
     renovacion:   {!! json_encode(wa_plantilla_renovacion('{nombre}', '{saldo}', '{dias}'), JSON_UNESCAPED_UNICODE) !!},
     vencimiento:  {!! json_encode(wa_plantilla_vencimiento('{nombre}', '{saldo}', '{dias}'), JSON_UNESCAPED_UNICODE) !!},
-    bienvenida:   {!! json_encode(wa_plantilla_bienvenida('{nombre}', '{email}'), JSON_UNESCAPED_UNICODE) !!},
+    bienvenida:   {!! json_encode(wa_plantilla_bienvenida('{nombre}', '{email}', '{password}'), JSON_UNESCAPED_UNICODE) !!},
 };
 
 function waReemplazar(tpl, vars) {
     return tpl
-        .replace(/\{nombre\}/g, vars.nombre ?? '')
-        .replace(/\{saldo\}/g,  vars.saldo  ?? '')
-        .replace(/\{dias\}/g,   vars.dias   ?? '')
-        .replace(/\{email\}/g,  vars.email  ?? '');
+        .replace(/\{nombre\}/g,   vars.nombre   ?? '')
+        .replace(/\{saldo\}/g,    vars.saldo    ?? '')
+        .replace(/\{dias\}/g,     vars.dias     ?? '')
+        .replace(/\{email\}/g,    vars.email    ?? '')
+        .replace(/\{password\}/g, vars.password ?? '');
 }
 
 function waModal() {
@@ -583,22 +587,25 @@ function waModal() {
         saldo: '0.00',
         dias: 0,
         email: '',
+        password: '',
         mensaje: '',
-        abrir(nombre, numero, saldo, dias, email = '') {
-            this.nombre = nombre;
-            this.numero = numero;
-            this.saldo  = saldo;
-            this.dias   = dias;
-            this.email  = email;
-            this.mensaje = waReemplazar(WA_PLANTILLAS.recordatorio, { nombre, saldo, dias, email });
+        abrir(nombre, numero, saldo, dias, email = '', password = '') {
+            this.nombre   = nombre;
+            this.numero   = numero;
+            this.saldo    = saldo;
+            this.dias     = dias;
+            this.email    = email;
+            this.password = password;
+            this.mensaje = waReemplazar(WA_PLANTILLAS.recordatorio, { nombre, saldo, dias, email, password });
             this.show = true;
         },
         usarPlantilla(tipo) {
             this.mensaje = waReemplazar(WA_PLANTILLAS[tipo] ?? WA_PLANTILLAS.recordatorio, {
-                nombre: this.nombre,
-                saldo:  this.saldo,
-                dias:   this.dias,
-                email:  this.email,
+                nombre:   this.nombre,
+                saldo:    this.saldo,
+                dias:     this.dias,
+                email:    this.email,
+                password: this.password,
             });
         },
         enviar() {

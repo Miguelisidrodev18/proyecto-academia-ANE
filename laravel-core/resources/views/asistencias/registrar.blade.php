@@ -2,7 +2,13 @@
 @section('title', 'Asistencia — ' . $clase->titulo)
 
 @section('content')
-<div class="max-w-3xl mx-auto">
+<div x-data="{
+    dniSearch: '',
+    dnis: {{ $alumnosInscritos->pluck('dni')->toJson() }},
+    get hayResultados() {
+        return !this.dniSearch || this.dnis.some(d => d.startsWith(this.dniSearch));
+    }
+}" class="max-w-3xl mx-auto">
 
     {{-- Breadcrumb --}}
     <div class="flex items-center gap-3 mb-6 flex-wrap">
@@ -74,6 +80,53 @@
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-5">
+
+                {{-- Buscador por DNI --}}
+                <div class="p-4 border-b border-gray-100 bg-gray-50/50">
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+                        </svg>
+                        <input x-model="dniSearch"
+                               type="text"
+                               inputmode="numeric"
+                               placeholder="Buscar alumno por DNI..."
+                               autocomplete="off"
+                               class="w-full pl-9 pr-8 py-2.5 rounded-xl border border-gray-200 text-sm
+                                      outline-none focus:border-accent focus:ring-2 focus:ring-accent/20
+                                      bg-white transition-all placeholder-gray-400">
+                        <button type="button"
+                                x-show="dniSearch"
+                                x-cloak
+                                @click="dniSearch = ''"
+                                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-300
+                                       hover:text-gray-500 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                      d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p x-show="dniSearch"
+                       x-cloak
+                       class="text-xs text-gray-400 mt-2 pl-1">
+                        Filtrando por DNI: <span class="font-semibold text-accent" x-text="dniSearch"></span>
+                    </p>
+                </div>
+
+                {{-- Mensaje sin resultados --}}
+                <div x-show="dniSearch && !hayResultados"
+                     x-cloak
+                     class="py-10 text-center text-gray-400 text-sm">
+                    <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    No se encontró ningún alumno con ese DNI.
+                </div>
+
                 <div class="divide-y divide-gray-50">
                     @foreach($alumnosInscritos as $alumno)
                     @php
@@ -83,6 +136,8 @@
                         $viaZoom      = $asistencia?->hora_ingreso;
                     @endphp
                     <div x-data="{ estado: '{{ $estadoActual }}' }"
+                         data-alumno-row
+                         x-show="!dniSearch || '{{ $alumno->dni }}'.startsWith(dniSearch)"
                          class="p-4 transition-colors"
                          :class="{
                              'bg-emerald-50/50': estado === 'presente',

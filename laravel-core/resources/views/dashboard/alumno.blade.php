@@ -3,10 +3,20 @@
 
 @section('content')
 
+{{-- Overlay de anuncios (fullscreen, una vez al día) --}}
+@if($mostrarAnunciosOverlay && $anuncios->isNotEmpty())
+    @include('partials.anuncios-overlay')
+@endif
+
 {{-- Overlay de racha (fullscreen, solo primera vez del día) --}}
 @if($mostrarOverlay && $rachaInfo)
     @include('partials.racha-overlay')
 @endif
+
+{{-- ═══════════════════════════════════════════════════════════ --}}
+{{-- ANUNCIOS                                                     --}}
+{{-- ═══════════════════════════════════════════════════════════ --}}
+@include('partials.anuncios-banner')
 
 @php
     $nombre = explode(' ', auth()->user()->name)[0];
@@ -133,11 +143,6 @@
         </div>
     </div>
 </div>
-
-{{-- ═══════════════════════════════════════════════════════════ --}}
-{{-- ANUNCIOS                                                     --}}
-{{-- ═══════════════════════════════════════════════════════════ --}}
-@include('partials.anuncios-banner')
 
 {{-- ═══════════════════════════════════════════════════════════ --}}
 {{-- ALERTA DE VENCIMIENTO                                       --}}
@@ -428,29 +433,97 @@
 {{-- BLOQUE DE PROGRESO / RACHA                                  --}}
 {{-- ═══════════════════════════════════════════════════════════ --}}
 @if($rachaInfo)
+<style>
+@keyframes rachaFlameSway {
+    0%   { transform: rotate(-5deg) scale(1); }
+    25%  { transform: rotate(3deg)  scale(1.1); }
+    50%  { transform: rotate(5deg)  scale(1.13); }
+    75%  { transform: rotate(-2deg) scale(1.07); }
+    100% { transform: rotate(-5deg) scale(1); }
+}
+@keyframes rachaCardGlow {
+    0%, 100% { box-shadow: var(--glow-base); }
+    50%       { box-shadow: var(--glow-peak); }
+}
+@keyframes rachaDotPulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50%       { transform: scale(1.8); opacity: 0; }
+}
+</style>
+
+@php
+    /* Colores de glow para la tarjeta por nivel */
+    $cardGlowBase = match(true) {
+        $rr <= 7   => '0 8px 32px rgba(37,99,235,0.35), 0 0 0 1px rgba(96,165,250,0.2)',
+        $rr <= 30  => '0 8px 32px rgba(5,150,105,0.35), 0 0 0 1px rgba(52,211,153,0.2)',
+        $rr <= 50  => '0 8px 32px rgba(124,58,237,0.35), 0 0 0 1px rgba(167,139,250,0.2)',
+        $rr <= 75  => '0 8px 32px rgba(234,88,12,0.4),  0 0 0 1px rgba(251,146,60,0.25)',
+        default    => '0 8px 32px rgba(217,119,6,0.45),  0 0 0 1px rgba(251,191,36,0.3)',
+    };
+    $cardGlowPeak = match(true) {
+        $rr <= 7   => '0 16px 48px rgba(37,99,235,0.6), 0 0 60px rgba(96,165,250,0.3)',
+        $rr <= 30  => '0 16px 48px rgba(5,150,105,0.6), 0 0 60px rgba(52,211,153,0.3)',
+        $rr <= 50  => '0 16px 48px rgba(124,58,237,0.6),0 0 60px rgba(167,139,250,0.3)',
+        $rr <= 75  => '0 16px 48px rgba(234,88,12,0.65),0 0 60px rgba(251,146,60,0.35)',
+        default    => '0 16px 48px rgba(217,119,6,0.7), 0 0 60px rgba(251,191,36,0.4)',
+    };
+    $dotColor = match(true) {
+        $rr <= 7   => 'rgba(96,165,250,0.7)',
+        $rr <= 30  => 'rgba(52,211,153,0.7)',
+        $rr <= 50  => 'rgba(167,139,250,0.7)',
+        $rr <= 75  => 'rgba(251,146,60,0.7)',
+        default    => 'rgba(251,191,36,0.75)',
+    };
+@endphp
+
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-2">
 
     {{-- Racha visual --}}
-    <div class="bg-gradient-to-br {{ $rGrad }} rounded-2xl p-5 shadow-lg {{ $rGlow }} relative overflow-hidden">
-        <div class="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-white/10"></div>
-        <div class="text-3xl mb-2">{{ $rEmoji }}</div>
-        <p class="text-white/60 text-xs font-semibold uppercase tracking-wide">Racha de acceso</p>
-        <p class="text-4xl font-black text-white mt-1">{{ $rr }}</p>
-        <p class="text-white/60 text-xs mt-1">{{ $rr === 1 ? 'día consecutivo' : 'días consecutivos' }}</p>
+    <div class="bg-gradient-to-br {{ $rGrad }} rounded-2xl p-5 relative overflow-hidden group"
+         style="--glow-base: {{ $cardGlowBase }}; --glow-peak: {{ $cardGlowPeak }};
+                box-shadow: {{ $cardGlowBase }};
+                animation: rachaCardGlow 2.8s ease-in-out infinite;">
+
+        {{-- Fondo decorativo --}}
+        <div class="absolute -right-4 -top-4 w-28 h-28 rounded-full bg-white/10 animate-pulse"></div>
+        <div class="absolute -left-5 -bottom-5 w-20 h-20 rounded-full bg-white/5 animate-pulse"
+             style="animation-delay: 0.8s;"></div>
+        {{-- Shimmer en hover --}}
+        <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+             style="background: radial-gradient(ellipse at 30% 35%, rgba(255,255,255,0.14), transparent 60%);"></div>
+
+        <div class="relative z-10">
+            {{-- Emoji con animación --}}
+            <div class="relative inline-block mb-2">
+                {{-- Anillo pulsante detrás del emoji --}}
+                <div class="absolute inset-0 rounded-full"
+                     style="background: {{ $dotColor }};
+                            animation: rachaDotPulse 2s ease-out infinite;
+                            transform-origin: center;"></div>
+                <div class="text-3xl relative z-10 inline-block"
+                     style="animation: rachaFlameSway 2.2s ease-in-out infinite;
+                            filter: drop-shadow(0 0 10px {{ $dotColor }});">{{ $rEmoji }}</div>
+            </div>
+
+            <p class="text-white/60 text-xs font-semibold uppercase tracking-wide">Racha de acceso</p>
+            <p class="text-4xl font-black text-white mt-1"
+               style="text-shadow: 0 0 24px rgba(255,255,255,0.4);">{{ $rr }}</p>
+            <p class="text-white/60 text-xs mt-1">{{ $rr === 1 ? 'día consecutivo' : 'días consecutivos' }}</p>
+        </div>
     </div>
 
     {{-- Racha anterior --}}
-    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300">
         <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center mb-3">
             <span class="text-xl">🏆</span>
         </div>
-        <p class="text-gray-400 text-xs font-semibold uppercase tracking-wide">Racha anterior</p>
+        <p class="text-gray-400 text-xs font-semibold uppercase tracking-wide">Mejor racha anterior</p>
         <p class="text-3xl font-black text-gray-800 mt-1">{{ $rachaInfo['racha_anterior'] }}</p>
         <p class="text-gray-400 text-xs mt-1">{{ $rachaInfo['racha_anterior'] === 1 ? 'día' : 'días' }} previos</p>
     </div>
 
     {{-- Estado del día --}}
-    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm sm:col-span-2 lg:col-span-1">
+    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 sm:col-span-2 lg:col-span-1">
         <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center mb-3">
             <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

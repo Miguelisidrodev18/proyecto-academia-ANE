@@ -3,11 +3,21 @@
 
 @section('content')
 
+{{-- Overlay de anuncios (fullscreen, una vez al día) --}}
+@if($mostrarAnunciosOverlay && $anuncios->isNotEmpty())
+    @include('partials.anuncios-overlay')
+@endif
+
 @php
     $nombre = explode(' ', auth()->user()->name)[0];
     $hora   = now()->hour;
     $saludo = $hora < 12 ? 'Buenos días' : ($hora < 19 ? 'Buenas tardes' : 'Buenas noches');
 @endphp
+
+{{-- ═══════════════════════════════════════════════════════════ --}}
+{{-- ANUNCIOS                                                     --}}
+{{-- ═══════════════════════════════════════════════════════════ --}}
+@include('partials.anuncios-banner')
 
 {{-- ═══════════════════════════════════════════════════════════ --}}
 {{-- HERO                                                        --}}
@@ -425,10 +435,5 @@
 @endif
 
 @endif
-
-{{-- ═══════════════════════════════════════════════════════════ --}}
-{{-- ANUNCIOS                                                     --}}
-{{-- ═══════════════════════════════════════════════════════════ --}}
-@include('partials.anuncios-banner')
 
 @endsection

@@ -11,7 +11,14 @@
 </head>
 <body class="bg-brand-bg font-sans antialiased">
 
-<div x-data="{ sidebarOpen: false }" class="min-h-screen">
+<div x-data="{
+    sidebarOpen: false,
+    sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' && window.innerWidth >= 768,
+    toggleCollapse() {
+        this.sidebarCollapsed = !this.sidebarCollapsed;
+        localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);
+    }
+}" class="min-h-screen">
 
     {{-- Overlay oscuro (solo móvil) --}}
     <div x-show="sidebarOpen"
@@ -30,7 +37,7 @@
     <x-sidebar />
 
     {{-- Área principal (offset del sidebar en desktop) --}}
-    <div class="md:pl-64">
+    <div class="transition-all duration-300" :class="sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'">
 
         {{-- Topbar móvil --}}
         <header class="md:hidden flex items-center h-14 px-3 gap-3 sticky top-0 z-10

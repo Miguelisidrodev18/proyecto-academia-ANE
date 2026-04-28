@@ -97,8 +97,18 @@ class DashboardController extends Controller
 
         $anuncios = Anuncio::vigentes()->paraRol('alumno')->orderBy('orden')->get();
 
+        $mostrarAnunciosOverlay = false;
+        if ($anuncios->isNotEmpty()) {
+            $sessionKey = 'anuncios_overlay_shown';
+            if (!session()->has($sessionKey)) {
+                $mostrarAnunciosOverlay = true;
+                session()->put($sessionKey, true);
+            }
+        }
+
         return view('dashboard.alumno', compact(
-            'alumno', 'matricula', 'cursos', 'rachaInfo', 'mostrarOverlay', 'proximasClases', 'anuncios'
+            'alumno', 'matricula', 'cursos', 'rachaInfo', 'mostrarOverlay',
+            'proximasClases', 'anuncios', 'mostrarAnunciosOverlay'
         ));
     }
 
@@ -132,8 +142,17 @@ class DashboardController extends Controller
 
         $anuncios = Anuncio::vigentes()->paraRol('representante')->orderBy('orden')->get();
 
+        $mostrarAnunciosOverlay = false;
+        if ($anuncios->isNotEmpty()) {
+            if (!session()->has('anuncios_overlay_shown')) {
+                $mostrarAnunciosOverlay = true;
+                session()->put('anuncios_overlay_shown', true);
+            }
+        }
+
         return view('dashboard.representante', compact(
-            'alumno', 'matricula', 'pagos', 'cuotas', 'proximasClases', 'anuncios'
+            'alumno', 'matricula', 'pagos', 'cuotas', 'proximasClases',
+            'anuncios', 'mostrarAnunciosOverlay'
         ));
     }
 
@@ -221,6 +240,7 @@ class DashboardController extends Controller
     {
         $defaults = [
             'whatsapp_number'    => config('app.whatsapp_number', ''),
+            'wa_msg_bienvenida'  => "¡Hola {nombre}! 👋 Bienvenido(a) a Academia Nueva Era Estudiantil.\n\nEstos son tus accesos a la plataforma:\n📧 Usuario: {email}\n🔑 Contraseña temporal: {password}\n🌐 Ingresa en: {url}\n\n⚠️ Por seguridad, te recomendamos cambiar tu contraseña la primera vez que ingreses.\n\nCualquier duda, escríbenos. 🎓",
             'wa_msg_recordatorio'=> 'Hola {nombre}, te recordamos que tienes un pago pendiente en Academia Nueva Era por S/. {saldo}. Por favor regulariza tu pago para no perder el acceso a tus clases.',
             'wa_msg_renovacion'  => 'Hola {nombre}, tu membresía en Academia Nueva Era ha vencido. ¡Renueva tu plan y sigue disfrutando de todas tus clases! Contáctanos para coordinar.',
             'wa_msg_vencimiento' => 'Hola {nombre}, te informamos que solo te quedan {dias} días de acceso en Academia Nueva Era. ¡Renueva a tiempo para no perder el acceso!',
@@ -240,6 +260,7 @@ class DashboardController extends Controller
     {
         $request->validate([
             'whatsapp_number'     => ['nullable', 'string', 'max:20'],
+            'wa_msg_bienvenida'   => ['nullable', 'string', 'max:1000'],
             'wa_msg_recordatorio' => ['nullable', 'string', 'max:1000'],
             'wa_msg_renovacion'   => ['nullable', 'string', 'max:1000'],
             'wa_msg_vencimiento'  => ['nullable', 'string', 'max:1000'],
@@ -253,6 +274,7 @@ class DashboardController extends Controller
             $numero = substr($numero, 2);
         }
         Configuracion::set('whatsapp_number',     $numero ?: null);
+        Configuracion::set('wa_msg_bienvenida',   $request->wa_msg_bienvenida);
         Configuracion::set('wa_msg_recordatorio', $request->wa_msg_recordatorio);
         Configuracion::set('wa_msg_renovacion',   $request->wa_msg_renovacion);
         Configuracion::set('wa_msg_vencimiento',  $request->wa_msg_vencimiento);

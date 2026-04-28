@@ -25,7 +25,8 @@ class AnuncioController extends Controller
 
     public function create(): View
     {
-        return view('anuncios.create');
+        $siguienteOrden = (Anuncio::max('orden') ?? -1) + 1;
+        return view('anuncios.create', compact('siguienteOrden'));
     }
 
     public function store(Request $request): RedirectResponse
