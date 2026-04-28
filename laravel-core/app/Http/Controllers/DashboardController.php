@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alumno;
+use App\Models\Anuncio;
 use App\Models\Configuracion;
 use App\Models\Curso;
 use App\Models\Matricula;
@@ -94,8 +95,10 @@ class DashboardController extends Controller
                 ->get();
         }
 
+        $anuncios = Anuncio::vigentes()->paraRol('alumno')->orderBy('orden')->get();
+
         return view('dashboard.alumno', compact(
-            'alumno', 'matricula', 'cursos', 'rachaInfo', 'mostrarOverlay', 'proximasClases'
+            'alumno', 'matricula', 'cursos', 'rachaInfo', 'mostrarOverlay', 'proximasClases', 'anuncios'
         ));
     }
 
@@ -127,8 +130,10 @@ class DashboardController extends Controller
             }
         }
 
+        $anuncios = Anuncio::vigentes()->paraRol('representante')->orderBy('orden')->get();
+
         return view('dashboard.representante', compact(
-            'alumno', 'matricula', 'pagos', 'cuotas', 'proximasClases'
+            'alumno', 'matricula', 'pagos', 'cuotas', 'proximasClases', 'anuncios'
         ));
     }
 

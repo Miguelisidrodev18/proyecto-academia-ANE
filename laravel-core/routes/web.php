@@ -13,6 +13,7 @@ use App\Http\Controllers\Materiales\MaterialController;
 use App\Http\Controllers\Asistencias\AsistenciaController;
 use App\Http\Controllers\Alumno\AlumnoPanelController;
 use App\Http\Controllers\Leads\LeadController;
+use App\Http\Controllers\Anuncios\AnuncioController;
 use App\Http\Controllers\Reportes\ReporteController;
 use Illuminate\Support\Facades\Route;
 
@@ -64,6 +65,9 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/planes/{plan}/toggle',         [PlanController::class, 'toggle'])->name('planes.toggle');
         Route::patch('/planes/{plan}/toggle-landing', [PlanController::class, 'toggleLanding'])->name('planes.toggle-landing');
         Route::resource('planes', PlanController::class)->parameters(['planes' => 'plan']);
+
+        Route::patch('/anuncios/{anuncio}/toggle', [AnuncioController::class, 'toggle'])->name('anuncios.toggle');
+        Route::resource('anuncios', AnuncioController::class)->except(['show']);
     });
 
     // ── Módulo Cursos + Aula Virtual: Admin y Docente ──────────────────────
