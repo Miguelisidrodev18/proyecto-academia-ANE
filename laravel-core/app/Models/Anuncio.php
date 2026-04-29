@@ -42,7 +42,9 @@ class Anuncio extends Model
 
     public function imagenUrl(): ?string
     {
-        return $this->imagen ? Storage::url($this->imagen) : null;
+        if (!$this->imagen) return null;
+        if (!Storage::disk('public')->exists($this->imagen)) return null;
+        return asset('storage/' . $this->imagen);
     }
 
     public function esParaRol(string $rol): bool
