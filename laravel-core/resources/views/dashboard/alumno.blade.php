@@ -1,22 +1,32 @@
 @extends('layouts.dashboard')
 @section('title', 'Mi Panel')
 
-@section('content')
+@push('styles')
+<style>
+@keyframes rachaFlameSway {
+    0%   { transform: rotate(-5deg) scale(1); }
+    25%  { transform: rotate(3deg)  scale(1.1); }
+    50%  { transform: rotate(5deg)  scale(1.13); }
+    75%  { transform: rotate(-2deg) scale(1.07); }
+    100% { transform: rotate(-5deg) scale(1); }
+}
+@keyframes rachaCardGlow {
+    0%, 100% { box-shadow: var(--glow-base); }
+    50%       { box-shadow: var(--glow-peak); }
+}
+@keyframes rachaDotPulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50%       { transform: scale(1.8); opacity: 0; }
+}
+</style>
+@endpush
 
-{{-- Overlay de anuncios (fullscreen, una vez al día) --}}
-@if($mostrarAnunciosOverlay && $anuncios->isNotEmpty())
-    @include('partials.anuncios-overlay')
-@endif
+@section('content')
 
 {{-- Overlay de racha (fullscreen, solo primera vez del día) --}}
 @if($mostrarOverlay && $rachaInfo)
     @include('partials.racha-overlay')
 @endif
-
-{{-- ═══════════════════════════════════════════════════════════ --}}
-{{-- ANUNCIOS                                                     --}}
-{{-- ═══════════════════════════════════════════════════════════ --}}
-@include('partials.anuncios-banner')
 
 @php
     $nombre = explode(' ', auth()->user()->name)[0];
@@ -37,6 +47,33 @@
         else                { $rGrad = 'from-amber-500 to-yellow-400';  $rGlow = 'shadow-amber-300/40'; }
     }
 @endphp
+
+{{-- ═══════════════════════════════════════════════════════════ --}}
+{{-- RACHA (primera sección visible)                             --}}
+{{-- ═══════════════════════════════════════════════════════════ --}}
+@if($rachaInfo)
+<div class="flex items-center gap-4 mb-5 p-4 rounded-2xl
+            bg-gradient-to-r {{ $rGrad }} shadow-lg {{ $rGlow }}">
+    <div class="text-4xl" style="animation: rachaFlameSway 2.2s ease-in-out infinite;
+                                  filter: drop-shadow(0 0 8px rgba(255,255,255,0.4));">{{ $rEmoji }}</div>
+    <div class="flex-1 min-w-0">
+        <p class="text-white/70 text-xs font-semibold uppercase tracking-wide">Tu racha de acceso</p>
+        <p class="text-white font-black text-2xl leading-none">
+            {{ $rr }} {{ $rr === 1 ? 'día' : 'días' }}
+            <span class="text-white/60 font-semibold text-sm ml-1">consecutivos</span>
+        </p>
+    </div>
+    <div class="text-right flex-shrink-0">
+        <p class="text-white/60 text-[10px] font-semibold uppercase tracking-wide">Mejor racha</p>
+        <p class="text-white font-black text-xl">{{ $rachaInfo['racha_anterior'] }}</p>
+    </div>
+</div>
+@endif
+
+{{-- ═══════════════════════════════════════════════════════════ --}}
+{{-- ANUNCIOS (pantalla completa vertical)                        --}}
+{{-- ═══════════════════════════════════════════════════════════ --}}
+@include('partials.anuncios-banner')
 
 {{-- ═══════════════════════════════════════════════════════════ --}}
 {{-- HERO                                                        --}}
@@ -433,24 +470,6 @@
 {{-- BLOQUE DE PROGRESO / RACHA                                  --}}
 {{-- ═══════════════════════════════════════════════════════════ --}}
 @if($rachaInfo)
-<style>
-@keyframes rachaFlameSway {
-    0%   { transform: rotate(-5deg) scale(1); }
-    25%  { transform: rotate(3deg)  scale(1.1); }
-    50%  { transform: rotate(5deg)  scale(1.13); }
-    75%  { transform: rotate(-2deg) scale(1.07); }
-    100% { transform: rotate(-5deg) scale(1); }
-}
-@keyframes rachaCardGlow {
-    0%, 100% { box-shadow: var(--glow-base); }
-    50%       { box-shadow: var(--glow-peak); }
-}
-@keyframes rachaDotPulse {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50%       { transform: scale(1.8); opacity: 0; }
-}
-</style>
-
 @php
     /* Colores de glow para la tarjeta por nivel */
     $cardGlowBase = match(true) {

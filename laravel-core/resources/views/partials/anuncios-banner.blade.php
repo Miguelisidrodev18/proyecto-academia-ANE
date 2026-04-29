@@ -1,5 +1,5 @@
 @if($anuncios->isNotEmpty())
-<section class="mb-6"
+<section class="mb-8"
     x-data="{
         current: 0,
         total: {{ $anuncios->count() }},
@@ -54,7 +54,7 @@
 
         {{-- Carrusel --}}
         <div class="relative overflow-hidden rounded-2xl shadow-lg"
-             style="aspect-ratio: 16/7;">
+             style="height: calc(100svh - 180px); min-height: 400px;">
 
             {{-- Barras de progreso estilo stories --}}
             @if($anuncios->count() > 1)

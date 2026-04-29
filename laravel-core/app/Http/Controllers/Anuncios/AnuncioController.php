@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Anuncios;
 
 use App\Http\Controllers\Controller;
 use App\Models\Anuncio;
+use App\Models\Plan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -26,7 +27,8 @@ class AnuncioController extends Controller
     public function create(): View
     {
         $siguienteOrden = (Anuncio::max('orden') ?? -1) + 1;
-        return view('anuncios.create', compact('siguienteOrden'));
+        $planes = Plan::where('activo', true)->orderBy('nombre')->get();
+        return view('anuncios.create', compact('siguienteOrden', 'planes'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -38,6 +40,7 @@ class AnuncioController extends Controller
         }
 
         $data['destinatarios'] = $request->input('destinatarios', []);
+        $data['planes_ids']    = $request->input('planes_ids', []) ?: null;
         $data['activo']        = $request->boolean('activo', true);
 
         Anuncio::create($data);
@@ -48,7 +51,8 @@ class AnuncioController extends Controller
 
     public function edit(Anuncio $anuncio): View
     {
-        return view('anuncios.edit', compact('anuncio'));
+        $planes = Plan::where('activo', true)->orderBy('nombre')->get();
+        return view('anuncios.edit', compact('anuncio', 'planes'));
     }
 
     public function update(Request $request, Anuncio $anuncio): RedirectResponse
@@ -68,6 +72,7 @@ class AnuncioController extends Controller
         }
 
         $data['destinatarios'] = $request->input('destinatarios', []);
+        $data['planes_ids']    = $request->input('planes_ids', []) ?: null;
         $data['activo']        = $request->boolean('activo', true);
 
         $anuncio->update($data);
@@ -99,15 +104,17 @@ class AnuncioController extends Controller
     private function validar(Request $request): array
     {
         return $request->validate([
-            'titulo'       => ['nullable', 'string', 'max:120'],
-            'descripcion'  => ['nullable', 'string', 'max:1000'],
-            'imagen'       => ['nullable', 'image', 'max:3072'],
-            'link_url'     => ['nullable', 'string', 'max:500'],
-            'link_texto'   => ['nullable', 'string', 'max:60'],
-            'tipo_link'    => ['nullable', 'in:whatsapp,externo'],
-            'orden'        => ['nullable', 'integer', 'min:0', 'max:999'],
-            'fecha_inicio' => ['nullable', 'date'],
-            'fecha_fin'    => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
+            'titulo'        => ['nullable', 'string', 'max:120'],
+            'descripcion'   => ['nullable', 'string', 'max:1000'],
+            'imagen'        => ['nullable', 'image', 'max:3072'],
+            'link_url'      => ['nullable', 'string', 'max:500'],
+            'link_texto'    => ['nullable', 'string', 'max:60'],
+            'tipo_link'     => ['nullable', 'in:whatsapp,externo'],
+            'orden'         => ['nullable', 'integer', 'min:0', 'max:999'],
+            'fecha_inicio'  => ['nullable', 'date'],
+            'fecha_fin'     => ['nullable', 'date', 'after_or_equal:fecha_inicio'],
+            'planes_ids'    => ['nullable', 'array'],
+            'planes_ids.*'  => ['integer', 'exists:planes,id'],
         ]);
     }
 }

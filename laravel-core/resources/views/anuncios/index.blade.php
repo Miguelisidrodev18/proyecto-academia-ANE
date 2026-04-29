@@ -122,6 +122,22 @@
                         @endif
                     </div>
 
+                    {{-- Planes --}}
+                    @if(!empty($anuncio->planes_ids))
+                    @php
+                        $planesAnuncio = \App\Models\Plan::whereIn('id', $anuncio->planes_ids)->pluck('nombre');
+                    @endphp
+                    <div class="flex flex-wrap gap-1 mt-2">
+                        @foreach($planesAnuncio as $nombrePlan)
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-accent/10 text-accent">
+                                {{ $nombrePlan }}
+                            </span>
+                        @endforeach
+                    </div>
+                    @else
+                    <p class="text-[10px] text-gray-400 mt-1.5">Todos los planes</p>
+                    @endif
+
                     {{-- Fechas --}}
                     @if($anuncio->fecha_inicio || $anuncio->fecha_fin)
                         <p class="text-[10px] text-gray-400 mt-2">

@@ -1,9 +1,11 @@
 @php
     $anuncio        ??= null;
     $siguienteOrden ??= 0;
+    $planes         ??= collect();
     $editing         = $anuncio !== null;
     $destinos  = ['alumno' => 'Alumnos', 'representante' => 'Representantes'];
     $selDest   = old('destinatarios', $editing ? ($anuncio->destinatarios ?? []) : ['alumno', 'representante']);
+    $selPlanes = array_map('intval', old('planes_ids', $editing ? ($anuncio->planes_ids ?? []) : []));
 @endphp
 
 {{-- Título --}}
@@ -99,7 +101,7 @@
 
 {{-- Destinatarios --}}
 <div>
-    <label class="block text-xs font-bold text-gray-600 mb-2">Visible para</label>
+    <label class="block text-xs font-bold text-gray-600 mb-2">Visible para (roles)</label>
     <div class="flex flex-wrap gap-3">
         @foreach($destinos as $valor => $etiqueta)
             <label class="flex items-center gap-2 cursor-pointer group">
@@ -112,6 +114,29 @@
     </div>
     @error('destinatarios')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
 </div>
+
+{{-- Planes --}}
+@if($planes->isNotEmpty())
+<div class="border border-gray-100 rounded-2xl p-4 bg-gray-50 space-y-3">
+    <div>
+        <p class="text-xs font-bold text-gray-600">Dirigido a planes</p>
+        <p class="text-[10px] text-gray-400 mt-0.5">Sin selección = visible para todos los planes de alumnos</p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+        @foreach($planes as $plan)
+            <label class="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" name="planes_ids[]" value="{{ $plan->id }}"
+                       @checked(in_array($plan->id, $selPlanes))
+                       class="w-4 h-4 rounded text-accent focus:ring-accent/30">
+                <span class="text-sm text-gray-700 group-hover:text-gray-900 transition font-medium">
+                    {{ $plan->tipoIcono() }} {{ $plan->nombre }}
+                </span>
+            </label>
+        @endforeach
+    </div>
+    @error('planes_ids')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+</div>
+@endif
 
 {{-- Vigencia --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

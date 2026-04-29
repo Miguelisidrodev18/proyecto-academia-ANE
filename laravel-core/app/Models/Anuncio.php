@@ -15,6 +15,7 @@ class Anuncio extends Model
         'link_texto',
         'tipo_link',
         'destinatarios',
+        'planes_ids',
         'activo',
         'orden',
         'fecha_inicio',
@@ -22,10 +23,11 @@ class Anuncio extends Model
     ];
 
     protected $casts = [
-        'activo'       => 'boolean',
-        'destinatarios'=> 'array',
-        'fecha_inicio' => 'date',
-        'fecha_fin'    => 'date',
+        'activo'        => 'boolean',
+        'destinatarios' => 'array',
+        'planes_ids'    => 'array',
+        'fecha_inicio'  => 'date',
+        'fecha_fin'     => 'date',
     ];
 
     public function scopeVigentes($query)
@@ -38,6 +40,16 @@ class Anuncio extends Model
     public function scopeParaRol($query, string $rol)
     {
         return $query->whereJsonContains('destinatarios', $rol);
+    }
+
+    public function scopeParaPlan($query, ?int $planId)
+    {
+        if (!$planId) return $query;
+        return $query->where(function ($q) use ($planId) {
+            $q->whereNull('planes_ids')
+              ->orWhereJsonLength('planes_ids', 0)
+              ->orWhereJsonContains('planes_ids', $planId);
+        });
     }
 
     public function imagenUrl(): ?string

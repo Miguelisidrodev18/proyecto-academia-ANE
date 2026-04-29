@@ -95,7 +95,11 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        $anuncios = Anuncio::vigentes()->paraRol('alumno')->orderBy('orden')->get();
+        $anuncios = Anuncio::vigentes()
+            ->paraRol('alumno')
+            ->paraPlan($matricula?->plan_id)
+            ->orderBy('orden')
+            ->get();
 
         $mostrarAnunciosOverlay = false;
         if ($anuncios->isNotEmpty()) {
