@@ -11,6 +11,7 @@ class Anuncio extends Model
         'titulo',
         'descripcion',
         'imagen',
+        'imagen_movil',
         'link_url',
         'link_texto',
         'tipo_link',
@@ -57,6 +58,13 @@ class Anuncio extends Model
         if (!$this->imagen) return null;
         if (!Storage::disk('public')->exists($this->imagen)) return null;
         return asset('storage/' . $this->imagen);
+    }
+
+    public function imagenMovilUrl(): ?string
+    {
+        if (!$this->imagen_movil) return null;
+        if (!Storage::disk('public')->exists($this->imagen_movil)) return null;
+        return asset('storage/' . $this->imagen_movil);
     }
 
     public function esParaRol(string $rol): bool

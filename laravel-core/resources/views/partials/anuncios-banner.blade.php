@@ -83,9 +83,14 @@
 
                 {{-- Imagen de fondo --}}
                 @if($anuncio->imagenUrl())
-                    <img src="{{ $anuncio->imagenUrl() }}"
-                         alt="{{ $anuncio->titulo }}"
-                         class="w-full h-full object-cover">
+                    <picture class="w-full h-full">
+                        @if($anuncio->imagenMovilUrl())
+                            <source media="(max-width: 767px)" srcset="{{ $anuncio->imagenMovilUrl() }}">
+                        @endif
+                        <img src="{{ $anuncio->imagenUrl() }}"
+                             alt="{{ $anuncio->titulo }}"
+                             class="w-full h-full object-cover">
+                    </picture>
                 @else
                     <div class="w-full h-full"
                          style="background: linear-gradient(135deg, #082B59 0%, #0f3d7a 50%, #30A9D9 100%);"></div>

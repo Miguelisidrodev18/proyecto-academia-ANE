@@ -39,6 +39,10 @@ class AnuncioController extends Controller
             $data['imagen'] = $request->file('imagen')->store('anuncios', 'public');
         }
 
+        if ($request->hasFile('imagen_movil')) {
+            $data['imagen_movil'] = $request->file('imagen_movil')->store('anuncios', 'public');
+        }
+
         $data['destinatarios'] = $request->input('destinatarios', []);
         $data['planes_ids']    = $request->input('planes_ids', []) ?: null;
         $data['activo']        = $request->boolean('activo', true);
@@ -71,6 +75,18 @@ class AnuncioController extends Controller
             $data['imagen'] = null;
         }
 
+        if ($request->hasFile('imagen_movil')) {
+            if ($anuncio->imagen_movil) {
+                Storage::disk('public')->delete($anuncio->imagen_movil);
+            }
+            $data['imagen_movil'] = $request->file('imagen_movil')->store('anuncios', 'public');
+        }
+
+        if ($request->boolean('eliminar_imagen_movil') && $anuncio->imagen_movil) {
+            Storage::disk('public')->delete($anuncio->imagen_movil);
+            $data['imagen_movil'] = null;
+        }
+
         $data['destinatarios'] = $request->input('destinatarios', []);
         $data['planes_ids']    = $request->input('planes_ids', []) ?: null;
         $data['activo']        = $request->boolean('activo', true);
@@ -85,6 +101,10 @@ class AnuncioController extends Controller
     {
         if ($anuncio->imagen) {
             Storage::disk('public')->delete($anuncio->imagen);
+        }
+
+        if ($anuncio->imagen_movil) {
+            Storage::disk('public')->delete($anuncio->imagen_movil);
         }
 
         $anuncio->delete();
@@ -106,7 +126,8 @@ class AnuncioController extends Controller
         return $request->validate([
             'titulo'        => ['nullable', 'string', 'max:120'],
             'descripcion'   => ['nullable', 'string', 'max:1000'],
-            'imagen'        => ['nullable', 'image', 'max:3072'],
+            'imagen'        => ['nullable', 'image', 'max:5120'],
+            'imagen_movil'  => ['nullable', 'image', 'max:5120'],
             'link_url'      => ['nullable', 'string', 'max:500'],
             'link_texto'    => ['nullable', 'string', 'max:60'],
             'tipo_link'     => ['nullable', 'in:whatsapp,externo'],

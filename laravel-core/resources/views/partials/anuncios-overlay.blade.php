@@ -40,10 +40,15 @@
 
                 {{-- Imagen --}}
                 @if($anuncio->imagenUrl())
-                    <img src="{{ $anuncio->imagenUrl() }}"
-                         alt="{{ $anuncio->titulo }}"
-                         class="w-full object-contain"
-                         style="max-height: 80vh;">
+                    <picture>
+                        @if($anuncio->imagenMovilUrl())
+                            <source media="(max-width: 767px)" srcset="{{ $anuncio->imagenMovilUrl() }}">
+                        @endif
+                        <img src="{{ $anuncio->imagenUrl() }}"
+                             alt="{{ $anuncio->titulo }}"
+                             class="w-full object-contain"
+                             style="max-height: 80vh;">
+                    </picture>
                 @else
                     <div class="flex items-center justify-center px-8 text-center"
                          style="min-height:320px; background:linear-gradient(135deg,#082B59,#30A9D9);">

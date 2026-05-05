@@ -28,41 +28,90 @@
     @error('descripcion')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
 </div>
 
-{{-- Imagen --}}
-<div x-data="{
-        preview: @js($editing && $anuncio->imagenUrl() ? $anuncio->imagenUrl() : null),
-        onChange(e) {
-            const file = e.target.files[0];
-            if (file) this.preview = URL.createObjectURL(file);
-        }
-    }">
-    <label class="block text-xs font-bold text-gray-600 mb-1.5">Imagen del anuncio</label>
+{{-- Imágenes: escritorio y móvil --}}
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-    <div class="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-accent/40 transition cursor-pointer"
-         @click="$refs.imgInput.click()">
-        <template x-if="preview">
-            <img :src="preview" class="h-40 mx-auto rounded-lg object-cover mb-2">
-        </template>
-        <template x-if="!preview">
-            <div>
-                <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                <p class="text-xs text-gray-400">Clic para seleccionar imagen</p>
-                <p class="text-[10px] text-gray-300 mt-0.5">JPG, PNG, GIF — máx. 3 MB</p>
-            </div>
-        </template>
-        <input type="file" name="imagen" accept="image/*" class="hidden" x-ref="imgInput" @change="onChange">
+    {{-- Imagen escritorio --}}
+    <div x-data="{
+            preview: @js($editing && $anuncio->imagenUrl() ? $anuncio->imagenUrl() : null),
+            onChange(e) {
+                const file = e.target.files[0];
+                if (file) this.preview = URL.createObjectURL(file);
+            }
+        }">
+        <label class="block text-xs font-bold text-gray-600 mb-1.5">
+            Imagen escritorio
+            <span class="text-gray-400 font-normal ml-1">— horizontal (16:9)</span>
+        </label>
+
+        <div class="border-2 border-dashed border-gray-200 rounded-xl p-3 text-center hover:border-accent/40 transition cursor-pointer"
+             @click="$refs.imgDesk.click()">
+            <template x-if="preview">
+                <img :src="preview" class="h-32 w-full mx-auto rounded-lg object-cover mb-1">
+            </template>
+            <template x-if="!preview">
+                <div class="py-4">
+                    <svg class="w-8 h-8 text-gray-300 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="text-xs text-gray-400">Clic para subir</p>
+                    <p class="text-[10px] text-gray-300 mt-0.5">Recomendado: 1280×720 px · máx. 5 MB</p>
+                </div>
+            </template>
+            <input type="file" name="imagen" accept="image/*" class="hidden" x-ref="imgDesk" @change="onChange">
+        </div>
+
+        @if($editing && $anuncio->imagenUrl())
+            <label class="flex items-center gap-2 mt-1.5 text-xs text-gray-500 cursor-pointer">
+                <input type="checkbox" name="eliminar_imagen" value="1" class="rounded">
+                Eliminar imagen escritorio
+            </label>
+        @endif
+        @error('imagen')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
     </div>
 
-    @if($editing && $anuncio->imagenUrl())
-        <label class="flex items-center gap-2 mt-2 text-xs text-gray-500 cursor-pointer">
-            <input type="checkbox" name="eliminar_imagen" value="1" class="rounded">
-            Eliminar imagen actual
+    {{-- Imagen móvil --}}
+    <div x-data="{
+            preview: @js($editing && $anuncio->imagenMovilUrl() ? $anuncio->imagenMovilUrl() : null),
+            onChange(e) {
+                const file = e.target.files[0];
+                if (file) this.preview = URL.createObjectURL(file);
+            }
+        }">
+        <label class="block text-xs font-bold text-gray-600 mb-1.5">
+            Imagen móvil
+            <span class="text-gray-400 font-normal ml-1">— vertical (9:16)</span>
         </label>
-    @endif
-    @error('imagen')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+
+        <div class="border-2 border-dashed border-blue-200 rounded-xl p-3 text-center hover:border-accent/40 transition cursor-pointer"
+             @click="$refs.imgMov.click()">
+            <template x-if="preview">
+                <img :src="preview" class="h-32 w-full mx-auto rounded-lg object-cover mb-1">
+            </template>
+            <template x-if="!preview">
+                <div class="py-4">
+                    <svg class="w-8 h-8 text-blue-200 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                              d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="text-xs text-gray-400">Clic para subir</p>
+                    <p class="text-[10px] text-gray-300 mt-0.5">Recomendado: 720×1280 px · máx. 5 MB</p>
+                    <p class="text-[10px] text-blue-400 mt-0.5 font-medium">Sin imagen → usa la de escritorio</p>
+                </div>
+            </template>
+            <input type="file" name="imagen_movil" accept="image/*" class="hidden" x-ref="imgMov" @change="onChange">
+        </div>
+
+        @if($editing && $anuncio->imagenMovilUrl())
+            <label class="flex items-center gap-2 mt-1.5 text-xs text-gray-500 cursor-pointer">
+                <input type="checkbox" name="eliminar_imagen_movil" value="1" class="rounded">
+                Eliminar imagen móvil
+            </label>
+        @endif
+        @error('imagen_movil')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+    </div>
+
 </div>
 
 {{-- Link --}}
