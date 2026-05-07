@@ -8,6 +8,262 @@
 @endphp
 
 {{-- ═══════════════════════════════════════════════════════════ --}}
+{{-- MODAL DE CONFIRMACIÓN DE ASISTENCIA                          --}}
+{{-- ═══════════════════════════════════════════════════════════ --}}
+<div x-data="asistenciaModal()"
+     x-cloak
+     @abrir-modal-asistencia.window="abrir($event.detail.url, $event.detail.zoom)">
+    <div x-show="abierto"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @keydown.escape.window="cerrar()"
+         class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+         style="background: rgba(8,43,89,0.75); backdrop-filter: blur(10px);">
+
+        <div x-show="abierto"
+             x-transition:enter="transition ease-out duration-350"
+             x-transition:enter-start="opacity-0 scale-90 translate-y-4"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-90"
+             class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
+
+            {{-- Estado: cargando --}}
+            <div x-show="estado === 'cargando'" class="p-10 text-center">
+                <div class="relative w-24 h-24 mx-auto mb-5">
+                    <div class="absolute inset-0 rounded-full border-4 border-accent/20"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-t-accent border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <svg class="w-10 h-10 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-primary-dark font-black text-xl">Registrando asistencia...</p>
+                <p class="text-gray-400 text-sm mt-1">Un momento, por favor</p>
+            </div>
+
+            {{-- Estado: éxito con clase registrada --}}
+            <div x-show="estado === 'exito'" class="text-center">
+                {{-- Header verde --}}
+                <div class="bg-gradient-to-br from-emerald-400 to-teal-500 px-8 pt-10 pb-8">
+                    <div class="w-20 h-20 mx-auto bg-white/25 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                        <svg class="w-11 h-11 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-black text-2xl leading-tight">¡Asistencia registrada!</h3>
+                    <p class="text-emerald-100 text-sm mt-1">Ingreso a clase confirmado</p>
+                </div>
+
+                <div class="px-8 py-6">
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        Hola <strong x-text="nombre" class="text-primary-dark"></strong>,
+                        tu asistencia de hoy quedó guardada. ¡Felicidades por ser puntual! 🎉
+                    </p>
+
+                    {{-- Barra de countdown --}}
+                    <div class="mt-5 mb-5">
+                        <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+                            <span>Abriendo Zoom automáticamente...</span>
+                            <span class="font-bold text-accent" x-text="countdown + 's'"></span>
+                        </div>
+                        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full bg-gradient-to-r from-accent to-primary-light transition-all duration-100"
+                                 :style="'width: ' + progreso + '%'"></div>
+                        </div>
+                    </div>
+
+                    <a :href="zoomUrl" target="_blank" @click="cerrar()"
+                       class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm text-white
+                              bg-gradient-to-r from-emerald-500 to-teal-400
+                              hover:from-emerald-600 hover:to-teal-500
+                              transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        Entrar a Zoom ahora
+                    </a>
+                </div>
+            </div>
+
+            {{-- Estado: ya registrado (segunda vez) --}}
+            <div x-show="estado === 'ya-registrado'" class="text-center">
+                <div class="bg-gradient-to-br from-primary-dark to-primary-light px-8 pt-10 pb-8">
+                    <div class="w-20 h-20 mx-auto bg-white/25 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                        <svg class="w-11 h-11 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-black text-2xl leading-tight">¡Ya estás registrado!</h3>
+                    <p class="text-blue-100 text-sm mt-1">Tu asistencia ya fue contabilizada</p>
+                </div>
+
+                <div class="px-8 py-6">
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        <strong x-text="nombre" class="text-primary-dark"></strong>,
+                        tu ingreso a esta clase ya fue registrado anteriormente. ¡Perfecto!
+                    </p>
+
+                    <div class="mt-5 mb-5">
+                        <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+                            <span>Redirigiendo a Zoom...</span>
+                            <span class="font-bold text-accent" x-text="countdown + 's'"></span>
+                        </div>
+                        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full bg-gradient-to-r from-primary-dark to-primary-light transition-all duration-100"
+                                 :style="'width: ' + progreso + '%'"></div>
+                        </div>
+                    </div>
+
+                    <a :href="zoomUrl" target="_blank" @click="cerrar()"
+                       class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm text-white
+                              bg-gradient-to-r from-primary-dark to-primary-light
+                              hover:opacity-90 transition-all shadow-md hover:-translate-y-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        Entrar a Zoom ahora
+                    </a>
+                </div>
+            </div>
+
+            {{-- Estado: sin clase hoy (puede entrar igual) --}}
+            <div x-show="estado === 'sin-clase'" class="text-center">
+                <div class="bg-gradient-to-br from-amber-400 to-orange-400 px-8 pt-10 pb-8">
+                    <div class="w-20 h-20 mx-auto bg-white/25 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                        <svg class="w-11 h-11 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-white font-black text-xl leading-tight">Atención, <span x-text="nombre"></span></h3>
+                    <p class="text-amber-100 text-sm mt-1">No hay clase programada hoy</p>
+                </div>
+
+                <div class="px-8 py-6">
+                    <p class="text-gray-600 text-sm leading-relaxed">
+                        El docente aún no ha registrado la clase de hoy, por lo que
+                        <strong class="text-amber-600">tu asistencia no puede contabilizarse automáticamente</strong>.
+                        Puedes entrar de todas formas.
+                    </p>
+
+                    <div class="flex gap-3 mt-6">
+                        <button @click="cerrar()"
+                                class="flex-1 py-3 rounded-2xl font-bold text-sm text-gray-500
+                                       bg-gray-100 hover:bg-gray-200 transition-colors">
+                            Cerrar
+                        </button>
+                        <a :href="zoomUrl" target="_blank" @click="cerrar()"
+                           class="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl font-bold text-sm text-white
+                                  bg-gradient-to-r from-amber-500 to-orange-400 hover:opacity-90
+                                  transition-all shadow-md">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            Entrar igual
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Estado: error --}}
+            <div x-show="estado === 'error'" class="p-10 text-center">
+                <div class="w-20 h-20 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-5">
+                    <svg class="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-gray-800 font-black text-xl">Hubo un problema</h3>
+                <p class="text-gray-500 text-sm mt-2 leading-relaxed">
+                    No se pudo registrar tu asistencia. Contacta al administrador.
+                </p>
+                <button @click="cerrar()"
+                        class="mt-6 w-full py-3 rounded-2xl font-bold text-sm text-white bg-primary-dark hover:bg-primary-dark/90 transition-colors">
+                    Cerrar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function asistenciaModal() {
+    return {
+        abierto: false,
+        estado: 'cargando',
+        nombre: '',
+        zoomUrl: '',
+        countdown: 4,
+        progreso: 100,
+        _timer: null,
+
+        abrir(registrarUrl, zoomFallback) {
+            this.abierto   = true;
+            this.estado    = 'cargando';
+            this.countdown = 4;
+            this.progreso  = 100;
+            this.zoomUrl   = zoomFallback;
+
+            fetch(registrarUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.json())
+                .then(data => {
+                    this.nombre  = data.nombre || '';
+                    this.zoomUrl = data.zoom_url || zoomFallback;
+
+                    if (!data.tiene_clase) {
+                        this.estado = 'sin-clase';
+                    } else if (data.ya_registrado) {
+                        this.estado = 'ya-registrado';
+                        this._iniciarCountdown();
+                    } else {
+                        this.estado = 'exito';
+                        this._iniciarCountdown();
+                    }
+                })
+                .catch(() => { this.estado = 'error'; });
+        },
+
+        _iniciarCountdown() {
+            const pasos    = 40;
+            const duracion = 4000;
+            const intervalo = duracion / pasos;
+            let paso = 0;
+
+            this._timer = setInterval(() => {
+                paso++;
+                this.progreso  = Math.max(0, 100 - (paso / pasos * 100));
+                this.countdown = Math.ceil(Math.max(0, (pasos - paso) / pasos * 4));
+
+                if (paso >= pasos) {
+                    clearInterval(this._timer);
+                    window.open(this.zoomUrl, '_blank');
+                    this.abierto = false;
+                }
+            }, intervalo);
+        },
+
+        cerrar() {
+            clearInterval(this._timer);
+            this.abierto = false;
+        }
+    };
+}
+</script>
+
+{{-- ═══════════════════════════════════════════════════════════ --}}
 {{-- HERO / BANNER DE PLAN                                       --}}
 {{-- ═══════════════════════════════════════════════════════════ --}}
 @if(!$alumno)
@@ -295,19 +551,22 @@
                             Sin link de Zoom configurado
                         </button>
                     @elseif($zoomHabilitado)
-                        {{-- Clase habilitada (5 min antes o durante) → botón activo --}}
-                        <a href="{{ route('alumno.zoom', $curso) }}" target="_blank"
-                           class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm text-white
-                                  bg-gradient-to-r from-emerald-500 to-teal-400
-                                  hover:from-emerald-600 hover:to-teal-500
-                                  transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden">
+                        {{-- Clase habilitada (5 min antes o durante) → abre modal de asistencia --}}
+                        <button @click="$dispatch('abrir-modal-asistencia', {
+                                    url: '{{ route('alumno.registrar-asistencia', $curso) }}',
+                                    zoom: '{{ addslashes($curso->zoom_link) }}'
+                                })"
+                                class="w-full flex items-center justify-center gap-2 py-2.5 rounded-2xl font-bold text-sm text-white
+                                       bg-gradient-to-r from-emerald-500 to-teal-400
+                                       hover:from-emerald-600 hover:to-teal-500
+                                       transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden">
                             <span class="absolute inset-0 bg-white/10 animate-pulse rounded-2xl pointer-events-none"></span>
                             <svg class="w-4 h-4 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M15 10l4.553-2.069A1 1 0 0121 8.882v6.236a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                             </svg>
                             <span class="relative z-10">¡Entrar a la clase ahora!</span>
-                        </a>
+                        </button>
                     @elseif($claseHoy)
                         {{-- Clase hoy pero aún no es la hora --}}
                         <button disabled

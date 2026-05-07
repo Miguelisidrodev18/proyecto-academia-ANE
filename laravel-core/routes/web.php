@@ -39,10 +39,11 @@ Route::middleware(['auth'])->group(function () {
 
     // ── Panel del Alumno ────────────────────────────────────────────────────
     Route::middleware(['role:alumno'])->group(function () {
-        Route::get('/mis-cursos',                [AlumnoPanelController::class, 'misCursos'])->name('alumno.mis-cursos');
-        Route::get('/mis-cursos/{curso}/zoom',   [AlumnoPanelController::class, 'zoom'])->name('alumno.zoom');
-        Route::get('/mis-cursos/{curso}',        [AlumnoPanelController::class, 'cursoDetalle'])->name('alumno.curso-detalle');
-        Route::get('/mis-asistencias',           [AlumnoPanelController::class, 'asistencias'])->name('alumno.asistencias');
+        Route::get('/mis-cursos',                         [AlumnoPanelController::class, 'misCursos'])->name('alumno.mis-cursos');
+        Route::get('/mis-cursos/{curso}/zoom',            [AlumnoPanelController::class, 'zoom'])->name('alumno.zoom');
+        Route::get('/mis-cursos/{curso}/asistencia-json', [AlumnoPanelController::class, 'registrarAsistencia'])->name('alumno.registrar-asistencia');
+        Route::get('/mis-cursos/{curso}',                 [AlumnoPanelController::class, 'cursoDetalle'])->name('alumno.curso-detalle');
+        Route::get('/mis-asistencias',                    [AlumnoPanelController::class, 'asistencias'])->name('alumno.asistencias');
     });
 
     // ── Módulos: solo Admin ─────────────────────────────────────────────────

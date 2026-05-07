@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Alumno;
 use App\Http\Controllers\Controller;
 use App\Models\Asistencia;
 use App\Models\Curso;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -75,6 +76,52 @@ class AlumnoPanelController extends Controller
         }
 
         return redirect()->away($curso->zoom_link);
+    }
+
+    public function registrarAsistencia(Curso $curso): JsonResponse
+    {
+        $user      = auth()->user();
+        $alumno    = $user->alumno;
+        $matricula = $alumno?->matriculaActiva();
+
+        $tieneAcceso = $matricula && $matricula->tieneAcceso() && $matricula->plan->cursos()
+            ->where('cursos.id', $curso->id)
+            ->where('cursos.activo', true)
+            ->exists();
+
+        if (!$alumno || !$tieneAcceso || !$curso->zoom_link) {
+            return response()->json(['success' => false], 403);
+        }
+
+        $claseHoy     = $curso->clases()->whereDate('fecha', today())->first();
+        $yaRegistrado = false;
+
+        if ($claseHoy) {
+            $asistencia = Asistencia::where('clase_id', $claseHoy->id)
+                ->where('alumno_id', $alumno->id)
+                ->first();
+
+            if (!$asistencia) {
+                Asistencia::create([
+                    'clase_id'     => $claseHoy->id,
+                    'alumno_id'    => $alumno->id,
+                    'estado'       => 'presente',
+                    'hora_ingreso' => now(),
+                ]);
+            } elseif (!$asistencia->hora_ingreso) {
+                $asistencia->update(['hora_ingreso' => now(), 'estado' => 'presente']);
+            } else {
+                $yaRegistrado = true;
+            }
+        }
+
+        return response()->json([
+            'success'       => true,
+            'zoom_url'      => $curso->zoom_link,
+            'tiene_clase'   => (bool) $claseHoy,
+            'ya_registrado' => $yaRegistrado,
+            'nombre'        => explode(' ', $user->name)[0],
+        ]);
     }
 
     public function asistencias(): View
